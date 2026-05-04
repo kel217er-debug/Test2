@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Ежедневный дашборд · УДП</title>
+<style>
+:root{
+  --bg:#f8fafc; --card:#fff; --border:#e2e8f0; --text:#0f172a; --muted:#64748b;
+  --blue:#2563eb; --green:#059669; --red:#dc2626; --amber:#d97706; --violet:#7c3aed;
+  --green-bg:#dcfce7; --amber-bg:#fef3c7; --red-bg:#fee2e2; --blue-bg:#dbeafe;
+  --good:#059669; --bad:#dc2626; --neutral:#64748b;
+}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:var(--text);background:var(--bg)}
+h1,h2,h3{margin:0;font-weight:600}
+h1{font-size:18px} h2{font-size:15px;margin-bottom:8px} h3{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:500}
+a{color:var(--blue);text-decoration:none}
+
+.header{background:var(--card);border-bottom:1px solid var(--border);padding:12px 20px;position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.header .title{font-weight:600;font-size:16px;white-space:nowrap}
+.header .meta{color:var(--muted);font-size:12px;display:flex;gap:16px;flex-wrap:wrap}
+.header .meta b{color:var(--text)}
+
+.container{max-width:1600px;margin:0 auto;padding:16px 20px 60px}
+
+/* Filters */
+.filters{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:12px}
+.f-group{display:flex;flex-direction:column;gap:3px}
+.f-group label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px}
+.f-group select{min-width:140px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:13px}
+.actions{display:flex;gap:8px;margin-left:auto}
+.actions button{padding:6px 12px;border:1px solid var(--border);background:#fff;border-radius:6px;cursor:pointer;font-size:13px}
+.actions button:hover{background:#f1f5f9}
+.actions button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.actions button.primary:hover{background:#1e40af}
+
+/* Timeline bar */
+.timeline{display:flex;align-items:stretch;gap:0;margin-bottom:16px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px;overflow-x:auto}
+.tl-item{flex:1;min-width:110px;padding:10px 12px;border-radius:7px;cursor:pointer;transition:all 0.15s;border:1px solid transparent;user-select:none;position:relative}
+.tl-item:hover{background:#f1f5f9}
+.tl-item.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.tl-item.active .tl-sub{color:#cfe0ff}
+.tl-item .tl-label{font-weight:600;font-size:13px}
+.tl-item .tl-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.tl-item .tl-badge{position:absolute;top:4px;right:6px;font-size:9px;padding:1px 5px;border-radius:8px;font-weight:600}
+.tl-item .tl-badge.open{background:var(--amber-bg);color:var(--amber)}
+.tl-item.active .tl-badge.open{background:rgba(255,255,255,0.25);color:#fff}
+.tl-divider{width:1px;background:var(--border);margin:4px 4px}
+
+/* Tabs */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:16px;overflow-x:auto}
+.tab{padding:10px 18px;cursor:pointer;border-bottom:2px solid transparent;color:var(--muted);font-weight:500;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* Alerts */
+.alerts{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.alert{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border-left:3px solid;font-size:13px}
+.alert.warn{background:var(--amber-bg);border-color:var(--amber);color:#92400e}
+.alert.bad{background:var(--red-bg);border-color:var(--red);color:#991b1b}
+.alert.good{background:var(--green-bg);border-color:var(--green);color:#065f46}
+.alert .a-icon{font-weight:bold}
+.alert .a-title{font-weight:600}
+
+/* KPI */
+.kpi-section{margin-bottom:20px}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media (max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;position:relative}
+.kpi.good{border-left:3px solid var(--good)}
+.kpi.bad{border-left:3px solid var(--bad)}
+.kpi.neutral{border-left:3px solid var(--neutral)}
+.kpi .kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;font-weight:500}
+.kpi .kpi-val{font-size:24px;font-weight:600;margin-top:4px;line-height:1.2}
+.kpi .kpi-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.kpi .kpi-delta{font-size:12px;margin-top:6px;display:flex;align-items:center;gap:6px}
+.kpi .kpi-delta.up-good,.kpi .kpi-delta.down-good{color:var(--good)}
+.kpi .kpi-delta.up-bad,.kpi .kpi-delta.down-bad{color:var(--bad)}
+.kpi .kpi-delta.flat{color:var(--neutral)}
+.kpi .kpi-delta .prev{color:var(--muted);font-size:11px}
+.kpi .kpi-spark{margin-top:8px;display:block}
+
+.kpi-group-label{display:flex;align-items:center;gap:8px;margin:18px 0 10px;padding:0}
+.kpi-group-label h3{margin:0}
+.kpi-group-label .hint{font-size:11px;color:var(--muted);font-style:italic}
+
+/* Card */
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px}
+.card .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.card .card-sub{font-size:11px;color:var(--muted)}
+
+/* Cohort plate */
+.cohort-plate{display:grid;grid-template-columns:1.2fr 3fr;gap:16px;align-items:start}
+@media (max-width:900px){.cohort-plate{grid-template-columns:1fr}}
+.cohort-text{font-size:13px;color:var(--text)}
+.cohort-text .big{font-size:22px;font-weight:600;color:var(--blue)}
+.cohort-bar{display:flex;height:40px;border-radius:6px;overflow:hidden;border:1px solid var(--border)}
+.cohort-bar .seg{display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:500;white-space:nowrap;min-width:12px}
+.cohort-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:12px}
+.cohort-legend .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:middle}
+
+/* Charts */
+.chart-wrap{height:280px;position:relative}
+.chart-wrap.tall{height:340px}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:900px){.chart-grid{grid-template-columns:1fr}}
+
+/* Tables */
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{text-align:left;font-weight:500;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:0.3px;padding:8px 10px;border-bottom:1px solid var(--border);background:#f8fafc;cursor:pointer;user-select:none;white-space:nowrap}
+thead th.num{text-align:right}
+thead th:hover{background:#f1f5f9}
+thead th.sorted-asc::after{content:' ↑';color:var(--blue)}
+thead th.sorted-desc::after{content:' ↓';color:var(--blue)}
+tbody td{padding:7px 10px;border-bottom:1px solid var(--border)}
+tbody td.num{text-align:right;font-variant-numeric:tabular-nums}
+tbody td.name{font-weight:500}
+tbody tr:hover{background:#f8fafc}
+tbody td.empty{text-align:center;color:var(--muted);padding:20px}
+
+/* Cell pill */
+.cell-pill{display:inline-block;padding:2px 6px;border-radius:4px;font-size:11px;font-variant-numeric:tabular-nums}
+.pill-g{background:var(--green-bg);color:#065f46}
+.pill-y{background:var(--amber-bg);color:#92400e}
+.pill-r{background:var(--red-bg);color:#991b1b}
+.pill-b{background:var(--blue-bg);color:#1e40af}
+.delta-up-good{color:var(--good)}
+.delta-down-good{color:var(--good)}
+.delta-up-bad{color:var(--bad)}
+.delta-down-bad{color:var(--bad)}
+.delta-flat{color:var(--neutral)}
+
+/* Sparkline in table */
+td.spark{padding:4px}
+td.spark canvas{vertical-align:middle}
+
+/* Utility */
+.hidden{display:none !important}
+.mono{font-variant-numeric:tabular-nums}
+.export-btn{font-size:11px;padding:4px 10px;background:#f1f5f9;border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--muted)}
+.export-btn:hover{background:#e2e8f0;color:var(--text)}
+
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="title">📊 Ежедневный дашборд УДП</div>
+  <div class="meta">
+    <span>Данные: <b id="hdr-from">—</b> → <b id="hdr-to">—</b></span>
+    <span>Заявок: <b id="hdr-rows">—</b></span>
+    <span>Собрано: <b id="hdr-build">—</b></span>
+  </div>
+</div>
+
+<div class="container">
+
+<div class="filters">
+  <div class="f-group">
+    <label>Направление</label>
+    <select id="f-direction"><option value="">все</option></select>
+  </div>
+  <div class="f-group">
+    <label>МРФ</label>
+    <select id="f-mrf"><option value="">все</option></select>
+  </div>
+  <div class="f-group">
+    <label>Руководитель</label>
+    <select id="f-director"><option value="">все</option></select>
+  </div>
+  <div class="f-group">
+    <label>Тимлид</label>
+    <select id="f-teamlead"><option value="">все</option></select>
+  </div>
+  <div class="actions">
+    <button id="btn-reset">Сбросить фильтры</button>
+    <button id="btn-copy-link" title="Скопировать ссылку с текущими фильтрами">🔗 Ссылка</button>
+  </div>
+</div>
+
+<!-- Timeline bar -->
+<div class="timeline" id="timeline"></div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" data-tab="main">Главное</div>
+  <div class="tab" data-tab="teams">Команды</div>
+  <div class="tab" data-tab="employees">Сотрудники</div>
+  <div class="tab" data-tab="open">Открытые заявки</div>
+  <div class="tab" data-tab="services">Услуги</div>
+</div>
+
+<!-- ============ MAIN TAB ============ -->
+<div class="tab-content active" data-tab="main">
+  <div class="alerts" id="main-alerts"></div>
+
+  <div class="kpi-group-label">
+    <h3>📥 Входящий поток</h3>
+    <span class="hint">по дате регистрации — что пришло в периоде</span>
+  </div>
+  <div class="kpi-grid" id="kpi-leading"></div>
+
+  <div class="kpi-group-label">
+    <h3>💰 Результат</h3>
+    <span class="hint">по дате закрытия — что закрылось в периоде</span>
+  </div>
+  <div class="kpi-grid" id="kpi-lagging" style="grid-template-columns:repeat(6,1fr)"></div>
+
+  <div class="card" id="cohort-card" style="margin-top:18px">
+    <div class="card-head">
+      <div>
+        <h2>Когорты подключений</h2>
+        <div class="card-sub">из каких периодов регистрации закрылись заявки в выбранном периоде</div>
+      </div>
+    </div>
+    <div id="cohort-body"></div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <h2>Динамика потока</h2>
+          <div class="card-sub">синий — заявки (по регистрации); зелёный — подключения (по закрытию); красный — SLA наруш.</div>
+        </div>
+      </div>
+      <div class="chart-wrap tall"><canvas id="ch-dynamic"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <h2>НД и конверсия</h2>
+          <div class="card-sub">оранжевый — НД закрытых (₽); синий — конверсия когорты регистрации, %</div>
+        </div>
+      </div>
+      <div class="chart-wrap tall"><canvas id="ch-conv"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <h2>По направлениям</h2>
+        <div class="card-sub" id="dir-sub">—</div>
+      </div>
+      <button class="export-btn" onclick="exportTableCSV('table-directions','по_направлениям')">CSV</button>
+    </div>
+    <table id="table-directions"><thead><tr>
+      <th data-k="name">Направление</th>
+      <th class="num" data-k="n_total">Заявок</th>
+      <th class="num" data-k="transfer_rate">Передачи %</th>
+      <th class="num" data-k="sla_acc_rate">SLA принятия %</th>
+      <th class="num" data-k="n_connected">Подключений</th>
+      <th class="num" data-k="nd_sum">НД ₽</th>
+      <th class="num" data-k="close_conv">Close %</th>
+      <th class="num" data-k="equip_share">Оборуд. %</th>
+    </tr></thead><tbody></tbody></table>
+  </div>
+</div>
+
+<!-- ============ TEAMS TAB ============ -->
+<div class="tab-content" data-tab="teams">
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <h2>Команды (тимлиды)</h2>
+        <div class="card-sub" id="teams-sub">—</div>
+      </div>
+      <button class="export-btn" onclick="exportTableCSV('table-teams','команды')">CSV</button>
+    </div>
+    <table id="table-teams"><thead><tr>
+      <th data-k="name">Тимлид</th>
+      <th data-k="director">Руководитель</th>
+      <th data-k="emp_cnt">Сотр.</th>
+      <th class="num" data-k="n_total">Заявки</th>
+      <th class="num" data-k="sla_acc_rate">SLA %</th>
+      <th class="num" data-k="transfer_rate">Перед. %</th>
+      <th class="num" data-k="load">Нагр.</th>
+      <th class="num" data-k="n_connected">Подкл.</th>
+      <th class="num" data-k="nd_sum">НД ₽</th>
+      <th class="num" data-k="close_conv">Close %</th>
+      <th class="num" data-k="crossell_pct" title="Доля ИНН с ≥2 уникальных продуктов">Допрод. %</th>
+      <th class="num" data-k="fraud_pct" title="Доля 2-х продуктов с абон. платой ≤400₽/мес (индикатор накрутки KPI)">Фрод %</th>
+      <th data-k="spark">Тренд подкл.</th>
+    </tr></thead><tbody></tbody></table>
+  </div>
+</div>
+
+<!-- ============ EMPLOYEES TAB ============ -->
+<div class="tab-content" data-tab="employees">
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <h2>Сотрудники</h2>
+        <div class="card-sub" id="emp-sub">—</div>
+      </div>
+      <button class="export-btn" onclick="exportTableCSV('table-emp','сотрудники')">CSV</button>
+    </div>
+    <table id="table-emp"><thead><tr>
+      <th data-k="name">Сотрудник</th>
+      <th data-k="teamlead">Тимлид</th>
+      <th data-k="mrf">МРФ</th>
+      <th class="num" data-k="n_total">Заявки</th>
+      <th class="num" data-k="sla_acc_rate">SLA %</th>
+      <th class="num" data-k="transfer_rate">Перед. %</th>
+      <th class="num" data-k="n_connected">Подкл.</th>
+      <th class="num" data-k="nd_sum">НД ₽</th>
+      <th class="num" data-k="equip_share">Оборуд. %</th>
+      <th class="num" data-k="crossell_pct" title="Доля ИНН с ≥2 уникальных продуктов">Допрод. %</th>
+      <th class="num" data-k="fraud_pct" title="% 2-х продуктов ≤400₽/мес">Фрод %</th>
+      <th class="num" data-k="n_open">Откр.</th>
+      <th class="num" data-k="n_stale">Застр.</th>
+    </tr></thead><tbody></tbody></table>
+  </div>
+</div>
+
+<!-- ============ OPEN TAB ============ -->
+<div class="tab-content" data-tab="open">
+  <div class="kpi-grid" id="open-kpis" style="grid-template-columns:repeat(4,1fr)"></div>
+  <div class="chart-grid">
+    <div class="card">
+      <div class="card-head"><h2>Открытые по неделе регистрации</h2></div>
+      <div class="chart-wrap tall"><canvas id="ch-open-weeks"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Застрявшие (&gt;30 дн) по тимлидам</h2></div>
+      <div class="chart-wrap tall"><canvas id="ch-stale-teams"></canvas></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div><h2>Застрявшие по сотрудникам</h2><div class="card-sub">открытые заявки, где часов в текущем статусе &gt; 720 (30 дн)</div></div>
+      <button class="export-btn" onclick="exportTableCSV('table-stale','застрявшие')">CSV</button>
+    </div>
+    <table id="table-stale"><thead><tr>
+      <th data-k="name">Сотрудник</th>
+      <th data-k="teamlead">Тимлид</th>
+      <th class="num" data-k="n_open">Открыто</th>
+      <th class="num" data-k="n_stale">Застр. 30+</th>
+      <th class="num" data-k="stale_rate">%</th>
+    </tr></thead><tbody></tbody></table>
+  </div>
+</div>
+
+<!-- ============ SERVICES TAB ============ -->
+<div class="tab-content" data-tab="services">
+  <div class="chart-grid">
+    <div class="card">
+      <div class="card-head"><h2>Подключения по услугам</h2><div class="card-sub" id="serv-sub">—</div></div>
+      <div class="chart-wrap tall"><canvas id="ch-serv-share"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Доля с оборудованием</h2></div>
+      <div class="chart-wrap tall"><canvas id="ch-serv-equip"></canvas></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div><h2>Услуги — детализация</h2></div>
+      <button class="export-btn" onclick="exportTableCSV('table-services','услуги')">CSV</button>
+    </div>
+    <table id="table-services"><thead><tr>
+      <th data-k="service">Услуга</th>
+      <th class="num" data-k="cur">Подключений</th>
+      <th class="num" data-k="cur_share">% от всех</th>
+      <th class="num" data-k="prev">Пред. период</th>
+      <th class="num" data-k="delta">Δ</th>
+      <th class="num" data-k="eq_cur">С оборудованием</th>
+      <th class="num" data-k="eq_share">% оборуд.</th>
+    </tr></thead><tbody></tbody></table>
+  </div>
+</div>
+
+</div> <!-- /container -->
+
+<script>
+/*__CHARTJS__*/
+</script>
+<script>
+// ==================== ДАННЫЕ ====================
+const DATA = /*__DATA__*/;
+const BUILD_TIME = "/*__BUILD_TIME__*/";
+
+// ==================== УТИЛИТЫ ====================
+const fmtInt = v => (v == null || !isFinite(v)) ? '—' : Math.round(v).toLocaleString('ru-RU');
+const fmtPct = (v, dig=1) => (v == null || !isFinite(v)) ? '—' : v.toFixed(dig) + '%';
+const fmtMoney = v => {
+  if (v == null || !isFinite(v)) return '—';
+  if (Math.abs(v) >= 1e6) return (v/1e6).toFixed(2) + ' млн';
+  if (Math.abs(v) >= 1e3) return (v/1e3).toFixed(0) + ' тыс';
+  return Math.round(v).toLocaleString('ru-RU');
+};
+const fmtMoneyFull = v => (v == null || !isFinite(v)) ? '—' : Math.round(v).toLocaleString('ru-RU') + ' ₽';
+
+// Метрики, где РОСТ = ПЛОХО
+const INV_METRICS = new Set(['transfer_rate','sla_acc_rate','sla_cont_rate','stale_rate','fraud_pct']);
+// Метрики «Результат» (lagging) — для определения scope у sparkline-id и типа агрегации
+const LAGGING_METRICS = new Set(['n_connected','nd_sum','close_conv','equip_share','crossell_pct','fraud_pct']);
+
+function deltaSign(metric, delta) {
+  if (delta === 0 || delta == null) return 'flat';
+  const up = delta > 0;
+  const inv = INV_METRICS.has(metric);
+  if (up && inv) return 'up-bad';
+  if (up && !inv) return 'up-good';
+  if (!up && inv) return 'down-good';
+  return 'down-bad';
+}
+
+function arrowFor(sign) {
+  if (sign === 'flat') return '•';
+  return sign.startsWith('up') ? '▲' : '▼';
+}
+
+// ==================== СОСТОЯНИЕ ====================
+const STATE = {
+  activePeriod: null,   // ключ timeline (mkey или wkey)
+};
+const CHARTS = {};
+
+// ==================== URL-state ====================
+function readUrlFilters() {
+  const p = new URLSearchParams(location.hash.slice(1));
+  return {
+    direction: p.get('dir') || '',
+    mrf: p.get('mrf') || '',
+    director: p.get('dre') || '',
+    teamlead: p.get('tl') || '',
+    period: p.get('p') || '',
+    tab: p.get('t') || 'main',
+  };
+}
+function writeUrlFilters() {
+  const f = currentFilters();
+  const p = new URLSearchParams();
+  if (f.direction) p.set('dir', f.direction);
+  if (f.mrf) p.set('mrf', f.mrf);
+  if (f.director) p.set('dre', f.director);
+  if (f.teamlead) p.set('tl', f.teamlead);
+  if (STATE.activePeriod) p.set('p', STATE.activePeriod);
+  const activeTab = document.querySelector('.tab.active');
+  if (activeTab && activeTab.dataset.tab !== 'main') p.set('t', activeTab.dataset.tab);
+  const s = p.toString();
+  history.replaceState(null, '', s ? '#' + s : location.pathname + location.search);
+}
+
+// ==================== ФИЛЬТРЫ ====================
+function currentFilters() {
+  return {
+    direction: document.getElementById('f-direction').value,
+    mrf: document.getElementById('f-mrf').value,
+    director: document.getElementById('f-director').value,
+    teamlead: document.getElementById('f-teamlead').value,
+  };
+}
+function filteredEmployees() {
+  const f = currentFilters();
+  return DATA.employees.filter(e => {
+    if (!e.in_data) return false;
+    if (f.direction && e.direction !== f.direction) return false;
+    if (f.mrf && e.mrf !== f.mrf) return false;
+    if (f.director && e.director !== f.director) return false;
+    if (f.teamlead && e.teamlead !== f.teamlead) return false;
+    return true;
+  });
+}
+
+function initFilters() {
+  const dirSel = document.getElementById('f-direction');
+  const mrfSel = document.getElementById('f-mrf');
+  const dreSel = document.getElementById('f-director');
+  const tlSel = document.getElementById('f-teamlead');
+
+  for (const d of DATA.directions) dirSel.add(new Option(d, d));
+  for (const m of (DATA.mrfs || [])) mrfSel.add(new Option(m, m));
+  for (const d of DATA.directors) dreSel.add(new Option(d, d));
+  for (const t of DATA.teamleads) tlSel.add(new Option(t, t));
+
+  // Применим URL-фильтры
+  const u = readUrlFilters();
+  if (u.direction && [...dirSel.options].some(o => o.value === u.direction)) dirSel.value = u.direction;
+  if (u.mrf && [...mrfSel.options].some(o => o.value === u.mrf)) mrfSel.value = u.mrf;
+
+  dirSel.addEventListener('change', () => { updateCascading(); renderAll(); writeUrlFilters(); });
+  mrfSel.addEventListener('change', () => { updateCascading(); renderAll(); writeUrlFilters(); });
+  dreSel.addEventListener('change', () => { updateCascading(); renderAll(); writeUrlFilters(); });
+  tlSel.addEventListener('change', () => { renderAll(); writeUrlFilters(); });
+
+  updateCascading();
+
+  // После каскадности восстановим выбранные значения
+  if (u.director && [...dreSel.options].some(o => o.value === u.director)) dreSel.value = u.director;
+  if (u.director) updateCascading();
+  if (u.teamlead && [...tlSel.options].some(o => o.value === u.teamlead)) tlSel.value = u.teamlead;
+
+  document.getElementById('btn-reset').addEventListener('click', () => {
+    dirSel.value = ''; mrfSel.value = ''; dreSel.value = ''; tlSel.value = '';
+    updateCascading();
+    STATE.activePeriod = DATA.meta.current_week; // текущая неделя по умолчанию
+    renderTimeline();
+    renderAll();
+    writeUrlFilters();
+  });
+  document.getElementById('btn-copy-link').addEventListener('click', () => {
+    writeUrlFilters();
+    navigator.clipboard && navigator.clipboard.writeText(location.href);
+    alert('Ссылка с фильтрами скопирована');
+  });
+}
+
+function updateCascading() {
+  const f = currentFilters();
+
+  const dreSel = document.getElementById('f-director');
+  const prevDre = dreSel.value;
+  dreSel.innerHTML = '<option value="">все</option>';
+  const drAllowed = new Set();
+  for (const e of DATA.employees) {
+    if (!e.director) continue;
+    if (f.direction && e.direction !== f.direction) continue;
+    if (f.mrf && e.mrf !== f.mrf) continue;
+    drAllowed.add(e.director);
+  }
+  for (const d of DATA.directors) if (drAllowed.has(d)) dreSel.add(new Option(d, d));
+  if (drAllowed.has(prevDre)) dreSel.value = prevDre;
+
+  const tlSel = document.getElementById('f-teamlead');
+  const prevTl = tlSel.value;
+  tlSel.innerHTML = '<option value="">все</option>';
+  const tlAllowed = new Set();
+  for (const e of DATA.employees) {
+    if (!e.teamlead) continue;
+    if (f.direction && e.direction !== f.direction) continue;
+    if (f.mrf && e.mrf !== f.mrf) continue;
+    if (dreSel.value && e.director !== dreSel.value) continue;
+    tlAllowed.add(e.teamlead);
+  }
+  for (const t of DATA.teamleads) if (tlAllowed.has(t)) tlSel.add(new Option(t, t));
+  if (tlAllowed.has(prevTl)) tlSel.value = prevTl;
+}
+
+// ==================== TIMELINE ====================
+function renderTimeline() {
+  const host = document.getElementById('timeline');
+  host.innerHTML = '';
+  const tl = DATA.timeline;
+  let lastKind = null;
+  tl.forEach((t, i) => {
+    if (lastKind && lastKind !== t.kind) {
+      const div = document.createElement('div');
+      div.className = 'tl-divider';
+      host.appendChild(div);
+    }
+    const d = document.createElement('div');
+    d.className = 'tl-item' + (t.key === STATE.activePeriod ? ' active' : '');
+    d.innerHTML = `
+      ${!t.closed ? '<span class="tl-badge open">текущ.</span>' : ''}
+      <div class="tl-label">${t.label}</div>
+      <div class="tl-sub">${t.kind === 'month' ? 'тотал за месяц' : t.label === t.label_full ? '' : t.label_full.split('·').slice(1).join('').trim()}</div>
+    `;
+    d.onclick = () => { STATE.activePeriod = t.key; renderTimeline(); renderAll(); writeUrlFilters(); };
+    host.appendChild(d);
+    lastKind = t.kind;
+  });
+}
+
+// Получить текущую timeline-запись
+function activeTl() {
+  return DATA.timeline.find(t => t.key === STATE.activePeriod) || DATA.timeline[DATA.timeline.length-1];
+}
+// Предыдущая запись в timeline (для сравнения)
+function prevTl() {
+  const idx = DATA.timeline.findIndex(t => t.key === STATE.activePeriod);
+  if (idx > 0) return DATA.timeline[idx-1];
+  return null;
+}
+// Получить бакет по периоду и типу агрегации
+function getBucket(period, aggType, level, id) {
+  // aggType: 'registered' | 'closed'
+  const kind = period.kind === 'month' ? 'by_month' : 'by_week';
+  const per = DATA[aggType][kind][period.key];
+  if (!per) return null;
+  return (per[level] && per[level][id]) || null;
+}
+
+// ==================== АГРЕГАТЫ ПО ФИЛЬТРАМ ====================
+// Суммирует метрики по списку сотрудников за конкретный период и тип
+function aggByEmployees(aggType, period, empNames, fields) {
+  const kind = period.kind === 'month' ? 'by_month' : 'by_week';
+  const src = DATA[aggType][kind][period.key];
+  if (!src) return null;
+  const set = new Set(empNames);
+  const out = {};
+  for (const f of fields) out[f] = 0;
+  const byService = {};
+  const byServiceEq = {};
+  for (const [name, m] of Object.entries(src.employee || {})) {
+    if (!set.has(name)) continue;
+    for (const f of fields) out[f] += (m[f] || 0);
+    if (aggType === 'closed') {
+      for (const [s, c] of Object.entries(m.by_service || {})) byService[s] = (byService[s] || 0) + c;
+      for (const [s, c] of Object.entries(m.by_service_equip || {})) byServiceEq[s] = (byServiceEq[s] || 0) + c;
+    }
+  }
+  if (aggType === 'closed') { out.by_service = byService; out.by_service_equip = byServiceEq; }
+  return out;
+}
+
+function regMetrics(period, empNames) {
+  const m = aggByEmployees('registered', period, empNames, [
+    'n_total','n_base_all','n_stayed_base','n_transferred',
+    'n_sla_acc_viol','n_sla_cont_viol',
+    'n_connected_stayed_from_period','nd_sum_from_period'
+  ]);
+  if (!m) return null;
+  m.transfer_rate = m.n_total ? 100 * m.n_transferred / m.n_total : 0;
+  m.sla_acc_rate = m.n_total ? 100 * m.n_sla_acc_viol / m.n_total : 0;
+  m.sla_cont_rate = m.n_total ? 100 * m.n_sla_cont_viol / m.n_total : 0;
+  m.conv_clean = m.n_base_all ? 100 * m.n_connected_stayed_from_period / m.n_base_all : 0;
+  m.conv_regular = m.n_stayed_base ? 100 * m.n_connected_stayed_from_period / m.n_stayed_base : 0;
+  return m;
+}
+function closedMetrics(period, empNames) {
+  const m = aggByEmployees('closed', period, empNames, [
+    'n_closed','n_connected','n_with_equip','nd_sum',
+    'n_secondary','n_ultra_cheap'
+  ]);
+  if (!m) return null;
+  m.close_conv = m.n_closed ? 100 * m.n_connected / m.n_closed : 0;
+  m.equip_share = m.n_connected ? 100 * m.n_with_equip / m.n_connected : 0;
+  // Cross-sell — ИНН уникальны, простое суммирование по сотрудникам может переоценить при мульти-сотрудничестве,
+  // поэтому при монофильтре берём scope-bucket напрямую.
+  const scope = bestScopeBucket('closed', period);
+  if (scope) {
+    m.n_inn_connected = scope.n_inn_connected || 0;
+    m.n_inn_multi = scope.n_inn_multi || 0;
+    m.crossell_pct = scope.crossell_pct || 0;
+    m.n_secondary = scope.n_secondary || 0;
+    m.n_ultra_cheap = scope.n_ultra_cheap || 0;
+    m.fraud_pct = scope.fraud_pct || 0;
+  } else {
+    // Фоллбек: суммируем по сотрудникам (корректно для secondary, верхняя оценка для inn_* — каждый ИНН в скопе сотрудника уникален,
+    // но один ИНН может подключаться разными сотрудниками команды)
+    const empSum = aggByEmployees('closed', period, empNames, ['n_inn_connected','n_inn_multi']);
+    m.n_inn_connected = empSum?.n_inn_connected || 0;
+    m.n_inn_multi = empSum?.n_inn_multi || 0;
+    m.crossell_pct = m.n_inn_connected ? 100 * m.n_inn_multi / m.n_inn_connected : 0;
+    m.fraud_pct = m.n_secondary ? 100 * m.n_ultra_cheap / m.n_secondary : 0;
+  }
+  return m;
+}
+
+// Возвращает scope-уровневый bucket closed-метрик, если активный набор фильтров
+// ровно совпадает с одной из осей (direction / director / teamlead / total без фильтров).
+// Это позволяет избежать сумм по сотрудникам для уникальных ИНН.
+function bestScopeBucket(aggType, period) {
+  const f = currentFilters();
+  const kind = period.kind === 'month' ? 'by_month' : 'by_week';
+  const per = DATA[aggType][kind][period.key];
+  if (!per) return null;
+  const has = (x) => !!x;
+  const cnt = [f.direction, f.mrf, f.director, f.teamlead].filter(has).length;
+  if (cnt === 0) return per.total?.all || null;
+  if (cnt === 1 && f.teamlead) return per.teamlead?.[f.teamlead] || null;
+  if (cnt === 1 && f.director) return per.director?.[f.director] || null;
+  if (cnt === 1 && f.direction) return per.direction?.[f.direction] || null;
+  return null; // mrf или комбинация — считаем из employee-скопа
+}
+
+// Агрегация по открытым заявкам для списка сотрудников
+function openMetrics(empNames) {
+  const set = new Set(empNames);
+  let n_open = 0, n_stale = 0;
+  const by_week = {}, stale_by_week = {};
+  const per_emp = [];
+  for (const [name, r] of Object.entries(DATA.open.employee || {})) {
+    if (!set.has(name)) continue;
+    n_open += r.n_open; n_stale += r.n_stale30;
+    for (const [w, c] of Object.entries(r.by_week || {})) by_week[w] = (by_week[w] || 0) + c;
+    for (const [w, c] of Object.entries(r.stale_by_week || {})) stale_by_week[w] = (stale_by_week[w] || 0) + c;
+    per_emp.push({ name, ...r });
+  }
+  return {
+    n_open, n_stale,
+    stale_rate: n_open ? 100 * n_stale / n_open : 0,
+    by_week, stale_by_week, per_emp,
+  };
+}
+
+// ==================== RENDER ====================
+function renderHeader() {
+  const m = DATA.meta;
+  document.getElementById('hdr-from').textContent = m.data_from ? m.data_from.slice(0,10) : '—';
+  document.getElementById('hdr-to').textContent = m.data_to ? m.data_to.slice(0,10) : '—';
+  document.getElementById('hdr-rows').textContent = fmtInt(m.n_rows_total);
+  document.getElementById('hdr-build').textContent = BUILD_TIME;
+}
+
+// --------- Main tab ---------
+function renderMain() {
+  const period = activeTl();
+  const prev = prevTl();
+  const emps = filteredEmployees();
+  const empNames = emps.map(e => e.name);
+
+  // Метрики текущего периода
+  const r = regMetrics(period, empNames) || {};
+  const c = closedMetrics(period, empNames) || {};
+  const op = openMetrics(empNames);
+
+  // Метрики предыдущего периода
+  const rPrev = prev ? (regMetrics(prev, empNames) || {}) : null;
+  const cPrev = prev ? (closedMetrics(prev, empNames) || {}) : null;
+
+  // Нагрузка = n_total / число сотрудников с >=1 заявкой в периоде
+  const kind = period.kind === 'month' ? 'by_month' : 'by_week';
+  const curActive = empNames.filter(n => (DATA.registered[kind][period.key]?.employee?.[n]?.n_total || 0) > 0).length || 1;
+  const prevActive = prev ? (empNames.filter(n => (DATA.registered[prev.kind === 'month' ? 'by_month' : 'by_week'][prev.key]?.employee?.[n]?.n_total || 0) > 0).length || 1) : 1;
+  const curLoad = (r.n_total || 0) / curActive;
+  const prevLoad = rPrev ? ((rPrev.n_total || 0) / prevActive) : null;
+
+  // ALERTS
+  renderAlerts(emps, period, r, c, op);
+
+  // LEADING
+  const leading = [
+    { lbl: 'Заявок (регистрация)', cur: r.n_total, prev: rPrev?.n_total, fmt: fmtInt, metric: 'n_total' },
+    { lbl: 'SLA принятия, наруш.', cur: r.sla_acc_rate, prev: rPrev?.sla_acc_rate, fmt: v=>fmtPct(v,1), metric: 'sla_acc_rate', kind:'pp' },
+    { lbl: 'Передачи %', cur: r.transfer_rate, prev: rPrev?.transfer_rate, fmt: v=>fmtPct(v,1), metric: 'transfer_rate', kind:'pp' },
+    { lbl: 'Нагрузка/сотр.', cur: curLoad, prev: prevLoad, fmt: v=>v==null?'—':v.toFixed(1), metric: 'load', kind:'abs' },
+  ];
+  document.getElementById('kpi-leading').innerHTML = leading.map(k => renderKpi(k, period.key)).join('');
+
+  // LAGGING
+  const lagging = [
+    { lbl: 'Подключений (закрытия)', cur: c.n_connected, prev: cPrev?.n_connected, fmt: fmtInt, metric: 'n_connected' },
+    { lbl: 'НД закрытых', cur: c.nd_sum, prev: cPrev?.nd_sum, fmt: fmtMoney, metric: 'nd_sum', sub: v => fmtMoneyFull(v), kind:'money' },
+    { lbl: 'Close %', cur: c.close_conv, prev: cPrev?.close_conv, fmt: v=>fmtPct(v,2), metric: 'close_conv', kind:'pp', hint:'подкл/закр в периоде' },
+    { lbl: 'Услуги с оборуд. %', cur: c.equip_share, prev: cPrev?.equip_share, fmt: v=>fmtPct(v,1), metric: 'equip_share', kind:'pp' },
+    { lbl: 'Допродажи %', cur: c.crossell_pct, prev: cPrev?.crossell_pct, fmt: v=>fmtPct(v,1), metric: 'crossell_pct', kind:'pp',
+      sub: v => `${fmtInt(c.n_inn_multi)} из ${fmtInt(c.n_inn_connected)} ИНН ≥2 продукта` },
+    { lbl: 'Фрод-риск %', cur: c.fraud_pct, prev: cPrev?.fraud_pct, fmt: v=>fmtPct(v,1), metric: 'fraud_pct', kind:'pp',
+      sub: v => `${fmtInt(c.n_ultra_cheap)} из ${fmtInt(c.n_secondary)} 2-х продуктов ≤400₽/мес` },
+  ];
+  document.getElementById('kpi-lagging').innerHTML = lagging.map(k => renderKpi(k, period.key)).join('');
+
+  // Sparklines (рисуем после вставки в DOM)
+  leading.forEach((k, i) => drawSparkline(`spark-leading-${i}`, k.metric, 'registered', empNames));
+  lagging.forEach((k, i) => drawSparkline(`spark-lagging-${i}`, k.metric, 'closed', empNames));
+
+  // COHORT
+  renderCohort(period, empNames);
+
+  // CHARTS
+  renderDynamicChart(empNames);
+  renderConvChart(empNames);
+
+  // Directions table
+  renderDirTable(period, prev, empNames);
+  document.getElementById('dir-sub').textContent =
+    `период: ${period.label_full || period.label} · сравнение: ${prev ? (prev.label_full || prev.label) : '—'}`;
+}
+
+function renderKpi(k, pkey) {
+  const d = (k.prev == null) ? null : (k.cur - k.prev);
+  const sign = (d == null) ? 'flat' : deltaSign(k.metric, d);
+  const cls = sign === 'flat' ? 'neutral' : (sign.endsWith('good') ? 'good' : 'bad');
+  let arrow = '';
+  if (d != null) {
+    if (k.kind === 'pp') arrow = `${arrowFor(sign)} ${d > 0 ? '+' : ''}${d.toFixed(1)} п.п.`;
+    else if (k.kind === 'money') arrow = `${arrowFor(sign)} ${d > 0 ? '+' : '-'}${fmtMoney(Math.abs(d))}`;
+    else if (k.kind === 'abs') arrow = `${arrowFor(sign)} ${d > 0 ? '+' : ''}${d.toFixed(1)}`;
+    else arrow = `${arrowFor(sign)} ${d > 0 ? '+' : ''}${Math.round(d).toLocaleString('ru-RU')}`;
+  }
+  const subHtml = k.sub ? `<div class="kpi-sub">${k.sub(k.cur)}</div>` : (k.hint ? `<div class="kpi-sub">${k.hint}</div>` : '');
+  const deltaHtml = (k.prev == null) ? '<div class="kpi-delta flat">—</div>' :
+    `<div class="kpi-delta ${sign}">${arrow} <span class="prev">vs ${k.fmt(k.prev)}</span></div>`;
+  // уникальный id для sparkline
+  const idx = k.lbl.replace(/[^a-zA-Z0-9]/g,'_');
+  const scope = LAGGING_METRICS.has(k.metric) ? 'lagging' : 'leading';
+  const sparkId = `spark-${scope}-${k._idx ?? ''}`;
+  return `<div class="kpi ${cls}">
+    <div class="kpi-label">${k.lbl}</div>
+    <div class="kpi-val">${k.fmt(k.cur)}</div>
+    ${subHtml}
+    ${deltaHtml}
+    <canvas class="kpi-spark" id="spark-${scope}-${k.metric}" width="180" height="28"></canvas>
+  </div>`;
+}
+
+// Отрисовка sparkline по последним 12 неделям
+function drawSparkline(canvasId, metric, aggType, empNames) {
+  // Canvas id: spark-<scope>-<metric>
+  const id = `spark-${aggType === 'closed' ? 'lagging' : 'leading'}-${metric}`;
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const weeks = DATA.weeks.slice(-12);
+  const data = weeks.map(w => {
+    const per = { key: w.key, kind: 'week' };
+    if (metric === 'load') {
+      const r = regMetrics(per, empNames);
+      const act = empNames.filter(n => (DATA.registered.by_week[w.key]?.employee?.[n]?.n_total || 0) > 0).length || 1;
+      return r ? (r.n_total || 0) / act : 0;
+    }
+    if (aggType === 'registered') {
+      const r = regMetrics(per, empNames);
+      return r ? (r[metric] || 0) : 0;
+    } else {
+      const c = closedMetrics(per, empNames);
+      return c ? (c[metric] || 0) : 0;
+    }
+  });
+  const sparkKey = `sp-${id}`;
+  if (CHARTS[sparkKey]) CHARTS[sparkKey].destroy();
+  CHARTS[sparkKey] = new Chart(canvas, {
+    type: 'line',
+    data: { labels: weeks.map(w => w.label), datasets: [{
+      data, borderColor: '#64748b', backgroundColor: 'rgba(100,116,139,0.1)',
+      fill: true, borderWidth: 1.5, pointRadius: 0, tension: 0.3,
+    }]},
+    options: {
+      responsive: false, maintainAspectRatio: false, animation: false,
+      plugins: { legend: {display:false}, tooltip: {enabled:false} },
+      scales: { x: { display: false }, y: { display: false, beginAtZero: true } },
+    }
+  });
+}
+
+function renderAlerts(emps, period, r, c, op) {
+  const host = document.getElementById('main-alerts');
+  const alerts = [];
+  // Правило: если SLA > 60% — bad
+  if (r.sla_acc_rate > 60) alerts.push({ type:'bad', icon:'🚨', title:'SLA принятия критично', text:`${r.sla_acc_rate.toFixed(1)}% нарушено — плюс-минус 3 из 5 заявок` });
+  else if (r.sla_acc_rate > 45) alerts.push({ type:'warn', icon:'⚠️', title:'SLA принятия высокое', text:`${r.sla_acc_rate.toFixed(1)}% нарушено — рекомендуется перераспределить нагрузку` });
+
+  // Застрявшие
+  if (op.stale_rate > 20) alerts.push({ type:'warn', icon:'⏰', title:'Много застрявших', text:`${op.n_stale} заявок стоят &gt;30 дней (${op.stale_rate.toFixed(1)}% от открытых)` });
+
+  // Close % падает
+  const prev = prevTl();
+  if (prev && c.close_conv !== undefined) {
+    const cP = closedMetrics(prev, emps.map(e => e.name));
+    if (cP && cP.close_conv > 0 && c.close_conv > 0) {
+      const dp = c.close_conv - cP.close_conv;
+      if (dp < -5) alerts.push({ type:'warn', icon:'📉', title:'Конверсия закрытий просела', text:`Close %: ${c.close_conv.toFixed(1)}% (-${Math.abs(dp).toFixed(1)} п.п. к предыдущему)` });
+    }
+  }
+
+  // Фрод-индикатор: команды с аномально большой долей «ультра-дешёвых» 2-х продуктов
+  const kindAl = period.kind === 'month' ? 'by_month' : 'by_week';
+  const tlBuckets = (DATA.closed[kindAl][period.key] || {}).teamlead || {};
+  const fraudTeams = [];
+  for (const [tl, b] of Object.entries(tlBuckets)) {
+    if ((b.n_secondary || 0) < 20) continue;
+    if ((b.fraud_pct || 0) >= 15) fraudTeams.push({ tl, pct: b.fraud_pct, cheap: b.n_ultra_cheap, total: b.n_secondary });
+  }
+  fraudTeams.sort((a, b) => b.pct - a.pct);
+  if (fraudTeams.length > 0) {
+    const worst = fraudTeams[0];
+    const type = worst.pct >= 30 ? 'bad' : 'warn';
+    const top = fraudTeams.slice(0, 3).map(x => `${x.tl.split(' ').slice(0,2).join(' ')} (${x.pct.toFixed(0)}%)`).join(', ');
+    alerts.push({ type, icon:'🕵️', title:`Риск накрутки допродаж — ${fraudTeams.length} команд`, text: `${top} — доля 2-х продуктов ≤400₽/мес завышена` });
+  }
+
+  // Топ-3 проблемных сотрудника по SLA
+  const empProbs = [];
+  const kind = period.kind === 'month' ? 'by_month' : 'by_week';
+  const src = DATA.registered[kind][period.key] && DATA.registered[kind][period.key].employee || {};
+  for (const e of emps) {
+    const m = src[e.name];
+    if (!m || m.n_total < 10) continue;
+    if (m.sla_acc_rate > 60) empProbs.push({ name: e.name, sla: m.sla_acc_rate, tot: m.n_total, teamlead: e.teamlead });
+  }
+  empProbs.sort((a,b) => b.sla - a.sla);
+  if (empProbs.length > 0) {
+    const top3 = empProbs.slice(0, 3).map(p => `${p.name.split(' ').slice(0,2).join(' ')} (SLA ${p.sla.toFixed(0)}%)`).join(', ');
+    alerts.push({ type:'warn', icon:'👤', title:`В красной зоне ${empProbs.length} сотрудник(ов)`, text: top3 + (empProbs.length > 3 ? ` и ещё ${empProbs.length-3}` : '') });
+  }
+
+  if (alerts.length === 0) alerts.push({ type:'good', icon:'✅', title:'Всё спокойно', text:'Критичных отклонений не обнаружено' });
+  host.innerHTML = alerts.map(a =>
+    `<div class="alert ${a.type}"><span class="a-icon">${a.icon}</span><span><b class="a-title">${a.title}.</b> ${a.text}</span></div>`
+  ).join('');
+}
+
+function renderCohort(period, empNames) {
+  const host = document.getElementById('cohort-body');
+  // Когорты только для месячных периодов (по текущей реализации ETL)
+  if (period.kind !== 'month') {
+    host.innerHTML = `<div style="color:var(--muted);font-size:13px">Когортная разбивка доступна только для месячных периодов. Сейчас выбрана неделя <b>${period.label}</b>. Кликните на месяц в полосе сверху, чтобы увидеть, из каких когорт зарегистрированных заявок сложился результат.</div>`;
+    return;
+  }
+  const coh = DATA.cohort.by_month[period.key];
+  if (!coh) { host.innerHTML = '<div style="color:var(--muted)">нет данных</div>'; return; }
+  // Суммируем только по filtered empNames — к сожалению, cohort в ETL не разбит по сотрудникам;
+  // покажем общую картину с примечанием (если фильтры активны)
+  const f = currentFilters();
+  const hasFilters = f.direction || f.mrf || f.director || f.teamlead;
+
+  const regPeriods = Object.keys(coh).sort();
+  const rows = regPeriods.map(rp => ({ rp, ...coh[rp] }));
+  const total = rows.reduce((s, r) => s + r.n_connected, 0);
+  const totalNd = rows.reduce((s, r) => s + r.nd_sum, 0);
+  if (total === 0) { host.innerHTML = '<div style="color:var(--muted)">нет закрытий</div>'; return; }
+
+  const monthName = (mk) => {
+    const t = DATA.timeline.find(x => x.key === mk);
+    return t ? t.label : mk;
+  };
+  const colors = ['#94a3b8','#60a5fa','#34d399','#fbbf24','#f87171','#a78bfa','#22d3ee','#fb923c'];
+
+  // Колокольчик: из какого месяца больше всего пришло
+  const maxRow = rows.reduce((a,b) => a.n_connected > b.n_connected ? a : b);
+  const maxShare = 100 * maxRow.n_connected / total;
+
+  const barSegs = rows.map((r, i) => {
+    const w = 100 * r.n_connected / total;
+    return `<div class="seg" style="flex:${w};background:${colors[i%colors.length]}" title="${monthName(r.rp)}: ${r.n_connected} (${w.toFixed(1)}%)">${w > 8 ? monthName(r.rp) : ''}</div>`;
+  }).join('');
+  const legend = rows.map((r, i) => `<span><span class="dot" style="background:${colors[i%colors.length]}"></span>${monthName(r.rp)}: ${r.n_connected} (${(100*r.n_connected/total).toFixed(1)}%) · ${fmtMoney(r.nd_sum)}</span>`).join('');
+
+  host.innerHTML = `
+    <div class="cohort-plate">
+      <div class="cohort-text">
+        В периоде <b>${period.label}</b> закрылось <span class="big">${fmtInt(total)}</span> подключений на <b>${fmtMoneyFull(totalNd)}</b>.
+        Главная когорта — <b>${monthName(maxRow.rp)}</b>: ${maxShare.toFixed(0)}% всех подключений пришли из регистраций этого периода.
+        ${hasFilters ? '<br><small style="color:var(--muted)">⚠ Когорты считаются по всем сотрудникам (без фильтров)</small>' : ''}
+      </div>
+      <div>
+        <div class="cohort-bar">${barSegs}</div>
+        <div class="cohort-legend">${legend}</div>
+      </div>
+    </div>`;
+}
+
+function renderDirTable(period, prev, empNames) {
+  const tbody = document.querySelector('#table-directions tbody');
+  const dirs = ['НИР', 'НПП', 'НСП'];
+  const rows = [];
+  for (const d of dirs) {
+    // Фильтруем сотрудников этого направления
+    const empsD = empNames.filter(n => {
+      const e = DATA.employees.find(e => e.name === n);
+      return e && e.direction === d;
+    });
+    if (!empsD.length) continue;
+    const r = regMetrics(period, empsD) || {};
+    const c = closedMetrics(period, empsD) || {};
+    const rP = prev ? (regMetrics(prev, empsD) || {}) : {};
+    const cP = prev ? (closedMetrics(prev, empsD) || {}) : {};
+    rows.push({ name: d, r, c, rP, cP });
+  }
+  tbody.innerHTML = rows.map(row => {
+    const ddelta = (m, prev, metric, fn, kind) => {
+      if (prev == null) return '';
+      const d = m - prev;
+      const sign = deltaSign(metric, d);
+      const str = kind === 'pp' ? (d>0?'+':'') + d.toFixed(1) + ' п.п.'
+                : kind === 'money' ? (d>0?'+':'-') + fmtMoney(Math.abs(d))
+                : (d>0?'+':'') + Math.round(d).toLocaleString('ru-RU');
+      return `<div class="delta-${sign}" style="font-size:10px">${arrowFor(sign)} ${str}</div>`;
+    };
+    return `<tr>
+      <td class="name">${row.name}</td>
+      <td class="num">${fmtInt(row.r.n_total)}${ddelta(row.r.n_total, row.rP.n_total, 'n_total', fmtInt, 'cnt')}</td>
+      <td class="num">${fmtPct(row.r.transfer_rate)}${ddelta(row.r.transfer_rate, row.rP.transfer_rate, 'transfer_rate', null, 'pp')}</td>
+      <td class="num">${fmtPct(row.r.sla_acc_rate)}${ddelta(row.r.sla_acc_rate, row.rP.sla_acc_rate, 'sla_acc_rate', null, 'pp')}</td>
+      <td class="num">${fmtInt(row.c.n_connected)}${ddelta(row.c.n_connected, row.cP.n_connected, 'n_connected', fmtInt, 'cnt')}</td>
+      <td class="num">${fmtMoney(row.c.nd_sum)}${ddelta(row.c.nd_sum, row.cP.nd_sum, 'nd_sum', fmtMoney, 'money')}</td>
+      <td class="num">${fmtPct(row.c.close_conv,2)}${ddelta(row.c.close_conv, row.cP.close_conv, 'close_conv', null, 'pp')}</td>
+      <td class="num">${fmtPct(row.c.equip_share)}${ddelta(row.c.equip_share, row.cP.equip_share, 'equip_share', null, 'pp')}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" class="empty">нет данных</td></tr>';
+}
+
+function renderDynamicChart(empNames) {
+  destroyChart('ch-dynamic');
+  const weeks = DATA.weeks.slice(-12);
+  const labels = weeks.map(w => w.label);
+  const regs = weeks.map(w => { const r = regMetrics({key:w.key, kind:'week'}, empNames); return r ? r.n_total : 0; });
+  const conns = weeks.map(w => { const c = closedMetrics({key:w.key, kind:'week'}, empNames); return c ? c.n_connected : 0; });
+  const sla = weeks.map(w => { const r = regMetrics({key:w.key, kind:'week'}, empNames); return r ? r.sla_acc_rate : 0; });
+  CHARTS['ch-dynamic'] = new Chart(document.getElementById('ch-dynamic'), {
+    data: {
+      labels, datasets: [
+        { type:'bar', label:'Заявок (рег.)', data: regs, backgroundColor:'rgba(37,99,235,0.3)', borderColor:'#2563eb', yAxisID:'y', order:3 },
+        { type:'line', label:'Подключений (закр.)', data: conns, borderColor:'#059669', backgroundColor:'#059669', yAxisID:'y', tension:0.25, order:2 },
+        { type:'line', label:'SLA принятия, наруш. %', data: sla, borderColor:'#dc2626', backgroundColor:'#dc2626', yAxisID:'y2', tension:0.25, order:1 },
+      ]
+    },
+    options: chartOpts({ y:{pos:'left'}, y2:{pos:'right', pct:true} })
+  });
+}
+function renderConvChart(empNames) {
+  destroyChart('ch-conv');
+  const weeks = DATA.weeks.slice(-12);
+  const labels = weeks.map(w => w.label);
+  const nd = weeks.map(w => { const c = closedMetrics({key:w.key, kind:'week'}, empNames); return c ? c.nd_sum/1000 : 0; });
+  const conv = weeks.map(w => { const r = regMetrics({key:w.key, kind:'week'}, empNames); return r ? r.conv_clean : 0; });
+  CHARTS['ch-conv'] = new Chart(document.getElementById('ch-conv'), {
+    data: {
+      labels, datasets: [
+        { type:'bar', label:'НД закрытых, тыс ₽', data: nd, backgroundColor:'rgba(217,119,6,0.3)', borderColor:'#d97706', yAxisID:'y', order:2 },
+        { type:'line', label:'Конв. когорты (clean) %', data: conv, borderColor:'#2563eb', backgroundColor:'#2563eb', yAxisID:'y2', tension:0.25, order:1 },
+      ]
+    },
+    options: chartOpts({ y:{pos:'left', money:true}, y2:{pos:'right', pct:true} })
+  });
+}
+
+function chartOpts(axs) {
+  const scales = {};
+  for (const [id, cfg] of Object.entries(axs)) {
+    scales[id] = {
+      position: cfg.pos || 'left',
+      beginAtZero: true,
+      grid: { display: id === 'y' },
+      ticks: {
+        callback: v => {
+          if (cfg.pct) return v.toFixed(0) + '%';
+          if (cfg.money) return v >= 1000 ? (v/1000).toFixed(0)+'М' : v.toLocaleString('ru-RU');
+          return v.toLocaleString('ru-RU');
+        }
+      }
+    };
+  }
+  return {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { position:'bottom', labels: { font:{size:11}, boxWidth:12 } },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => {
+            let v = ctx.parsed.y; const y = ctx.dataset.yAxisID || 'y'; const cfg = axs[y] || {};
+            let s;
+            if (cfg.pct) s = v.toFixed(2) + '%';
+            else if (cfg.money) s = Math.round(v*1000).toLocaleString('ru-RU') + ' ₽';
+            else s = Number.isInteger(v) ? v.toLocaleString('ru-RU') : v.toFixed(2);
+            return ctx.dataset.label + ': ' + s;
+          }
+        }
+      }
+    },
+    scales
+  };
+}
+function destroyChart(id) { if (CHARTS[id]) { CHARTS[id].destroy(); delete CHARTS[id]; } }
+
+// --------- Teams tab ---------
+function renderTeams() {
+  const period = activeTl();
+  const emps = filteredEmployees();
+  const byTeam = {};
+  for (const e of emps) {
+    if (!e.teamlead) continue;
+    if (!byTeam[e.teamlead]) byTeam[e.teamlead] = { tl: e.teamlead, director: e.director, emps: [] };
+    byTeam[e.teamlead].emps.push(e.name);
+  }
+  const rows = Object.values(byTeam).map(t => {
+    const r = regMetrics(period, t.emps) || {};
+    const c = closedMetrics(period, t.emps) || {};
+    const kind = period.kind === 'month' ? 'by_month' : 'by_week';
+    const active = t.emps.filter(n => (DATA.registered[kind][period.key]?.employee?.[n]?.n_total || 0) > 0).length || 1;
+    // Для команды берём scope-bucket тимлида напрямую (уникальные ИНН не задваиваются)
+    const tlBucket = DATA.closed[kind][period.key]?.teamlead?.[t.tl] || {};
+    return {
+      name: t.tl, director: t.director || '—',
+      emp_cnt: t.emps.length,
+      n_total: r.n_total || 0,
+      sla_acc_rate: r.sla_acc_rate || 0,
+      transfer_rate: r.transfer_rate || 0,
+      load: (r.n_total || 0) / active,
+      n_connected: c.n_connected || 0,
+      nd_sum: c.nd_sum || 0,
+      close_conv: c.close_conv || 0,
+      // Cross-sell + фрод из teamlead-бакета
+      crossell_pct: tlBucket.crossell_pct || 0,
+      fraud_pct: tlBucket.fraud_pct || 0,
+      n_inn_connected: tlBucket.n_inn_connected || 0,
+      n_inn_multi: tlBucket.n_inn_multi || 0,
+      n_secondary: tlBucket.n_secondary || 0,
+      n_ultra_cheap: tlBucket.n_ultra_cheap || 0,
+      emps: t.emps,
+    };
+  });
+  rows.sort((a, b) => b.nd_sum - a.nd_sum);
+
+  const tbody = document.querySelector('#table-teams tbody');
+  tbody.innerHTML = rows.map((r, i) => `<tr data-idx="${i}">
+    <td class="name">${r.name}</td>
+    <td>${r.director}</td>
+    <td class="num">${r.emp_cnt}</td>
+    <td class="num">${fmtInt(r.n_total)}</td>
+    <td class="num">${pillPct(r.sla_acc_rate, [40, 60], true)}</td>
+    <td class="num">${pillPct(r.transfer_rate, [25, 40], true)}</td>
+    <td class="num mono">${r.load.toFixed(1)}</td>
+    <td class="num">${fmtInt(r.n_connected)}</td>
+    <td class="num">${fmtMoney(r.nd_sum)}</td>
+    <td class="num">${pillPct(r.close_conv, [10, 20], false, 2)}</td>
+    <td class="num" title="${fmtInt(r.n_inn_multi)} из ${fmtInt(r.n_inn_connected)} уник. ИНН">${pillPct(r.crossell_pct, [3, 6], false, 1)}</td>
+    <td class="num" title="${fmtInt(r.n_ultra_cheap)} из ${fmtInt(r.n_secondary)} 2-х продуктов ≤400₽/мес">${pillPct(r.fraud_pct, [15, 30], true, 1)}</td>
+    <td class="spark"><canvas id="tspark-${i}" width="120" height="28"></canvas></td>
+  </tr>`).join('') || '<tr><td colspan="13" class="empty">нет данных</td></tr>';
+
+  // Sparklines для команд — тренд подключений (12 недель)
+  rows.forEach((r, i) => {
+    const weeks = DATA.weeks.slice(-12);
+    const data = weeks.map(w => { const cc = closedMetrics({key:w.key, kind:'week'}, r.emps); return cc ? cc.n_connected : 0; });
+    const canvas = document.getElementById(`tspark-${i}`);
+    if (canvas) {
+      if (CHARTS['tsp-'+i]) CHARTS['tsp-'+i].destroy();
+      CHARTS['tsp-'+i] = new Chart(canvas, {
+        type: 'line',
+        data: { labels: weeks.map(_=>''), datasets: [{ data, borderColor:'#059669', backgroundColor:'rgba(5,150,105,0.15)', fill:true, borderWidth:1.5, pointRadius:0, tension:0.3 }]},
+        options: { responsive:false, plugins:{legend:{display:false},tooltip:{enabled:false}}, scales:{x:{display:false},y:{display:false,beginAtZero:true}} }
+      });
+    }
+  });
+
+  document.getElementById('teams-sub').textContent =
+    `период: ${period.label_full || period.label} · команд: ${rows.length}`;
+  enableSort('table-teams', rows, (sorted) => {
+    const tbody = document.querySelector('#table-teams tbody');
+    tbody.innerHTML = sorted.map((r, i) => tbody.querySelector(`tr[data-idx="${rows.indexOf(r)}"]`)?.outerHTML || '').join('');
+  });
+}
+
+// --------- Employees tab ---------
+function renderEmployees() {
+  const period = activeTl();
+  const emps = filteredEmployees();
+  const kind = period.kind === 'month' ? 'by_month' : 'by_week';
+  const srcReg = DATA.registered[kind][period.key]?.employee || {};
+  const srcCl = DATA.closed[kind][period.key]?.employee || {};
+  const rows = emps.map(e => {
+    const r = srcReg[e.name] || {};
+    const c = srcCl[e.name] || {};
+    const op = DATA.open.employee[e.name] || {};
+    return {
+      name: e.name,
+      teamlead: e.teamlead || '—',
+      mrf: e.mrf || '—',
+      n_total: r.n_total || 0,
+      sla_acc_rate: r.sla_acc_rate || 0,
+      transfer_rate: r.transfer_rate || 0,
+      n_connected: c.n_connected || 0,
+      nd_sum: c.nd_sum || 0,
+      equip_share: c.equip_share || 0,
+      crossell_pct: c.crossell_pct || 0,
+      fraud_pct: c.fraud_pct || 0,
+      n_inn_connected: c.n_inn_connected || 0,
+      n_inn_multi: c.n_inn_multi || 0,
+      n_secondary: c.n_secondary || 0,
+      n_ultra_cheap: c.n_ultra_cheap || 0,
+      n_open: op.n_open || 0,
+      n_stale: op.n_stale30 || 0,
+    };
+  }).filter(r => r.n_total > 0 || r.n_connected > 0 || r.n_open > 0);
+  rows.sort((a, b) => b.n_total - a.n_total);
+  const tbody = document.querySelector('#table-emp tbody');
+  tbody.innerHTML = rows.map(r => `<tr>
+    <td class="name">${r.name}</td>
+    <td>${r.teamlead}</td>
+    <td>${r.mrf}</td>
+    <td class="num">${fmtInt(r.n_total)}</td>
+    <td class="num">${pillPct(r.sla_acc_rate, [40, 60], true)}</td>
+    <td class="num">${pillPct(r.transfer_rate, [25, 40], true)}</td>
+    <td class="num">${fmtInt(r.n_connected)}</td>
+    <td class="num">${fmtMoney(r.nd_sum)}</td>
+    <td class="num">${fmtPct(r.equip_share)}</td>
+    <td class="num" title="${fmtInt(r.n_inn_multi)}/${fmtInt(r.n_inn_connected)} ИНН">${r.n_inn_connected ? pillPct(r.crossell_pct, [3, 6], false, 1) : '—'}</td>
+    <td class="num" title="${fmtInt(r.n_ultra_cheap)}/${fmtInt(r.n_secondary)} 2-х ≤400₽">${r.n_secondary ? pillPct(r.fraud_pct, [15, 30], true, 1) : '—'}</td>
+    <td class="num">${fmtInt(r.n_open)}</td>
+    <td class="num">${r.n_stale > 0 ? `<span class="cell-pill pill-r">${r.n_stale}</span>` : '—'}</td>
+  </tr>`).join('') || '<tr><td colspan="13" class="empty">нет данных</td></tr>';
+  document.getElementById('emp-sub').textContent =
+    `период: ${period.label_full || period.label} · сотрудников с активностью: ${rows.length}`;
+  enableSort('table-emp', rows);
+}
+
+// --------- Open tab ---------
+function renderOpen() {
+  const emps = filteredEmployees();
+  const empNames = emps.map(e => e.name);
+  const op = openMetrics(empNames);
+  const host = document.getElementById('open-kpis');
+  const kpis = [
+    { lbl: 'Открытых (снэпшот)', cur: op.n_open, prev: null, fmt: fmtInt, metric:'n_open' },
+    { lbl: 'Застрявших &gt;30 дн.', cur: op.n_stale, prev: null, fmt: fmtInt, metric:'n_stale' },
+    { lbl: '% застрявших', cur: op.stale_rate, prev: null, fmt: v=>fmtPct(v,1), metric:'stale_rate' },
+    { lbl: 'Средний застой', cur: null, prev: null, fmt: v=>v==null?'—':v, metric:'' },
+  ];
+  host.innerHTML = kpis.map(k => {
+    const subHtml = k.sub ? `<div class="kpi-sub">${k.sub(k.cur)}</div>` : '';
+    return `<div class="kpi neutral">
+      <div class="kpi-label">${k.lbl}</div>
+      <div class="kpi-val">${k.fmt(k.cur)}</div>
+      ${subHtml}
+    </div>`;
+  }).join('');
+
+  // Открытые по неделе
+  const weeks = DATA.weeks.slice(-16);
+  const labels = weeks.map(w => w.label);
+  const byw = weeks.map(w => op.by_week[w.key] || 0);
+  const staleByw = weeks.map(w => op.stale_by_week[w.key] || 0);
+  destroyChart('ch-open-weeks');
+  CHARTS['ch-open-weeks'] = new Chart(document.getElementById('ch-open-weeks'), {
+    type:'bar',
+    data: { labels, datasets: [
+      { label:'Открыто', data: byw, backgroundColor:'rgba(37,99,235,0.5)' },
+      { label:'Из них застряли', data: staleByw, backgroundColor:'rgba(220,38,38,0.7)' },
+    ]},
+    options: { ...chartOpts({y:{pos:'left'}}), scales: { y: { beginAtZero: true, stacked:false }}}
+  });
+
+  // Застрявшие по тимлидам
+  const byTL = {};
+  for (const e of emps) {
+    if (!e.teamlead) continue;
+    const o = DATA.open.employee[e.name];
+    if (!o) continue;
+    byTL[e.teamlead] = (byTL[e.teamlead] || 0) + o.n_stale30;
+  }
+  const tlList = Object.entries(byTL).sort((a,b) => b[1]-a[1]).slice(0, 12);
+  destroyChart('ch-stale-teams');
+  CHARTS['ch-stale-teams'] = new Chart(document.getElementById('ch-stale-teams'), {
+    type:'bar',
+    data: { labels: tlList.map(x => x[0].split(' ').slice(0,2).join(' ')), datasets: [
+      { label:'Застрявших &gt;30 дн.', data: tlList.map(x => x[1]), backgroundColor:'rgba(220,38,38,0.6)' }
+    ]},
+    options: { ...chartOpts({y:{pos:'left'}}), indexAxis: 'y' }
+  });
+
+  // Таблица — сотрудники с застрявшими
+  const rows = op.per_emp.filter(p => p.n_stale30 > 0).map(p => {
+    const e = DATA.employees.find(x => x.name === p.name) || {};
+    return {
+      name: p.name, teamlead: e.teamlead || '—',
+      n_open: p.n_open, n_stale: p.n_stale30,
+      stale_rate: p.n_open ? 100*p.n_stale30/p.n_open : 0,
+    };
+  }).sort((a,b) => b.n_stale - a.n_stale);
+  const tbody = document.querySelector('#table-stale tbody');
+  tbody.innerHTML = rows.map(r => `<tr>
+    <td class="name">${r.name}</td>
+    <td>${r.teamlead}</td>
+    <td class="num">${fmtInt(r.n_open)}</td>
+    <td class="num"><span class="cell-pill pill-r">${fmtInt(r.n_stale)}</span></td>
+    <td class="num">${fmtPct(r.stale_rate)}</td>
+  </tr>`).join('') || '<tr><td colspan="5" class="empty">застрявших нет</td></tr>';
+  enableSort('table-stale', rows);
+}
+
+// --------- Services tab ---------
+function renderServices() {
+  const period = activeTl();
+  const prev = prevTl();
+  const emps = filteredEmployees();
+  const empNames = emps.map(e => e.name);
+  const cur = closedMetrics(period, empNames) || { by_service:{}, by_service_equip:{}, n_connected:0 };
+  const prv = prev ? (closedMetrics(prev, empNames) || { by_service:{}, by_service_equip:{}, n_connected:0 }) : null;
+
+  const allServices = new Set([...Object.keys(cur.by_service), ...(prv ? Object.keys(prv.by_service) : [])]);
+  const items = Array.from(allServices).map(s => {
+    const c = cur.by_service[s] || 0;
+    const p = prv ? (prv.by_service[s] || 0) : 0;
+    const eq = cur.by_service_equip[s] || 0;
+    return {
+      service: s, cur: c, prev: p,
+      cur_share: cur.n_connected ? 100*c/cur.n_connected : 0,
+      prev_share: (prv && prv.n_connected) ? 100*p/prv.n_connected : 0,
+      delta: c - p,
+      eq_cur: eq,
+      eq_share: c ? 100*eq/c : 0,
+    };
+  }).sort((a,b) => b.cur - a.cur);
+
+  // Pie share chart
+  const top = items.slice(0, 8);
+  destroyChart('ch-serv-share');
+  CHARTS['ch-serv-share'] = new Chart(document.getElementById('ch-serv-share'), {
+    type:'bar',
+    data: { labels: top.map(x => x.service), datasets: [
+      { label:'Тек. период', data: top.map(x => x.cur), backgroundColor:'rgba(37,99,235,0.5)' },
+      { label:'Пред. период', data: top.map(x => x.prev), backgroundColor:'rgba(148,163,184,0.5)' },
+    ]},
+    options: chartOpts({y:{pos:'left'}})
+  });
+  destroyChart('ch-serv-equip');
+  const eqTop = items.filter(x => x.cur > 0).slice(0, 8);
+  CHARTS['ch-serv-equip'] = new Chart(document.getElementById('ch-serv-equip'), {
+    type:'bar',
+    data: { labels: eqTop.map(x => x.service), datasets: [
+      { label:'Всего подключений', data: eqTop.map(x => x.cur), backgroundColor:'rgba(37,99,235,0.4)' },
+      { label:'С оборудованием', data: eqTop.map(x => x.eq_cur), backgroundColor:'#d97706' },
+    ]},
+    options: chartOpts({y:{pos:'left'}})
+  });
+  document.getElementById('serv-sub').textContent =
+    `период: ${period.label_full || period.label} · сравнение: ${prev ? (prev.label_full || prev.label) : '—'}`;
+
+  const tbody = document.querySelector('#table-services tbody');
+  tbody.innerHTML = items.map(r => {
+    const dsign = deltaSign('n_connected', r.delta);
+    return `<tr>
+      <td class="name">${r.service}</td>
+      <td class="num">${fmtInt(r.cur)}</td>
+      <td class="num">${fmtPct(r.cur_share)}</td>
+      <td class="num">${fmtInt(r.prev)}</td>
+      <td class="num delta-${dsign}">${r.delta>0?'+':''}${r.delta}</td>
+      <td class="num">${fmtInt(r.eq_cur)}</td>
+      <td class="num">${fmtPct(r.eq_share)}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" class="empty">нет данных</td></tr>';
+  enableSort('table-services', items);
+}
+
+// --------- Helpers ---------
+function pillPct(v, thresh, inverse, dig=1) {
+  let cls = 'pill-y';
+  if (inverse) {
+    if (v < thresh[0]) cls = 'pill-g';
+    else if (v < thresh[1]) cls = 'pill-y';
+    else cls = 'pill-r';
+  } else {
+    if (v >= thresh[1]) cls = 'pill-g';
+    else if (v >= thresh[0]) cls = 'pill-y';
+    else cls = 'pill-r';
+  }
+  return `<span class="cell-pill ${cls}">${fmtPct(v, dig)}</span>`;
+}
+
+function enableSort(tableId, rows, onSort) {
+  const table = document.getElementById(tableId);
+  if (!table || table._sortInit) return;
+  table._sortInit = true;
+  const ths = table.querySelectorAll('thead th[data-k]');
+  ths.forEach(th => {
+    th.addEventListener('click', () => {
+      const k = th.dataset.k;
+      const cur = th.classList.contains('sorted-asc') ? 'desc' : 'asc';
+      ths.forEach(t => t.classList.remove('sorted-asc','sorted-desc'));
+      th.classList.add('sorted-' + cur);
+      const sorted = [...rows].sort((a,b) => {
+        const av = a[k] ?? ''; const bv = b[k] ?? '';
+        if (typeof av === 'number' && typeof bv === 'number') return cur === 'asc' ? av-bv : bv-av;
+        return cur === 'asc' ? String(av).localeCompare(String(bv),'ru') : String(bv).localeCompare(String(av),'ru');
+      });
+      // Перерисуем (упрощённо)
+      const tbody = table.querySelector('tbody');
+      if (onSort) onSort(sorted);
+      else {
+        const curTab = document.querySelector('.tab.active').dataset.tab;
+        if (curTab === 'employees') renderEmployees();
+        else if (curTab === 'services') renderServices();
+        else if (curTab === 'open') renderOpen();
+      }
+    });
+  });
+}
+
+function exportTableCSV(tableId, filename) {
+  const table = document.getElementById(tableId);
+  if (!table) return;
+  const rows = [];
+  for (const tr of table.querySelectorAll('tr')) {
+    const cells = [];
+    for (const c of tr.children) {
+      // Убираем HTML разметку из ячейки
+      const txt = c.textContent.replace(/\s+/g,' ').trim();
+      cells.push('"' + txt.replace(/"/g,'""') + '"');
+    }
+    rows.push(cells.join(','));
+  }
+  const csv = '\uFEFF' + rows.join('\n'); // BOM для Excel
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `${filename}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+// ==================== TABS ====================
+function initTabs() {
+  const u = readUrlFilters();
+  if (u.tab && document.querySelector(`.tab[data-tab="${u.tab}"]`)) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelector(`.tab[data-tab="${u.tab}"]`).classList.add('active');
+    document.querySelector(`.tab-content[data-tab="${u.tab}"]`).classList.add('active');
+  }
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      document.querySelector(`.tab-content[data-tab="${t.dataset.tab}"]`).classList.add('active');
+      renderAll(); writeUrlFilters();
+    });
+  });
+}
+
+// ==================== ГЛАВНЫЙ ДИСПАТЧЕР ====================
+function renderAll() {
+  const activeTab = document.querySelector('.tab.active').dataset.tab;
+  if (activeTab === 'main') renderMain();
+  else if (activeTab === 'teams') renderTeams();
+  else if (activeTab === 'employees') renderEmployees();
+  else if (activeTab === 'open') renderOpen();
+  else if (activeTab === 'services') renderServices();
+}
+
+// ==================== ЗАПУСК ====================
+document.addEventListener('DOMContentLoaded', () => {
+  renderHeader();
+
+  const u = readUrlFilters();
+  // По умолчанию — current_week (текущая неделя открытого месяца)
+  STATE.activePeriod = u.period || DATA.meta.current_week;
+
+  initFilters();
+  renderTimeline();
+  initTabs();
+  renderAll();
+});
+</script>
+
+</body>
+</html>
