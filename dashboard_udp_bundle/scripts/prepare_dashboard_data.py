@@ -86,15 +86,24 @@ def norm_str(v):
 
 def clean_name(v):
     s = norm_str(v)
-    if not s: return ''
+    if not s:
+        return ''
+
+    # Some exports may append emails after FIO.
     if '@' in s:
         parts = s.split()
         clean = []
         for p in parts:
-            if '@' in p: break
+            if '@' in p:
+                break
             clean.append(p)
         s = ' '.join(clean)
-    return s.strip()
+
+    # Normalize FIO: if there are extra symbols before/after (or inside) the name,
+    # keep only letter/hyphen groups and re-join by single spaces.
+    # Example: '***Воронин Александр Александрович***' -> 'Воронин Александр Александрович'
+    tokens = re.findall(r"[A-Za-zА-Яа-яЁё-]+", s)
+    return ' '.join(tokens).strip()
 
 # -------- иерархия --------
 
@@ -118,7 +127,7 @@ def _load_hierarchy_from_json(hierarchy_path):
     employees = raw.get('employees', raw if isinstance(raw, list) else [])
     emp_map = {}
     for info in employees:
-        name = (info.get('name') or info.get('manager') or '').strip()
+        name = clean_name(info.get('name') or info.get('manager') or '')
         if not name:
             continue
         emp_map[name] = {
