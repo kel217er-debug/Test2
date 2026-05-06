@@ -17,8 +17,8 @@ DIST_DIR = os.path.join(PROJECT_ROOT, 'dist')
 REQUIRED_FILES = [
     os.path.join('scripts', 'prepare_dashboard_data.py'),
     os.path.join('scripts', 'build_offline_dashboard.py'),
-    # hierarchy can be provided as Excel (preferred) or legacy JSON
-    # (prepare_dashboard_data.py auto-picks employee_hierarchy.xlsx if present)
+    # Иерархия может быть в Excel (предпочтительно) или в legacy JSON
+    # (prepare_dashboard_data.py автоматически выбирает employee_hierarchy.xlsx, если он есть)
     os.path.join('config', 'employee_hierarchy.xlsx'),
     os.path.join('templates', 'daily_dashboard_template.html'),
     os.path.join('vendor', 'chartjs.umd.js'),
@@ -54,7 +54,7 @@ def check_inputs():
     for name in REQUIRED_FILES:
         if os.path.exists(os.path.join(PROJECT_ROOT, name)):
             continue
-        # allow legacy config/employee_hierarchy.json
+        # допускаем legacy config/employee_hierarchy.json
         if name == os.path.join('config', 'employee_hierarchy.xlsx'):
             if os.path.exists(os.path.join(PROJECT_ROOT, 'config', 'employee_hierarchy.json')):
                 continue

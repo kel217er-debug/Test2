@@ -54,6 +54,7 @@ from dashboard_logic.periods import (
     split_timeline_periods,
 )
 from dashboard_logic.sla_rules import is_sla_violated
+from dashboard_logic.repeat_metrics import is_repeat_by_comment, normalize_phone
 
 STALE_HOURS = 720  # 30 дней
 
@@ -104,6 +105,9 @@ def clean_name(v):
     # Example: '***Воронин Александр Александрович***' -> 'Воронин Александр Александрович'
     tokens = re.findall(r"[A-Za-zА-Яа-яЁё-]+", s)
     return ' '.join(tokens).strip()
+
+
+
 
 # -------- иерархия --------
 
@@ -218,7 +222,50 @@ def run_etl(muz_path, hierarchy_path, out_path):
     wb = CalamineWorkbook.from_path(muz_path)
     sheet = wb.get_sheet_by_name('Sheet1')
     rows_iter = iter(sheet.to_python())
-    _header = next(rows_iter)
+
+    # Некоторые выгрузки содержат "преамбулу" (заголовок/фильтры) перед строкой реальных заголовков.
+    # Реальную строку заголовков определяем по известным первым колонкам.
+    header_row = None
+    for _ in range(50):
+        candidate = next(rows_iter)
+        c0 = norm_str(candidate[0]).lower() if len(candidate) > 0 else ''
+        c1 = norm_str(candidate[1]).lower() if len(candidate) > 1 else ''
+        if c0 == 'мрф' and c1 == 'регион':
+            header_row = candidate
+            break
+    if header_row is None:
+        # Фоллбек: считаем, что первая строка и есть заголовки (legacy-формат)
+        header_row = next(rows_iter)
+
+    # Колонки для метрики повторов ищем по тексту заголовка (индексы в выгрузках могут "плавать")
+    _MULTISPACE_RE = re.compile(r'\s+')
+
+    def _norm_header(v):
+        s = '' if v is None else str(v).strip().lower()
+        s = s.replace('\u00a0', ' ')
+        s = _MULTISPACE_RE.sub(' ', s)
+        return s
+
+    headers_norm = [_norm_header(h) for h in header_row]
+
+    def _find_col_exact_or_contains(*needles):
+        needles_norm = [_norm_header(n) for n in needles if n]
+        for i, h in enumerate(headers_norm):
+            for n in needles_norm:
+                if not n:
+                    continue
+                if h == n or (n in h):
+                    return i
+        return None
+
+    idx_repeat_comment = _find_col_exact_or_contains(
+        'Комментарии, направленные сотрудникам (все комментарии, внесенные в процессе обработки заявки)',
+        'Комментарии, направленные сотрудникам',
+    )
+    idx_phone = _find_col_exact_or_contains(
+        'Контактный телефон представителя клиента',
+        'Контактный телефон',
+    )
 
     # --- структуры ---
     # Для каждой корзины и периода — метрики
@@ -251,6 +298,11 @@ def run_etl(muz_path, hierarchy_path, out_path):
     dates_min = None; dates_max = None
     close_min = None; close_max = None
 
+    # -------- Аккумуляторы для метрики повторов --------
+    phone_min_info = {}  # телефон -> {'dt': datetime, 'direction': str, 'director': str, 'teamlead': str, 'employee': str}
+    repeat_rows = []  # список телефонов (по одной записи на каждую строку/заявку, признанную повторной)
+
+
     t_iter = time.time()
     for row in rows_iter:
         n_read += 1
@@ -266,6 +318,8 @@ def run_etl(muz_path, hierarchy_path, out_path):
         if reg_dt is None:
             n_skip_no_date += 1
             continue
+
+        phone_digits = ''
 
         if dates_min is None or reg_dt < dates_min: dates_min = reg_dt
         if dates_max is None or reg_dt > dates_max: dates_max = reg_dt
@@ -309,6 +363,27 @@ def run_etl(muz_path, hierarchy_path, out_path):
         emp_info = emp_map.get(primary_name, {})
         teamlead = emp_info.get('teamlead', '')
         director = emp_info.get('director', '')
+
+        # ------ Метрика повторов (комментарий + телефон) ------
+        # Повтор определяем по ключевым словам в колонке комментариев.
+        # Для корректной атрибуции: "дата" и срезы повтора берём из самой ранней reg_dt внутри группы одинакового телефона.
+        if idx_repeat_comment is not None and idx_phone is not None:
+            phone_digits = normalize_phone(row[idx_phone] if idx_phone < len(row) else None)
+            if phone_digits:
+                prev = phone_min_info.get(phone_digits)
+                if (prev is None) or (reg_dt < prev['dt']):
+                    phone_min_info[phone_digits] = {
+                        'dt': reg_dt,
+                        'direction': direction,
+                        'director': director,
+                        'teamlead': teamlead,
+                        'employee': primary_name,
+                    }
+
+            comment_val = row[idx_repeat_comment] if idx_repeat_comment < len(row) else None
+            if phone_digits and is_repeat_by_comment(comment_val):
+                repeat_rows.append(phone_digits)
+
 
         # Периоды регистрации
         wkey_reg, mon_r, sun_r = iso_week_key(reg_dt)
@@ -416,6 +491,43 @@ def run_etl(muz_path, hierarchy_path, out_path):
     print(f"[ETL v2] Reg dates: {dates_min} — {dates_max}")
     print(f"[ETL v2] Close dates: {close_min} — {close_max}")
 
+    # -------- Repeat обращения (по комментариям; дата = самая ранняя по телефону) --------
+    repeat_total = len(repeat_rows)
+    repeat_attributed = 0
+    repeat_attribution_missing_min_dt = 0
+
+    def _apply_repeat_metric(m):
+        m['n_repeat'] += 1
+
+    for phone_digits in repeat_rows:
+        info = phone_min_info.get(phone_digits)
+        if info is None:
+            repeat_attribution_missing_min_dt += 1
+            continue
+
+        min_dt = info['dt']
+        wkey, _mon, _sun = iso_week_key(min_dt)
+        mkey = month_key(min_dt)
+
+        def apply_repeat(scope):
+            _apply_repeat_metric(scope)
+
+        apply_repeat(weekly_reg[wkey]['total']['all'])
+        apply_repeat(monthly_reg[mkey]['total']['all'])
+        if info['direction']:
+            apply_repeat(weekly_reg[wkey]['direction'][info['direction']])
+            apply_repeat(monthly_reg[mkey]['direction'][info['direction']])
+        if info['director']:
+            apply_repeat(weekly_reg[wkey]['director'][info['director']])
+            apply_repeat(monthly_reg[mkey]['director'][info['director']])
+        if info['teamlead']:
+            apply_repeat(weekly_reg[wkey]['teamlead'][info['teamlead']])
+            apply_repeat(monthly_reg[mkey]['teamlead'][info['teamlead']])
+        if info['employee']:
+            apply_repeat(weekly_reg[wkey]['employee'][info['employee']])
+            apply_repeat(monthly_reg[mkey]['employee'][info['employee']])
+
+        repeat_attributed += 1
     # --------- сериализация ---------
 
     weeks_sorted = sorted(weeks_meta.keys())
@@ -501,6 +613,7 @@ def run_etl(muz_path, hierarchy_path, out_path):
 
     timeline = build_timeline(closed_months, open_weeks, months_meta, weeks_meta, current_week)
 
+    # -------- Repeat обращения (по комментариям; дата = самая ранняя по телефону) --------
     out = {
         'meta': {
             'generated_at': datetime.now().isoformat(timespec='seconds'),
@@ -529,6 +642,19 @@ def run_etl(muz_path, hierarchy_path, out_path):
         'directors': directors,
         'directions': directions,
         'mrfs': mrfs,
+        'repeat_summary': {
+            'n_total_our': n_our,
+            'n_repeat': repeat_attributed,
+            'repeat_pct': round((100.0 * repeat_attributed / n_our), 2) if n_our else 0.0,
+            'columns_found': {
+                'comment': idx_repeat_comment is not None,
+                'phone': idx_phone is not None,
+            },
+            'debug': {
+                'n_repeat_rows_raw': repeat_total,
+                'n_missing_min_dt': repeat_attribution_missing_min_dt,
+            },
+        },
     }
 
     with open(out_path, 'w', encoding='utf-8') as f:

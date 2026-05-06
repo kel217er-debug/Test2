@@ -23,7 +23,7 @@ a{color:var(--blue);text-decoration:none}
 
 .container{max-width:1600px;margin:0 auto;padding:16px 20px 60px}
 
-/* Filters */
+/* Фильтры */
 .filters{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:12px}
 .f-group{display:flex;flex-direction:column;gap:3px}
 .f-group label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px}
@@ -34,7 +34,7 @@ a{color:var(--blue);text-decoration:none}
 .actions button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
 .actions button.primary:hover{background:#1e40af}
 
-/* Timeline bar */
+/* Полоса периода */
 .timeline{display:flex;align-items:stretch;gap:0;margin-bottom:16px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px;overflow-x:auto}
 .tl-item{flex:1;min-width:110px;padding:10px 12px;border-radius:7px;cursor:pointer;transition:all 0.15s;border:1px solid transparent;user-select:none;position:relative}
 .tl-item:hover{background:#f1f5f9}
@@ -47,7 +47,7 @@ a{color:var(--blue);text-decoration:none}
 .tl-item.active .tl-badge.open{background:rgba(255,255,255,0.25);color:#fff}
 .tl-divider{width:1px;background:var(--border);margin:4px 4px}
 
-/* Tabs */
+/* Вкладки */
 .tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:16px;overflow-x:auto}
 .tab{padding:10px 18px;cursor:pointer;border-bottom:2px solid transparent;color:var(--muted);font-weight:500;white-space:nowrap}
 .tab:hover{color:var(--text)}
@@ -55,7 +55,7 @@ a{color:var(--blue);text-decoration:none}
 .tab-content{display:none}
 .tab-content.active{display:block}
 
-/* Alerts */
+/* Алёрты */
 .alerts{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
 .alert{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border-left:3px solid;font-size:13px}
 .alert.warn{background:var(--amber-bg);border-color:var(--amber);color:#92400e}
@@ -86,12 +86,12 @@ a{color:var(--blue);text-decoration:none}
 .kpi-group-label h3{margin:0}
 .kpi-group-label .hint{font-size:11px;color:var(--muted);font-style:italic}
 
-/* Card */
+/* Карточки */
 .card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px}
 .card .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .card .card-sub{font-size:11px;color:var(--muted)}
 
-/* Cohort plate */
+/* Когортная таблица */
 .cohort-plate{display:grid;grid-template-columns:1.2fr 3fr;gap:16px;align-items:start}
 @media (max-width:900px){.cohort-plate{grid-template-columns:1fr}}
 .cohort-text{font-size:13px;color:var(--text)}
@@ -101,13 +101,14 @@ a{color:var(--blue);text-decoration:none}
 .cohort-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:12px}
 .cohort-legend .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:middle}
 
-/* Charts */
+/* Графики */
 .chart-wrap{height:280px;position:relative}
 .chart-wrap.tall{height:340px}
 .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media (max-width:900px){.chart-grid{grid-template-columns:1fr}}
 
 /* Tables */
+/* Таблицы */
 table{width:100%;border-collapse:collapse;font-size:13px}
 thead th{text-align:left;font-weight:500;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:0.3px;padding:8px 10px;border-bottom:1px solid var(--border);background:#f8fafc;cursor:pointer;user-select:none;white-space:nowrap}
 thead th.num{text-align:right}
@@ -120,7 +121,7 @@ tbody td.name{font-weight:500}
 tbody tr:hover{background:#f8fafc}
 tbody td.empty{text-align:center;color:var(--muted);padding:20px}
 
-/* Cell pill */
+/* Плашки в ячейках */
 .cell-pill{display:inline-block;padding:2px 6px;border-radius:4px;font-size:11px;font-variant-numeric:tabular-nums}
 .pill-g{background:var(--green-bg);color:#065f46}
 .pill-y{background:var(--amber-bg);color:#92400e}
@@ -132,11 +133,11 @@ tbody td.empty{text-align:center;color:var(--muted);padding:20px}
 .delta-down-bad{color:var(--bad)}
 .delta-flat{color:var(--neutral)}
 
-/* Sparkline in table */
+/* Спарклайны в таблицах */
 td.spark{padding:4px}
 td.spark canvas{vertical-align:middle}
 
-/* Utility */
+/* Утилиты */
 .hidden{display:none !important}
 .mono{font-variant-numeric:tabular-nums}
 .export-btn{font-size:11px;padding:4px 10px;background:#f1f5f9;border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--muted)}
@@ -251,6 +252,7 @@ td.spark canvas{vertical-align:middle}
       <th data-k="name">Направление</th>
       <th class="num" data-k="n_total">Заявок</th>
       <th class="num" data-k="transfer_rate">Передачи %</th>
+      <th class="num" data-k="repeat_pct">Повтор %</th>
       <th class="num" data-k="sla_acc_rate">SLA принятия %</th>
       <th class="num" data-k="n_connected">Подключений</th>
       <th class="num" data-k="nd_sum">НД ₽</th>
@@ -277,6 +279,7 @@ td.spark canvas{vertical-align:middle}
       <th class="num" data-k="n_total">Заявки</th>
       <th class="num" data-k="sla_acc_rate">SLA %</th>
       <th class="num" data-k="transfer_rate">Перед. %</th>
+      <th class="num" data-k="repeat_pct">Повтор %</th>
       <th class="num" data-k="load">Нагр.</th>
       <th class="num" data-k="n_connected">Подкл.</th>
       <th class="num" data-k="nd_sum">НД ₽</th>
@@ -305,6 +308,7 @@ td.spark canvas{vertical-align:middle}
       <th class="num" data-k="n_total">Заявки</th>
       <th class="num" data-k="sla_acc_rate">SLA %</th>
       <th class="num" data-k="transfer_rate">Перед. %</th>
+      <th class="num" data-k="repeat_pct">Повтор %</th>
       <th class="num" data-k="n_connected">Подкл.</th>
       <th class="num" data-k="nd_sum">НД ₽</th>
       <th class="num" data-k="equip_share">Оборуд. %</th>
@@ -610,12 +614,13 @@ function aggByEmployees(aggType, period, empNames, fields) {
 
 function regMetrics(period, empNames) {
   const m = aggByEmployees('registered', period, empNames, [
-    'n_total','n_base_all','n_stayed_base','n_transferred',
+    'n_total','n_base_all','n_stayed_base','n_transferred','n_repeat',
     'n_sla_acc_viol','n_sla_cont_viol',
     'n_connected_stayed_from_period','nd_sum_from_period'
   ]);
   if (!m) return null;
   m.transfer_rate = m.n_total ? 100 * m.n_transferred / m.n_total : 0;
+  m.repeat_pct = m.n_total ? 100 * (m.n_repeat || 0) / m.n_total : 0;
   m.sla_acc_rate = m.n_total ? 100 * m.n_sla_acc_viol / m.n_total : 0;
   m.sla_cont_rate = m.n_total ? 100 * m.n_sla_cont_viol / m.n_total : 0;
   m.conv_clean = m.n_base_all ? 100 * m.n_connected_stayed_from_period / m.n_base_all : 0;
@@ -721,19 +726,20 @@ function renderMain() {
   const curLoad = (r.n_total || 0) / curActive;
   const prevLoad = rPrev ? ((rPrev.n_total || 0) / prevActive) : null;
 
-  // ALERTS
+  // АЛЁРТЫ
   renderAlerts(emps, period, r, c, op);
 
-  // LEADING
+  // ЛИДИРУЮЩИЕ (leading)
   const leading = [
     { lbl: 'Заявок (регистрация)', cur: r.n_total, prev: rPrev?.n_total, fmt: fmtInt, metric: 'n_total' },
     { lbl: 'SLA принятия, наруш.', cur: r.sla_acc_rate, prev: rPrev?.sla_acc_rate, fmt: v=>fmtPct(v,1), metric: 'sla_acc_rate', kind:'pp' },
     { lbl: 'Передачи %', cur: r.transfer_rate, prev: rPrev?.transfer_rate, fmt: v=>fmtPct(v,1), metric: 'transfer_rate', kind:'pp' },
+    { lbl: 'Повтор %', cur: r.repeat_pct, prev: rPrev?.repeat_pct, fmt: v=>fmtPct(v,1), metric: 'repeat_pct', kind:'pp' },
     { lbl: 'Нагрузка/сотр.', cur: curLoad, prev: prevLoad, fmt: v=>v==null?'—':v.toFixed(1), metric: 'load', kind:'abs' },
   ];
   document.getElementById('kpi-leading').innerHTML = leading.map(k => renderKpi(k, period.key)).join('');
 
-  // LAGGING
+  // ОТСТАЮЩИЕ (lagging)
   const lagging = [
     { lbl: 'Подключений (закрытия)', cur: c.n_connected, prev: cPrev?.n_connected, fmt: fmtInt, metric: 'n_connected' },
     { lbl: 'НД закрытых', cur: c.nd_sum, prev: cPrev?.nd_sum, fmt: fmtMoney, metric: 'nd_sum', sub: v => fmtMoneyFull(v), kind:'money' },
@@ -750,14 +756,14 @@ function renderMain() {
   leading.forEach((k, i) => drawSparkline(`spark-leading-${i}`, k.metric, 'registered', empNames));
   lagging.forEach((k, i) => drawSparkline(`spark-lagging-${i}`, k.metric, 'closed', empNames));
 
-  // COHORT
+  // КОГОРТЫ
   renderCohort(period, empNames);
 
-  // CHARTS
+  // ГРАФИКИ
   renderDynamicChart(empNames);
   renderConvChart(empNames);
 
-  // Directions table
+  // Таблица по направлениям
   renderDirTable(period, prev, empNames);
   document.getElementById('dir-sub').textContent =
     `период: ${period.label_full || period.label} · сравнение: ${prev ? (prev.label_full || prev.label) : '—'}`;
@@ -966,13 +972,14 @@ function renderDirTable(period, prev, empNames) {
       <td class="name">${row.name}</td>
       <td class="num">${fmtInt(row.r.n_total)}${ddelta(row.r.n_total, row.rP.n_total, 'n_total', fmtInt, 'cnt')}</td>
       <td class="num">${fmtPct(row.r.transfer_rate)}${ddelta(row.r.transfer_rate, row.rP.transfer_rate, 'transfer_rate', null, 'pp')}</td>
+      <td class="num">${fmtPct(row.r.repeat_pct)}${ddelta(row.r.repeat_pct, row.rP.repeat_pct, 'repeat_pct', null, 'pp')}</td>
       <td class="num">${fmtPct(row.r.sla_acc_rate)}${ddelta(row.r.sla_acc_rate, row.rP.sla_acc_rate, 'sla_acc_rate', null, 'pp')}</td>
       <td class="num">${fmtInt(row.c.n_connected)}${ddelta(row.c.n_connected, row.cP.n_connected, 'n_connected', fmtInt, 'cnt')}</td>
       <td class="num">${fmtMoney(row.c.nd_sum)}${ddelta(row.c.nd_sum, row.cP.nd_sum, 'nd_sum', fmtMoney, 'money')}</td>
       <td class="num">${fmtPct(row.c.close_conv,2)}${ddelta(row.c.close_conv, row.cP.close_conv, 'close_conv', null, 'pp')}</td>
       <td class="num">${fmtPct(row.c.equip_share)}${ddelta(row.c.equip_share, row.cP.equip_share, 'equip_share', null, 'pp')}</td>
     </tr>`;
-  }).join('') || '<tr><td colspan="8" class="empty">нет данных</td></tr>';
+  }).join('') || '<tr><td colspan="9" class="empty">нет данных</td></tr>';
 }
 
 function renderDynamicChart(empNames) {
@@ -1072,6 +1079,7 @@ function renderTeams() {
       n_total: r.n_total || 0,
       sla_acc_rate: r.sla_acc_rate || 0,
       transfer_rate: r.transfer_rate || 0,
+      repeat_pct: r.repeat_pct || 0,
       load: (r.n_total || 0) / active,
       n_connected: c.n_connected || 0,
       nd_sum: c.nd_sum || 0,
@@ -1096,6 +1104,7 @@ function renderTeams() {
     <td class="num">${fmtInt(r.n_total)}</td>
     <td class="num">${pillPct(r.sla_acc_rate, [40, 60], true)}</td>
     <td class="num">${pillPct(r.transfer_rate, [25, 40], true)}</td>
+    <td class="num">${pillPct(r.repeat_pct, [6, 10], true)}</td>
     <td class="num mono">${r.load.toFixed(1)}</td>
     <td class="num">${fmtInt(r.n_connected)}</td>
     <td class="num">${fmtMoney(r.nd_sum)}</td>
@@ -1103,7 +1112,7 @@ function renderTeams() {
     <td class="num" title="${fmtInt(r.n_inn_multi)} из ${fmtInt(r.n_inn_connected)} уник. ИНН">${pillPct(r.crossell_pct, [3, 6], false, 1)}</td>
     <td class="num" title="${fmtInt(r.n_ultra_cheap)} из ${fmtInt(r.n_secondary)} 2-х продуктов ≤400₽/мес">${pillPct(r.fraud_pct, [15, 30], true, 1)}</td>
     <td class="spark"><canvas id="tspark-${i}" width="120" height="28"></canvas></td>
-  </tr>`).join('') || '<tr><td colspan="13" class="empty">нет данных</td></tr>';
+  </tr>`).join('') || '<tr><td colspan="14" class="empty">нет данных</td></tr>';
 
   // Sparklines для команд — тренд подключений (12 недель)
   rows.forEach((r, i) => {
@@ -1146,6 +1155,7 @@ function renderEmployees() {
       n_total: r.n_total || 0,
       sla_acc_rate: r.sla_acc_rate || 0,
       transfer_rate: r.transfer_rate || 0,
+      repeat_pct: r.repeat_pct || 0,
       n_connected: c.n_connected || 0,
       nd_sum: c.nd_sum || 0,
       equip_share: c.equip_share || 0,
@@ -1168,6 +1178,7 @@ function renderEmployees() {
     <td class="num">${fmtInt(r.n_total)}</td>
     <td class="num">${pillPct(r.sla_acc_rate, [40, 60], true)}</td>
     <td class="num">${pillPct(r.transfer_rate, [25, 40], true)}</td>
+    <td class="num">${pillPct(r.repeat_pct, [6, 10], true)}</td>
     <td class="num">${fmtInt(r.n_connected)}</td>
     <td class="num">${fmtMoney(r.nd_sum)}</td>
     <td class="num">${fmtPct(r.equip_share)}</td>
@@ -1175,7 +1186,7 @@ function renderEmployees() {
     <td class="num" title="${fmtInt(r.n_ultra_cheap)}/${fmtInt(r.n_secondary)} 2-х ≤400₽">${r.n_secondary ? pillPct(r.fraud_pct, [15, 30], true, 1) : '—'}</td>
     <td class="num">${fmtInt(r.n_open)}</td>
     <td class="num">${r.n_stale > 0 ? `<span class="cell-pill pill-r">${r.n_stale}</span>` : '—'}</td>
-  </tr>`).join('') || '<tr><td colspan="13" class="empty">нет данных</td></tr>';
+  </tr>`).join('') || '<tr><td colspan="14" class="empty">нет данных</td></tr>';
   document.getElementById('emp-sub').textContent =
     `период: ${period.label_full || period.label} · сотрудников с активностью: ${rows.length}`;
   enableSort('table-emp', rows);
@@ -1280,6 +1291,7 @@ function renderServices() {
   }).sort((a,b) => b.cur - a.cur);
 
   // Pie share chart
+  // Круговая диаграмма долей
   const top = items.slice(0, 8);
   destroyChart('ch-serv-share');
   CHARTS['ch-serv-share'] = new Chart(document.getElementById('ch-serv-share'), {

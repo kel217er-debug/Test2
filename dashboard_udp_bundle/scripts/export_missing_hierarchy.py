@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Exports an Excel file with the same columns as config/employee_hierarchy.xlsx,
-but containing only employees whose hierarchy fields were not resolved
-(MRF / Director / Teamlead).
+Экспортирует Excel-файл с теми же колонками, что и config/employee_hierarchy.xlsx,
+но содержит только сотрудников, у которых не определилась иерархия
+(МРФ / Руководитель / Тимлид).
 
-Period selection is hardcoded below.
+Выбор периода захардкожен ниже.
 """
 
 import json
@@ -17,11 +17,11 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font
 
 
-# -------- PERIOD (edit this) --------
-# Use "current" to pick meta.current_week (week mode).
-# Or set an explicit key like "2026-W19" (week) or "2026-04" (month) "Текущая неделя" (PERIOD_KEY = "current" PERIOD_KIND = "auto") 
+# -------- ПЕРИОД (править тут) --------
+# Используй "current", чтобы взять meta.current_week текущю неделю (недельный режим).
+# Или задай явный ключ, например "2026-W19" (неделя) или "2026-04" (месяц).
 PERIOD_KEY = "2026-04"
-# One of: "week", "month", "auto"
+# Один из вариантов: "week", "month", "auto"
 PERIOD_KIND = "month"
 
 # -----------------------------------
@@ -168,4 +168,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

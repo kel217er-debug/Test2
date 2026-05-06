@@ -7,6 +7,7 @@ def new_reg_metrics():
     return {
         'n_total': 0, 'n_base_all': 0, 'n_stayed_base': 0,
         'n_transferred': 0, 'n_sla_acc_viol': 0, 'n_sla_cont_viol': 0,
+        'n_repeat': 0,
         'n_connected_stayed_from_period': 0,
         'nd_sum_from_period': 0.0,
     }
