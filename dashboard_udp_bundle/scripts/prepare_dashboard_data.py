@@ -98,7 +98,20 @@ def clean_name(v):
 
 # -------- иерархия --------
 
-def load_hierarchy(hierarchy_path):
+def _truthy(v):
+    if v is None:
+        return False
+    if isinstance(v, bool):
+        return v
+    if isinstance(v, (int, float)):
+        return v != 0
+    s = str(v).strip().lower()
+    if not s:
+        return False
+    return s in ('1', 'true', 'yes', 'y', 'да', 'д', 'активен', 'active')
+
+
+def _load_hierarchy_from_json(hierarchy_path):
     with open(hierarchy_path, 'r', encoding='utf-8') as f:
         raw = json.load(f)
 
@@ -113,9 +126,74 @@ def load_hierarchy(hierarchy_path):
             'director': info.get('director') or '',
             'direction': info.get('direction') or '',
             'mrf': info.get('mrf') or '',
-            'is_active': info.get('is_active', True),
+            'is_active': bool(info.get('is_active', True)),
         }
     return emp_map
+
+
+def _norm_header(v):
+    return norm_str(v).strip().lower().replace('\n', ' ')
+
+
+def _load_hierarchy_from_xlsx(hierarchy_path):
+    # Uses the same dependency as main MUZ ETL (python-calamine).
+    from python_calamine import CalamineWorkbook
+
+    wb = CalamineWorkbook.from_path(hierarchy_path)
+    sheet_names = wb.sheet_names
+    if not sheet_names:
+        return {}
+
+    preferred = None
+    for n in sheet_names:
+        ln = n.strip().lower()
+        if ln in ('employees', 'employee_hierarchy', 'hierarchy', 'справочник', 'сотрудники', 'иерархия'):
+            preferred = n
+            break
+    sheet = wb.get_sheet_by_name(preferred or sheet_names[0])
+
+    rows = list(sheet.to_python())
+    if not rows:
+        return {}
+
+    headers = [_norm_header(v) for v in rows[0]]
+
+    def col_index(*names):
+        for name in names:
+            if name in headers:
+                return headers.index(name)
+        return None
+
+    idx_name = col_index('name', 'employee', 'fio', 'фио', 'сотрудник', 'фамилия имя отчество')
+    idx_teamlead = col_index('teamlead', 'tl', 'тимлид', 'тим лид', 'тим-лид', 'тимлидер', 'тим лидер')
+    idx_director = col_index('director', 'manager', 'руководитель', 'директор')
+    idx_direction = col_index('direction', 'направление')
+    idx_mrf = col_index('mrf', 'мрф')
+    idx_is_active = col_index('is_active', 'active', 'активен', 'активность', 'действующий', 'действующий да/нет', 'действующий да / нет')
+
+    if idx_name is None:
+        raise ValueError('Hierarchy Excel: required column "name" (or "ФИО") not found in header row')
+
+    emp_map = {}
+    for row in rows[1:]:
+        name = clean_name(row[idx_name] if idx_name is not None and idx_name < len(row) else '')
+        if not name:
+            continue
+        emp_map[name] = {
+            'teamlead': clean_name(row[idx_teamlead]) if idx_teamlead is not None and idx_teamlead < len(row) else '',
+            'director': clean_name(row[idx_director]) if idx_director is not None and idx_director < len(row) else '',
+            'direction': norm_str(row[idx_direction]) if idx_direction is not None and idx_direction < len(row) else '',
+            'mrf': norm_str(row[idx_mrf]) if idx_mrf is not None and idx_mrf < len(row) else '',
+            'is_active': _truthy(row[idx_is_active]) if idx_is_active is not None and idx_is_active < len(row) else True,
+        }
+    return emp_map
+
+
+def load_hierarchy(hierarchy_path):
+    ext = os.path.splitext(hierarchy_path)[1].lower()
+    if ext in ('.xlsx', '.xlsm', '.xls'):
+        return _load_hierarchy_from_xlsx(hierarchy_path)
+    return _load_hierarchy_from_json(hierarchy_path)
 
 # -------- основной проход --------
 
@@ -464,7 +542,9 @@ def main():
                 muz = os.path.join(source_dir, f)
                 break
 
-    hierarchy = os.path.join(root, 'config', 'employee_hierarchy.json')
+    hierarchy_xlsx = os.path.join(root, 'config', 'employee_hierarchy.xlsx')
+    hierarchy_json = os.path.join(root, 'config', 'employee_hierarchy.json')
+    hierarchy = hierarchy_xlsx if os.path.exists(hierarchy_xlsx) else hierarchy_json
     if not muz or not os.path.exists(hierarchy):
         print(f"ERROR: muz={muz}, hierarchy={hierarchy}", file=sys.stderr)
         sys.exit(1)

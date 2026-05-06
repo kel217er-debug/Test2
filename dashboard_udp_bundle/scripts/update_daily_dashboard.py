@@ -17,7 +17,9 @@ DIST_DIR = os.path.join(PROJECT_ROOT, 'dist')
 REQUIRED_FILES = [
     os.path.join('scripts', 'prepare_dashboard_data.py'),
     os.path.join('scripts', 'build_offline_dashboard.py'),
-    os.path.join('config', 'employee_hierarchy.json'),
+    # hierarchy can be provided as Excel (preferred) or legacy JSON
+    # (prepare_dashboard_data.py auto-picks employee_hierarchy.xlsx if present)
+    os.path.join('config', 'employee_hierarchy.xlsx'),
     os.path.join('templates', 'daily_dashboard_template.html'),
     os.path.join('vendor', 'chartjs.umd.js'),
 ]
@@ -48,7 +50,15 @@ def fmt_size(path):
 
 
 def check_inputs():
-    missing = [name for name in REQUIRED_FILES if not os.path.exists(os.path.join(PROJECT_ROOT, name))]
+    missing = []
+    for name in REQUIRED_FILES:
+        if os.path.exists(os.path.join(PROJECT_ROOT, name)):
+            continue
+        # allow legacy config/employee_hierarchy.json
+        if name == os.path.join('config', 'employee_hierarchy.xlsx'):
+            if os.path.exists(os.path.join(PROJECT_ROOT, 'config', 'employee_hierarchy.json')):
+                continue
+        missing.append(name)
     muz_path = find_muz_file()
     if not muz_path:
         missing.append(os.path.join('data', 'source', '*muz*.xlsx'))
