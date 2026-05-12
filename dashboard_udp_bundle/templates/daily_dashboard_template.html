@@ -141,6 +141,9 @@ td.spark canvas{vertical-align:middle}
 .mono{font-variant-numeric:tabular-nums}
 .export-btn{font-size:11px;padding:4px 10px;background:#f1f5f9;border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--muted)}
 .export-btn:hover{background:#e2e8f0;color:var(--text)}
+.card-actions{display:flex;align-items:center;gap:8px}
+.toggle-btn.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.toggle-btn.active:hover{background:#1e40af;color:#fff}
 
 </style>
 </head>
@@ -300,7 +303,10 @@ td.spark canvas{vertical-align:middle}
         <h2>РЎРѕС‚СЂСѓРґРЅРёРєРё</h2>
         <div class="card-sub" id="emp-sub">вЂ”</div>
       </div>
-      <button class="export-btn" onclick="exportTableCSV('table-emp','СЃРѕС‚СЂСѓРґРЅРёРєРё')">CSV</button>
+      <div class="card-actions">
+        <button class="export-btn toggle-btn" id="btn-emp-hide-unknown" type="button">Скрыть без МРФ/ТЛ</button>
+        <button class="export-btn" onclick="exportTableCSV('table-emp','СЃРѕС‚СЂСѓРґРЅРёРєРё')">CSV</button>
+      </div>
     </div>
     <table id="table-emp"><thead><tr>
       <th data-k="name">РЎРѕС‚СЂСѓРґРЅРёРє</th>
@@ -424,6 +430,7 @@ function arrowFor(sign) {
 // ==================== РЎРћРЎРўРћРЇРќРР• ====================
 const STATE = {
   activePeriod: null,   // РєР»СЋС‡ timeline (mkey РёР»Рё wkey)
+  hideUnknownEmployees: false,
 };
 const CHARTS = {};
 
@@ -437,6 +444,7 @@ function readUrlFilters() {
     teamlead: p.get('tl') || '',
     period: p.get('p') || '',
     tab: p.get('t') || 'main',
+    hideUnknownEmployees: p.get('hu') === '1',
   };
 }
 function writeUrlFilters() {
@@ -447,10 +455,28 @@ function writeUrlFilters() {
   if (f.director) p.set('dre', f.director);
   if (f.teamlead) p.set('tl', f.teamlead);
   if (STATE.activePeriod) p.set('p', STATE.activePeriod);
+  if (STATE.hideUnknownEmployees) p.set('hu', '1');
   const activeTab = document.querySelector('.tab.active');
   if (activeTab && activeTab.dataset.tab !== 'main') p.set('t', activeTab.dataset.tab);
   const s = p.toString();
   history.replaceState(null, '', s ? '#' + s : location.pathname + location.search);
+}
+
+function isDash(v) {
+  if (v === null || v === undefined) return true;
+  const s = String(v).trim();
+  return !s || s === 'вЂ”' || s === '—' || s === '-';
+}
+
+function isUnknownEmployeeRow(r) {
+  return isDash(r.teamlead) || isDash(r.mrf);
+}
+
+function syncEmpUnknownToggleUi() {
+  const btn = document.getElementById('btn-emp-hide-unknown');
+  if (!btn) return;
+  btn.classList.toggle('active', !!STATE.hideUnknownEmployees);
+  btn.textContent = STATE.hideUnknownEmployees ? 'Показать без МРФ/ТЛ' : 'Скрыть без МРФ/ТЛ';
 }
 
 // ==================== Р¤РР›Р¬РўР Р« ====================
@@ -1158,7 +1184,7 @@ function renderEmployees() {
   const kind = period.kind === 'month' ? 'by_month' : 'by_week';
   const srcReg = DATA.registered[kind][period.key]?.employee || {};
   const srcCl = DATA.closed[kind][period.key]?.employee || {};
-  const rows = emps.map(e => {
+  const allRows = emps.map(e => {
     const r = srcReg[e.name] || {};
     const c = srcCl[e.name] || {};
     const op = DATA.open.employee[e.name] || {};
@@ -1185,6 +1211,8 @@ function renderEmployees() {
       n_stale: op.n_stale30 || 0,
     };
   }).filter(r => r.n_total > 0 || r.n_connected > 0 || r.n_open > 0);
+  const unknownCount = allRows.filter(isUnknownEmployeeRow).length;
+  const rows = STATE.hideUnknownEmployees ? allRows.filter(r => !isUnknownEmployeeRow(r)) : allRows;
   rows.sort((a, b) => b.n_total - a.n_total);
   const tbody = document.querySelector('#table-emp tbody');
   tbody.innerHTML = rows.map(r => `<tr>
@@ -1206,7 +1234,7 @@ function renderEmployees() {
     <td class="num">${r.n_stale > 0 ? `<span class="cell-pill pill-r">${r.n_stale}</span>` : 'вЂ”'}</td>
   </tr>`).join('') || '<tr><td colspan="16" class="empty">РЅРµС‚ РґР°РЅРЅС‹С…</td></tr>';
   document.getElementById('emp-sub').textContent =
-    `РїРµСЂРёРѕРґ: ${period.label_full || period.label} В· СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ СЃ Р°РєС‚РёРІРЅРѕСЃС‚СЊСЋ: ${rows.length}`;
+    `РїРµСЂРёРѕРґ: ${period.label_full || period.label} В· СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ: ${rows.length}${unknownCount ? ` (без МРФ/ТЛ: ${unknownCount})` : ''}`;
   enableSort('table-emp', rows);
 }
 
@@ -1461,10 +1489,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const u = readUrlFilters();
   // РџРѕ СѓРјРѕР»С‡Р°РЅРёСЋ вЂ” current_week (С‚РµРєСѓС‰Р°СЏ РЅРµРґРµР»СЏ РѕС‚РєСЂС‹С‚РѕРіРѕ РјРµСЃСЏС†Р°)
   STATE.activePeriod = u.period || DATA.meta.current_week;
+  STATE.hideUnknownEmployees = !!u.hideUnknownEmployees;
 
   initFilters();
   renderTimeline();
   initTabs();
+  syncEmpUnknownToggleUi();
+  const btnUnknown = document.getElementById('btn-emp-hide-unknown');
+  if (btnUnknown) {
+    btnUnknown.addEventListener('click', () => {
+      STATE.hideUnknownEmployees = !STATE.hideUnknownEmployees;
+      syncEmpUnknownToggleUi();
+      safeRenderAll(); writeUrlFilters();
+    });
+  }
   safeRenderAll();
 });
 </script>
