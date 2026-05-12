@@ -363,6 +363,14 @@ def run_etl(muz_path, hierarchy_path, out_path):
         emp_info = emp_map.get(primary_name, {})
         teamlead = emp_info.get('teamlead', '')
         director = emp_info.get('director', '')
+        exec_name = clean_name(row[COL['exec_name']])
+        exec_info = emp_map.get(exec_name, {})
+        exec_teamlead = exec_info.get('teamlead', '')
+        exec_director = exec_info.get('director', '')
+        exec_direction = exec_info.get('direction', direction_for_channel(exec_info.get('podr') or '') if exec_info else '')
+        if not exec_direction:
+            # Fallback: if hierarchy doesn't contain direction, use direction from channel (same as current logic).
+            exec_direction = direction
 
         # ------ Метрика повторов (комментарий + телефон) ------
         # Повтор определяем по ключевым словам в колонке комментариев.
@@ -404,23 +412,56 @@ def run_etl(muz_path, hierarchy_path, out_path):
                 nd_val,
             )
 
+        def apply_conv_exec(m):
+            m['n_conv_exec_total'] += 1
+            if _connected:
+                m['n_conv_exec_connected'] += 1
+
+        def apply_conv_primary(m):
+            m['n_conv_primary_total'] += 1
+            if _connected:
+                m['n_conv_primary_connected'] += 1
+
         for ag, key, name in [
             (weekly_reg[wkey_reg], 'total', 'all'),
             (monthly_reg[mkey_reg], 'total', 'all'),
         ]:
             apply_reg(ag[key][name])
+            apply_conv_exec(ag[key][name])
+            apply_conv_primary(ag[key][name])
         if direction:
             apply_reg(weekly_reg[wkey_reg]['direction'][direction])
             apply_reg(monthly_reg[mkey_reg]['direction'][direction])
+            # Primary conversion buckets follow "primary_name" hierarchy, same as other registered metrics.
+            apply_conv_primary(weekly_reg[wkey_reg]['direction'][direction])
+            apply_conv_primary(monthly_reg[mkey_reg]['direction'][direction])
+        if exec_direction:
+            apply_conv_exec(weekly_reg[wkey_reg]['direction'][exec_direction])
+            apply_conv_exec(monthly_reg[mkey_reg]['direction'][exec_direction])
         if director:
             apply_reg(weekly_reg[wkey_reg]['director'][director])
             apply_reg(monthly_reg[mkey_reg]['director'][director])
+            apply_conv_primary(weekly_reg[wkey_reg]['director'][director])
+            apply_conv_primary(monthly_reg[mkey_reg]['director'][director])
+        if exec_director:
+            apply_conv_exec(weekly_reg[wkey_reg]['director'][exec_director])
+            apply_conv_exec(monthly_reg[mkey_reg]['director'][exec_director])
         if teamlead:
             apply_reg(weekly_reg[wkey_reg]['teamlead'][teamlead])
             apply_reg(monthly_reg[mkey_reg]['teamlead'][teamlead])
+            apply_conv_primary(weekly_reg[wkey_reg]['teamlead'][teamlead])
+            apply_conv_primary(monthly_reg[mkey_reg]['teamlead'][teamlead])
+        if exec_teamlead:
+            apply_conv_exec(weekly_reg[wkey_reg]['teamlead'][exec_teamlead])
+            apply_conv_exec(monthly_reg[mkey_reg]['teamlead'][exec_teamlead])
         if primary_name:
             apply_reg(weekly_reg[wkey_reg]['employee'][primary_name])
             apply_reg(monthly_reg[mkey_reg]['employee'][primary_name])
+            apply_conv_primary(weekly_reg[wkey_reg]['employee'][primary_name])
+            apply_conv_primary(monthly_reg[mkey_reg]['employee'][primary_name])
+        if exec_name:
+            apply_conv_exec(weekly_reg[wkey_reg]['employee'][exec_name])
+            apply_conv_exec(monthly_reg[mkey_reg]['employee'][exec_name])
 
         daily_reg[reg_dt.strftime('%Y-%m-%d')]['n_total'] += 1
 

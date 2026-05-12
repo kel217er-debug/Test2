@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Ежедневный дашборд · УДП</title>
+<title>Р•Р¶РµРґРЅРµРІРЅС‹Р№ РґР°С€Р±РѕСЂРґ В· РЈР”Рџ</title>
 <style>
 :root{
   --bg:#f8fafc; --card:#fff; --border:#e2e8f0; --text:#0f172a; --muted:#64748b;
@@ -23,7 +23,7 @@ a{color:var(--blue);text-decoration:none}
 
 .container{max-width:1600px;margin:0 auto;padding:16px 20px 60px}
 
-/* Фильтры */
+/* Р¤РёР»СЊС‚СЂС‹ */
 .filters{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:12px}
 .f-group{display:flex;flex-direction:column;gap:3px}
 .f-group label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px}
@@ -34,7 +34,7 @@ a{color:var(--blue);text-decoration:none}
 .actions button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
 .actions button.primary:hover{background:#1e40af}
 
-/* Полоса периода */
+/* РџРѕР»РѕСЃР° РїРµСЂРёРѕРґР° */
 .timeline{display:flex;align-items:stretch;gap:0;margin-bottom:16px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px;overflow-x:auto}
 .tl-item{flex:1;min-width:110px;padding:10px 12px;border-radius:7px;cursor:pointer;transition:all 0.15s;border:1px solid transparent;user-select:none;position:relative}
 .tl-item:hover{background:#f1f5f9}
@@ -47,7 +47,7 @@ a{color:var(--blue);text-decoration:none}
 .tl-item.active .tl-badge.open{background:rgba(255,255,255,0.25);color:#fff}
 .tl-divider{width:1px;background:var(--border);margin:4px 4px}
 
-/* Вкладки */
+/* Р’РєР»Р°РґРєРё */
 .tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:16px;overflow-x:auto}
 .tab{padding:10px 18px;cursor:pointer;border-bottom:2px solid transparent;color:var(--muted);font-weight:500;white-space:nowrap}
 .tab:hover{color:var(--text)}
@@ -55,7 +55,7 @@ a{color:var(--blue);text-decoration:none}
 .tab-content{display:none}
 .tab-content.active{display:block}
 
-/* Алёрты */
+/* РђР»С‘СЂС‚С‹ */
 .alerts{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
 .alert{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border-left:3px solid;font-size:13px}
 .alert.warn{background:var(--amber-bg);border-color:var(--amber);color:#92400e}
@@ -86,12 +86,12 @@ a{color:var(--blue);text-decoration:none}
 .kpi-group-label h3{margin:0}
 .kpi-group-label .hint{font-size:11px;color:var(--muted);font-style:italic}
 
-/* Карточки */
+/* РљР°СЂС‚РѕС‡РєРё */
 .card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px}
 .card .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .card .card-sub{font-size:11px;color:var(--muted)}
 
-/* Когортная таблица */
+/* РљРѕРіРѕСЂС‚РЅР°СЏ С‚Р°Р±Р»РёС†Р° */
 .cohort-plate{display:grid;grid-template-columns:1.2fr 3fr;gap:16px;align-items:start}
 @media (max-width:900px){.cohort-plate{grid-template-columns:1fr}}
 .cohort-text{font-size:13px;color:var(--text)}
@@ -101,14 +101,13 @@ a{color:var(--blue);text-decoration:none}
 .cohort-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:12px}
 .cohort-legend .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:middle}
 
-/* Графики */
+/* Р“СЂР°С„РёРєРё */
 .chart-wrap{height:280px;position:relative}
 .chart-wrap.tall{height:340px}
 .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media (max-width:900px){.chart-grid{grid-template-columns:1fr}}
 
-/* Tables */
-/* Таблицы */
+/* РўР°Р±Р»РёС†С‹ */
 table{width:100%;border-collapse:collapse;font-size:13px}
 thead th{text-align:left;font-weight:500;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:0.3px;padding:8px 10px;border-bottom:1px solid var(--border);background:#f8fafc;cursor:pointer;user-select:none;white-space:nowrap}
 thead th.num{text-align:right}
@@ -121,7 +120,7 @@ tbody td.name{font-weight:500}
 tbody tr:hover{background:#f8fafc}
 tbody td.empty{text-align:center;color:var(--muted);padding:20px}
 
-/* Плашки в ячейках */
+/* РџР»Р°С€РєРё РІ СЏС‡РµР№РєР°С… */
 .cell-pill{display:inline-block;padding:2px 6px;border-radius:4px;font-size:11px;font-variant-numeric:tabular-nums}
 .pill-g{background:var(--green-bg);color:#065f46}
 .pill-y{background:var(--amber-bg);color:#92400e}
@@ -133,11 +132,11 @@ tbody td.empty{text-align:center;color:var(--muted);padding:20px}
 .delta-down-bad{color:var(--bad)}
 .delta-flat{color:var(--neutral)}
 
-/* Спарклайны в таблицах */
+/* РЎРїР°СЂРєР»Р°Р№РЅС‹ РІ С‚Р°Р±Р»РёС†Р°С… */
 td.spark{padding:4px}
 td.spark canvas{vertical-align:middle}
 
-/* Утилиты */
+/* РЈС‚РёР»РёС‚С‹ */
 .hidden{display:none !important}
 .mono{font-variant-numeric:tabular-nums}
 .export-btn{font-size:11px;padding:4px 10px;background:#f1f5f9;border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--muted)}
@@ -186,11 +185,11 @@ td.spark canvas{vertical-align:middle}
 
 <!-- Tabs -->
 <div class="tabs">
-  <div class="tab active" data-tab="main">Главное</div>
-  <div class="tab" data-tab="teams">Команды</div>
-  <div class="tab" data-tab="employees">Сотрудники</div>
-  <div class="tab" data-tab="open">Открытые заявки</div>
-  <div class="tab" data-tab="services">Услуги</div>
+  <div class="tab active" data-tab="main">Р“Р»Р°РІРЅРѕРµ</div>
+  <div class="tab" data-tab="teams">РљРѕРјР°РЅРґС‹</div>
+  <div class="tab" data-tab="employees">РЎРѕС‚СЂСѓРґРЅРёРєРё</div>
+  <div class="tab" data-tab="open">РћС‚РєСЂС‹С‚С‹Рµ Р·Р°СЏРІРєРё</div>
+  <div class="tab" data-tab="services">РЈСЃР»СѓРіРё</div>
 </div>
 
 <!-- ============ MAIN TAB ============ -->
@@ -199,21 +198,21 @@ td.spark canvas{vertical-align:middle}
 
   <div class="kpi-group-label">
     <h3>📥 Входящий поток</h3>
-    <span class="hint">по дате регистрации — что пришло в периоде</span>
+    <span class="hint">РїРѕ РґР°С‚Рµ СЂРµРіРёСЃС‚СЂР°С†РёРё вЂ” С‡С‚Рѕ РїСЂРёС€Р»Рѕ РІ РїРµСЂРёРѕРґРµ</span>
   </div>
   <div class="kpi-grid" id="kpi-leading"></div>
 
   <div class="kpi-group-label">
     <h3>💰 Результат</h3>
-    <span class="hint">по дате закрытия — что закрылось в периоде</span>
+    <span class="hint">РїРѕ РґР°С‚Рµ Р·Р°РєСЂС‹С‚РёСЏ вЂ” С‡С‚Рѕ Р·Р°РєСЂС‹Р»РѕСЃСЊ РІ РїРµСЂРёРѕРґРµ</span>
   </div>
   <div class="kpi-grid" id="kpi-lagging" style="grid-template-columns:repeat(6,1fr)"></div>
 
   <div class="card" id="cohort-card" style="margin-top:18px">
     <div class="card-head">
       <div>
-        <h2>Когорты подключений</h2>
-        <div class="card-sub">из каких периодов регистрации закрылись заявки в выбранном периоде</div>
+        <h2>РљРѕРіРѕСЂС‚С‹ РїРѕРґРєР»СЋС‡РµРЅРёР№</h2>
+        <div class="card-sub">РёР· РєР°РєРёС… РїРµСЂРёРѕРґРѕРІ СЂРµРіРёСЃС‚СЂР°С†РёРё Р·Р°РєСЂС‹Р»РёСЃСЊ Р·Р°СЏРІРєРё РІ РІС‹Р±СЂР°РЅРЅРѕРј РїРµСЂРёРѕРґРµ</div>
       </div>
     </div>
     <div id="cohort-body"></div>
@@ -223,8 +222,8 @@ td.spark canvas{vertical-align:middle}
     <div class="card">
       <div class="card-head">
         <div>
-          <h2>Динамика потока</h2>
-          <div class="card-sub">синий — заявки (по регистрации); зелёный — подключения (по закрытию); красный — SLA наруш.</div>
+          <h2>Р”РёРЅР°РјРёРєР° РїРѕС‚РѕРєР°</h2>
+          <div class="card-sub">СЃРёРЅРёР№ вЂ” Р·Р°СЏРІРєРё (РїРѕ СЂРµРіРёСЃС‚СЂР°С†РёРё); Р·РµР»С‘РЅС‹Р№ вЂ” РїРѕРґРєР»СЋС‡РµРЅРёСЏ (РїРѕ Р·Р°РєСЂС‹С‚РёСЋ); РєСЂР°СЃРЅС‹Р№ вЂ” SLA РЅР°СЂСѓС€.</div>
         </div>
       </div>
       <div class="chart-wrap tall"><canvas id="ch-dynamic"></canvas></div>
@@ -232,8 +231,8 @@ td.spark canvas{vertical-align:middle}
     <div class="card">
       <div class="card-head">
         <div>
-          <h2>НД и конверсия</h2>
-          <div class="card-sub">оранжевый — НД закрытых (₽); синий — конверсия когорты регистрации, %</div>
+          <h2>РќР” Рё РєРѕРЅРІРµСЂСЃРёСЏ</h2>
+          <div class="card-sub">РѕСЂР°РЅР¶РµРІС‹Р№ вЂ” РќР” Р·Р°РєСЂС‹С‚С‹С… (в‚Ѕ); СЃРёРЅРёР№ вЂ” РєРѕРЅРІРµСЂСЃРёСЏ РєРѕРіРѕСЂС‚С‹ СЂРµРіРёСЃС‚СЂР°С†РёРё, %</div>
         </div>
       </div>
       <div class="chart-wrap tall"><canvas id="ch-conv"></canvas></div>
@@ -243,21 +242,21 @@ td.spark canvas{vertical-align:middle}
   <div class="card">
     <div class="card-head">
       <div>
-        <h2>По направлениям</h2>
-        <div class="card-sub" id="dir-sub">—</div>
+        <h2>РџРѕ РЅР°РїСЂР°РІР»РµРЅРёСЏРј</h2>
+        <div class="card-sub" id="dir-sub">вЂ”</div>
       </div>
-      <button class="export-btn" onclick="exportTableCSV('table-directions','по_направлениям')">CSV</button>
+      <button class="export-btn" onclick="exportTableCSV('table-directions','РїРѕ_РЅР°РїСЂР°РІР»РµРЅРёСЏРј')">CSV</button>
     </div>
     <table id="table-directions"><thead><tr>
-      <th data-k="name">Направление</th>
-      <th class="num" data-k="n_total">Заявок</th>
-      <th class="num" data-k="transfer_rate">Передачи %</th>
-      <th class="num" data-k="repeat_pct">Повтор %</th>
-      <th class="num" data-k="sla_acc_rate">SLA принятия %</th>
-      <th class="num" data-k="n_connected">Подключений</th>
-      <th class="num" data-k="nd_sum">НД ₽</th>
+      <th data-k="name">РќР°РїСЂР°РІР»РµРЅРёРµ</th>
+      <th class="num" data-k="n_total">Р—Р°СЏРІРѕРє</th>
+      <th class="num" data-k="transfer_rate">РџРµСЂРµРґР°С‡Рё %</th>
+      <th class="num" data-k="repeat_pct">РџРѕРІС‚РѕСЂ %</th>
+      <th class="num" data-k="sla_acc_rate">SLA РїСЂРёРЅСЏС‚РёСЏ %</th>
+      <th class="num" data-k="n_connected">РџРѕРґРєР»СЋС‡РµРЅРёР№</th>
+      <th class="num" data-k="nd_sum">РќР” в‚Ѕ</th>
       <th class="num" data-k="close_conv">Close %</th>
-      <th class="num" data-k="equip_share">Оборуд. %</th>
+      <th class="num" data-k="equip_share">РћР±РѕСЂСѓРґ. %</th>
     </tr></thead><tbody></tbody></table>
   </div>
 </div>
@@ -267,26 +266,28 @@ td.spark canvas{vertical-align:middle}
   <div class="card">
     <div class="card-head">
       <div>
-        <h2>Команды (тимлиды)</h2>
-        <div class="card-sub" id="teams-sub">—</div>
+        <h2>РљРѕРјР°РЅРґС‹ (С‚РёРјР»РёРґС‹)</h2>
+        <div class="card-sub" id="teams-sub">вЂ”</div>
       </div>
-      <button class="export-btn" onclick="exportTableCSV('table-teams','команды')">CSV</button>
+      <button class="export-btn" onclick="exportTableCSV('table-teams','РєРѕРјР°РЅРґС‹')">CSV</button>
     </div>
     <table id="table-teams"><thead><tr>
-      <th data-k="name">Тимлид</th>
-      <th data-k="director">Руководитель</th>
-      <th data-k="emp_cnt">Сотр.</th>
-      <th class="num" data-k="n_total">Заявки</th>
+      <th data-k="name">РўРёРјР»РёРґ</th>
+      <th data-k="director">Р СѓРєРѕРІРѕРґРёС‚РµР»СЊ</th>
+      <th data-k="emp_cnt">РЎРѕС‚СЂ.</th>
+      <th class="num" data-k="n_total">Р—Р°СЏРІРєРё</th>
       <th class="num" data-k="sla_acc_rate">SLA %</th>
-      <th class="num" data-k="transfer_rate">Перед. %</th>
-      <th class="num" data-k="repeat_pct">Повтор %</th>
-      <th class="num" data-k="load">Нагр.</th>
-      <th class="num" data-k="n_connected">Подкл.</th>
-      <th class="num" data-k="nd_sum">НД ₽</th>
+      <th class="num" data-k="transfer_rate">РџРµСЂРµРґ. %</th>
+      <th class="num" data-k="repeat_pct">РџРѕРІС‚РѕСЂ %</th>
+      <th class="num" data-k="conv_exec_pct" title="Обычная: (Клиент подключен) / все заявки, атрибуция по 'ФИО исполнителя (на кого назначена)'">Конв. обыч.</th>
+      <th class="num" data-k="conv_primary_pct" title="Чистая: (Клиент подключен) / все заявки, атрибуция по 'ФИО сотрудника, принявшего заявку в работу, первичное'">Конв. чист.</th>
+      <th class="num" data-k="load">РќР°РіСЂ.</th>
+      <th class="num" data-k="n_connected">РџРѕРґРєР».</th>
+      <th class="num" data-k="nd_sum">РќР” в‚Ѕ</th>
       <th class="num" data-k="close_conv">Close %</th>
-      <th class="num" data-k="crossell_pct" title="Доля ИНН с ≥2 уникальных продуктов">Допрод. %</th>
-      <th class="num" data-k="fraud_pct" title="Доля 2-х продуктов с абон. платой ≤400₽/мес (индикатор накрутки KPI)">Фрод %</th>
-      <th data-k="spark">Тренд подкл.</th>
+      <th class="num" data-k="crossell_pct" title="Р”РѕР»СЏ РРќРќ СЃ в‰Ґ2 СѓРЅРёРєР°Р»СЊРЅС‹С… РїСЂРѕРґСѓРєС‚РѕРІ">Р”РѕРїСЂРѕРґ. %</th>
+      <th class="num" data-k="fraud_pct" title="Р”РѕР»СЏ 2-С… РїСЂРѕРґСѓРєС‚РѕРІ СЃ Р°Р±РѕРЅ. РїР»Р°С‚РѕР№ в‰¤400в‚Ѕ/РјРµСЃ (РёРЅРґРёРєР°С‚РѕСЂ РЅР°РєСЂСѓС‚РєРё KPI)">Р¤СЂРѕРґ %</th>
+      <th data-k="spark">РўСЂРµРЅРґ РїРѕРґРєР».</th>
     </tr></thead><tbody></tbody></table>
   </div>
 </div>
@@ -296,26 +297,28 @@ td.spark canvas{vertical-align:middle}
   <div class="card">
     <div class="card-head">
       <div>
-        <h2>Сотрудники</h2>
-        <div class="card-sub" id="emp-sub">—</div>
+        <h2>РЎРѕС‚СЂСѓРґРЅРёРєРё</h2>
+        <div class="card-sub" id="emp-sub">вЂ”</div>
       </div>
-      <button class="export-btn" onclick="exportTableCSV('table-emp','сотрудники')">CSV</button>
+      <button class="export-btn" onclick="exportTableCSV('table-emp','СЃРѕС‚СЂСѓРґРЅРёРєРё')">CSV</button>
     </div>
     <table id="table-emp"><thead><tr>
-      <th data-k="name">Сотрудник</th>
-      <th data-k="teamlead">Тимлид</th>
-      <th data-k="mrf">МРФ</th>
-      <th class="num" data-k="n_total">Заявки</th>
+      <th data-k="name">РЎРѕС‚СЂСѓРґРЅРёРє</th>
+      <th data-k="teamlead">РўРёРјР»РёРґ</th>
+      <th data-k="mrf">РњР Р¤</th>
+      <th class="num" data-k="n_total">Р—Р°СЏРІРєРё</th>
       <th class="num" data-k="sla_acc_rate">SLA %</th>
-      <th class="num" data-k="transfer_rate">Перед. %</th>
-      <th class="num" data-k="repeat_pct">Повтор %</th>
-      <th class="num" data-k="n_connected">Подкл.</th>
-      <th class="num" data-k="nd_sum">НД ₽</th>
-      <th class="num" data-k="equip_share">Оборуд. %</th>
-      <th class="num" data-k="crossell_pct" title="Доля ИНН с ≥2 уникальных продуктов">Допрод. %</th>
-      <th class="num" data-k="fraud_pct" title="% 2-х продуктов ≤400₽/мес">Фрод %</th>
-      <th class="num" data-k="n_open">Откр.</th>
-      <th class="num" data-k="n_stale">Застр.</th>
+      <th class="num" data-k="transfer_rate">РџРµСЂРµРґ. %</th>
+      <th class="num" data-k="repeat_pct">РџРѕРІС‚РѕСЂ %</th>
+      <th class="num" data-k="conv_exec_pct" title="Обычная: (Клиент подключен) / все заявки, атрибуция по 'ФИО исполнителя (на кого назначена)'">Конв. обыч.</th>
+      <th class="num" data-k="conv_primary_pct" title="Чистая: (Клиент подключен) / все заявки, атрибуция по 'ФИО сотрудника, принявшего заявку в работу, первичное'">Конв. чист.</th>
+      <th class="num" data-k="n_connected">РџРѕРґРєР».</th>
+      <th class="num" data-k="nd_sum">РќР” в‚Ѕ</th>
+      <th class="num" data-k="equip_share">РћР±РѕСЂСѓРґ. %</th>
+      <th class="num" data-k="crossell_pct" title="Р”РѕР»СЏ РРќРќ СЃ в‰Ґ2 СѓРЅРёРєР°Р»СЊРЅС‹С… РїСЂРѕРґСѓРєС‚РѕРІ">Р”РѕРїСЂРѕРґ. %</th>
+      <th class="num" data-k="fraud_pct" title="% 2-С… РїСЂРѕРґСѓРєС‚РѕРІ в‰¤400в‚Ѕ/РјРµСЃ">Р¤СЂРѕРґ %</th>
+      <th class="num" data-k="n_open">РћС‚РєСЂ.</th>
+      <th class="num" data-k="n_stale">Р—Р°СЃС‚СЂ.</th>
     </tr></thead><tbody></tbody></table>
   </div>
 </div>
@@ -325,24 +328,24 @@ td.spark canvas{vertical-align:middle}
   <div class="kpi-grid" id="open-kpis" style="grid-template-columns:repeat(4,1fr)"></div>
   <div class="chart-grid">
     <div class="card">
-      <div class="card-head"><h2>Открытые по неделе регистрации</h2></div>
+      <div class="card-head"><h2>РћС‚РєСЂС‹С‚С‹Рµ РїРѕ РЅРµРґРµР»Рµ СЂРµРіРёСЃС‚СЂР°С†РёРё</h2></div>
       <div class="chart-wrap tall"><canvas id="ch-open-weeks"></canvas></div>
     </div>
     <div class="card">
-      <div class="card-head"><h2>Застрявшие (&gt;30 дн) по тимлидам</h2></div>
+      <div class="card-head"><h2>Р—Р°СЃС‚СЂСЏРІС€РёРµ (&gt;30 РґРЅ) РїРѕ С‚РёРјР»РёРґР°Рј</h2></div>
       <div class="chart-wrap tall"><canvas id="ch-stale-teams"></canvas></div>
     </div>
   </div>
   <div class="card">
     <div class="card-head">
-      <div><h2>Застрявшие по сотрудникам</h2><div class="card-sub">открытые заявки, где часов в текущем статусе &gt; 720 (30 дн)</div></div>
-      <button class="export-btn" onclick="exportTableCSV('table-stale','застрявшие')">CSV</button>
+      <div><h2>Р—Р°СЃС‚СЂСЏРІС€РёРµ РїРѕ СЃРѕС‚СЂСѓРґРЅРёРєР°Рј</h2><div class="card-sub">РѕС‚РєСЂС‹С‚С‹Рµ Р·Р°СЏРІРєРё, РіРґРµ С‡Р°СЃРѕРІ РІ С‚РµРєСѓС‰РµРј СЃС‚Р°С‚СѓСЃРµ &gt; 720 (30 РґРЅ)</div></div>
+      <button class="export-btn" onclick="exportTableCSV('table-stale','Р·Р°СЃС‚СЂСЏРІС€РёРµ')">CSV</button>
     </div>
     <table id="table-stale"><thead><tr>
-      <th data-k="name">Сотрудник</th>
-      <th data-k="teamlead">Тимлид</th>
-      <th class="num" data-k="n_open">Открыто</th>
-      <th class="num" data-k="n_stale">Застр. 30+</th>
+      <th data-k="name">РЎРѕС‚СЂСѓРґРЅРёРє</th>
+      <th data-k="teamlead">РўРёРјР»РёРґ</th>
+      <th class="num" data-k="n_open">РћС‚РєСЂС‹С‚Рѕ</th>
+      <th class="num" data-k="n_stale">Р—Р°СЃС‚СЂ. 30+</th>
       <th class="num" data-k="stale_rate">%</th>
     </tr></thead><tbody></tbody></table>
   </div>
@@ -352,27 +355,27 @@ td.spark canvas{vertical-align:middle}
 <div class="tab-content" data-tab="services">
   <div class="chart-grid">
     <div class="card">
-      <div class="card-head"><h2>Подключения по услугам</h2><div class="card-sub" id="serv-sub">—</div></div>
+      <div class="card-head"><h2>РџРѕРґРєР»СЋС‡РµРЅРёСЏ РїРѕ СѓСЃР»СѓРіР°Рј</h2><div class="card-sub" id="serv-sub">вЂ”</div></div>
       <div class="chart-wrap tall"><canvas id="ch-serv-share"></canvas></div>
     </div>
     <div class="card">
-      <div class="card-head"><h2>Доля с оборудованием</h2></div>
+      <div class="card-head"><h2>Р”РѕР»СЏ СЃ РѕР±РѕСЂСѓРґРѕРІР°РЅРёРµРј</h2></div>
       <div class="chart-wrap tall"><canvas id="ch-serv-equip"></canvas></div>
     </div>
   </div>
   <div class="card">
     <div class="card-head">
-      <div><h2>Услуги — детализация</h2></div>
-      <button class="export-btn" onclick="exportTableCSV('table-services','услуги')">CSV</button>
+      <div><h2>РЈСЃР»СѓРіРё вЂ” РґРµС‚Р°Р»РёР·Р°С†РёСЏ</h2></div>
+      <button class="export-btn" onclick="exportTableCSV('table-services','СѓСЃР»СѓРіРё')">CSV</button>
     </div>
     <table id="table-services"><thead><tr>
-      <th data-k="service">Услуга</th>
-      <th class="num" data-k="cur">Подключений</th>
-      <th class="num" data-k="cur_share">% от всех</th>
-      <th class="num" data-k="prev">Пред. период</th>
-      <th class="num" data-k="delta">Δ</th>
-      <th class="num" data-k="eq_cur">С оборудованием</th>
-      <th class="num" data-k="eq_share">% оборуд.</th>
+      <th data-k="service">РЈСЃР»СѓРіР°</th>
+      <th class="num" data-k="cur">РџРѕРґРєР»СЋС‡РµРЅРёР№</th>
+      <th class="num" data-k="cur_share">% РѕС‚ РІСЃРµС…</th>
+      <th class="num" data-k="prev">РџСЂРµРґ. РїРµСЂРёРѕРґ</th>
+      <th class="num" data-k="delta">О”</th>
+      <th class="num" data-k="eq_cur">РЎ РѕР±РѕСЂСѓРґРѕРІР°РЅРёРµРј</th>
+      <th class="num" data-k="eq_share">% РѕР±РѕСЂСѓРґ.</th>
     </tr></thead><tbody></tbody></table>
   </div>
 </div>
@@ -383,24 +386,24 @@ td.spark canvas{vertical-align:middle}
 /*__CHARTJS__*/
 </script>
 <script>
-// ==================== ДАННЫЕ ====================
+// ==================== Р”РђРќРќР«Р• ====================
 const DATA = /*__DATA__*/;
 const BUILD_TIME = "/*__BUILD_TIME__*/";
 
-// ==================== УТИЛИТЫ ====================
+// ==================== РЈРўРР›РРўР« ====================
 const fmtInt = v => (v == null || !isFinite(v)) ? '—' : Math.round(v).toLocaleString('ru-RU');
 const fmtPct = (v, dig=1) => (v == null || !isFinite(v)) ? '—' : v.toFixed(dig) + '%';
 const fmtMoney = v => {
   if (v == null || !isFinite(v)) return '—';
-  if (Math.abs(v) >= 1e6) return (v/1e6).toFixed(2) + ' млн';
-  if (Math.abs(v) >= 1e3) return (v/1e3).toFixed(0) + ' тыс';
+  if (Math.abs(v) >= 1e6) return (v/1e6).toFixed(2) + ' РјР»РЅ';
+  if (Math.abs(v) >= 1e3) return (v/1e3).toFixed(0) + ' С‚С‹СЃ';
   return Math.round(v).toLocaleString('ru-RU');
 };
 const fmtMoneyFull = v => (v == null || !isFinite(v)) ? '—' : Math.round(v).toLocaleString('ru-RU') + ' ₽';
 
-// Метрики, где РОСТ = ПЛОХО
+// РњРµС‚СЂРёРєРё, РіРґРµ Р РћРЎРў = РџР›РћРҐРћ
 const INV_METRICS = new Set(['transfer_rate','sla_acc_rate','sla_cont_rate','stale_rate','fraud_pct']);
-// Метрики «Результат» (lagging) — для определения scope у sparkline-id и типа агрегации
+// РњРµС‚СЂРёРєРё В«Р РµР·СѓР»СЊС‚Р°С‚В» (lagging) вЂ” РґР»СЏ РѕРїСЂРµРґРµР»РµРЅРёСЏ scope Сѓ sparkline-id Рё С‚РёРїР° Р°РіСЂРµРіР°С†РёРё
 const LAGGING_METRICS = new Set(['n_connected','nd_sum','close_conv','equip_share','crossell_pct','fraud_pct']);
 
 function deltaSign(metric, delta) {
@@ -418,9 +421,9 @@ function arrowFor(sign) {
   return sign.startsWith('up') ? '▲' : '▼';
 }
 
-// ==================== СОСТОЯНИЕ ====================
+// ==================== РЎРћРЎРўРћРЇРќРР• ====================
 const STATE = {
-  activePeriod: null,   // ключ timeline (mkey или wkey)
+  activePeriod: null,   // РєР»СЋС‡ timeline (mkey РёР»Рё wkey)
 };
 const CHARTS = {};
 
@@ -450,7 +453,7 @@ function writeUrlFilters() {
   history.replaceState(null, '', s ? '#' + s : location.pathname + location.search);
 }
 
-// ==================== ФИЛЬТРЫ ====================
+// ==================== Р¤РР›Р¬РўР Р« ====================
 function currentFilters() {
   return {
     direction: document.getElementById('f-direction').value,
@@ -482,7 +485,7 @@ function initFilters() {
   for (const d of DATA.directors) dreSel.add(new Option(d, d));
   for (const t of DATA.teamleads) tlSel.add(new Option(t, t));
 
-  // Применим URL-фильтры
+  // РџСЂРёРјРµРЅРёРј URL-С„РёР»СЊС‚СЂС‹
   const u = readUrlFilters();
   if (u.direction && [...dirSel.options].some(o => o.value === u.direction)) dirSel.value = u.direction;
   if (u.mrf && [...mrfSel.options].some(o => o.value === u.mrf)) mrfSel.value = u.mrf;
@@ -494,7 +497,7 @@ function initFilters() {
 
   updateCascading();
 
-  // После каскадности восстановим выбранные значения
+  // РџРѕСЃР»Рµ РєР°СЃРєР°РґРЅРѕСЃС‚Рё РІРѕСЃСЃС‚Р°РЅРѕРІРёРј РІС‹Р±СЂР°РЅРЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ
   if (u.director && [...dreSel.options].some(o => o.value === u.director)) dreSel.value = u.director;
   if (u.director) updateCascading();
   if (u.teamlead && [...tlSel.options].some(o => o.value === u.teamlead)) tlSel.value = u.teamlead;
@@ -502,7 +505,7 @@ function initFilters() {
   document.getElementById('btn-reset').addEventListener('click', () => {
     dirSel.value = ''; mrfSel.value = ''; dreSel.value = ''; tlSel.value = '';
     updateCascading();
-    STATE.activePeriod = DATA.meta.current_week; // текущая неделя по умолчанию
+    STATE.activePeriod = DATA.meta.current_week; // С‚РµРєСѓС‰Р°СЏ РЅРµРґРµР»СЏ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
     renderTimeline();
     renderAll();
     writeUrlFilters();
@@ -510,7 +513,7 @@ function initFilters() {
   document.getElementById('btn-copy-link').addEventListener('click', () => {
     writeUrlFilters();
     navigator.clipboard && navigator.clipboard.writeText(location.href);
-    alert('Ссылка с фильтрами скопирована');
+    alert('РЎСЃС‹Р»РєР° СЃ С„РёР»СЊС‚СЂР°РјРё СЃРєРѕРїРёСЂРѕРІР°РЅР°');
   });
 }
 
@@ -519,7 +522,7 @@ function updateCascading() {
 
   const dreSel = document.getElementById('f-director');
   const prevDre = dreSel.value;
-  dreSel.innerHTML = '<option value="">все</option>';
+  dreSel.innerHTML = '<option value="">РІСЃРµ</option>';
   const drAllowed = new Set();
   for (const e of DATA.employees) {
     if (!e.director) continue;
@@ -532,7 +535,7 @@ function updateCascading() {
 
   const tlSel = document.getElementById('f-teamlead');
   const prevTl = tlSel.value;
-  tlSel.innerHTML = '<option value="">все</option>';
+  tlSel.innerHTML = '<option value="">РІСЃРµ</option>';
   const tlAllowed = new Set();
   for (const e of DATA.employees) {
     if (!e.teamlead) continue;
@@ -560,9 +563,9 @@ function renderTimeline() {
     const d = document.createElement('div');
     d.className = 'tl-item' + (t.key === STATE.activePeriod ? ' active' : '');
     d.innerHTML = `
-      ${!t.closed ? '<span class="tl-badge open">текущ.</span>' : ''}
+      ${!t.closed ? '<span class="tl-badge open">С‚РµРєСѓС‰.</span>' : ''}
       <div class="tl-label">${t.label}</div>
-      <div class="tl-sub">${t.kind === 'month' ? 'тотал за месяц' : t.label === t.label_full ? '' : t.label_full.split('·').slice(1).join('').trim()}</div>
+      <div class="tl-sub">${t.kind === 'month' ? 'С‚РѕС‚Р°Р» Р·Р° РјРµСЃСЏС†' : t.label === t.label_full ? '' : t.label_full.split('В·').slice(1).join('').trim()}</div>
     `;
     d.onclick = () => { STATE.activePeriod = t.key; renderTimeline(); renderAll(); writeUrlFilters(); };
     host.appendChild(d);
@@ -570,17 +573,17 @@ function renderTimeline() {
   });
 }
 
-// Получить текущую timeline-запись
+// РџРѕР»СѓС‡РёС‚СЊ С‚РµРєСѓС‰СѓСЋ timeline-Р·Р°РїРёСЃСЊ
 function activeTl() {
   return DATA.timeline.find(t => t.key === STATE.activePeriod) || DATA.timeline[DATA.timeline.length-1];
 }
-// Предыдущая запись в timeline (для сравнения)
+// РџСЂРµРґС‹РґСѓС‰Р°СЏ Р·Р°РїРёСЃСЊ РІ timeline (РґР»СЏ СЃСЂР°РІРЅРµРЅРёСЏ)
 function prevTl() {
   const idx = DATA.timeline.findIndex(t => t.key === STATE.activePeriod);
   if (idx > 0) return DATA.timeline[idx-1];
   return null;
 }
-// Получить бакет по периоду и типу агрегации
+// РџРѕР»СѓС‡РёС‚СЊ Р±Р°РєРµС‚ РїРѕ РїРµСЂРёРѕРґСѓ Рё С‚РёРїСѓ Р°РіСЂРµРіР°С†РёРё
 function getBucket(period, aggType, level, id) {
   // aggType: 'registered' | 'closed'
   const kind = period.kind === 'month' ? 'by_month' : 'by_week';
@@ -589,8 +592,8 @@ function getBucket(period, aggType, level, id) {
   return (per[level] && per[level][id]) || null;
 }
 
-// ==================== АГРЕГАТЫ ПО ФИЛЬТРАМ ====================
-// Суммирует метрики по списку сотрудников за конкретный период и тип
+// ==================== РђР“Р Р•Р“РђРўР« РџРћ Р¤РР›Р¬РўР РђРњ ====================
+// РЎСѓРјРјРёСЂСѓРµС‚ РјРµС‚СЂРёРєРё РїРѕ СЃРїРёСЃРєСѓ СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ Р·Р° РєРѕРЅРєСЂРµС‚РЅС‹Р№ РїРµСЂРёРѕРґ Рё С‚РёРї
 function aggByEmployees(aggType, period, empNames, fields) {
   const kind = period.kind === 'month' ? 'by_month' : 'by_week';
   const src = DATA[aggType][kind][period.key];
@@ -616,7 +619,9 @@ function regMetrics(period, empNames) {
   const m = aggByEmployees('registered', period, empNames, [
     'n_total','n_base_all','n_stayed_base','n_transferred','n_repeat',
     'n_sla_acc_viol','n_sla_cont_viol',
-    'n_connected_stayed_from_period','nd_sum_from_period'
+    'n_connected_stayed_from_period','nd_sum_from_period',
+    'n_conv_exec_total','n_conv_exec_connected',
+    'n_conv_primary_total','n_conv_primary_connected'
   ]);
   if (!m) return null;
   m.transfer_rate = m.n_total ? 100 * m.n_transferred / m.n_total : 0;
@@ -625,8 +630,11 @@ function regMetrics(period, empNames) {
   m.sla_cont_rate = m.n_total ? 100 * m.n_sla_cont_viol / m.n_total : 0;
   m.conv_clean = m.n_base_all ? 100 * m.n_connected_stayed_from_period / m.n_base_all : 0;
   m.conv_regular = m.n_stayed_base ? 100 * m.n_connected_stayed_from_period / m.n_stayed_base : 0;
+  m.conv_exec_pct = m.n_conv_exec_total ? 100 * m.n_conv_exec_connected / m.n_conv_exec_total : 0;
+  m.conv_primary_pct = m.n_conv_primary_total ? 100 * m.n_conv_primary_connected / m.n_conv_primary_total : 0;
   return m;
 }
+
 function closedMetrics(period, empNames) {
   const m = aggByEmployees('closed', period, empNames, [
     'n_closed','n_connected','n_with_equip','nd_sum',
@@ -635,8 +643,8 @@ function closedMetrics(period, empNames) {
   if (!m) return null;
   m.close_conv = m.n_closed ? 100 * m.n_connected / m.n_closed : 0;
   m.equip_share = m.n_connected ? 100 * m.n_with_equip / m.n_connected : 0;
-  // Cross-sell — ИНН уникальны, простое суммирование по сотрудникам может переоценить при мульти-сотрудничестве,
-  // поэтому при монофильтре берём scope-bucket напрямую.
+  // Cross-sell вЂ” РРќРќ СѓРЅРёРєР°Р»СЊРЅС‹, РїСЂРѕСЃС‚РѕРµ СЃСѓРјРјРёСЂРѕРІР°РЅРёРµ РїРѕ СЃРѕС‚СЂСѓРґРЅРёРєР°Рј РјРѕР¶РµС‚ РїРµСЂРµРѕС†РµРЅРёС‚СЊ РїСЂРё РјСѓР»СЊС‚Рё-СЃРѕС‚СЂСѓРґРЅРёС‡РµСЃС‚РІРµ,
+  // РїРѕСЌС‚РѕРјСѓ РїСЂРё РјРѕРЅРѕС„РёР»СЊС‚СЂРµ Р±РµСЂС‘Рј scope-bucket РЅР°РїСЂСЏРјСѓСЋ.
   const scope = bestScopeBucket('closed', period);
   if (scope) {
     m.n_inn_connected = scope.n_inn_connected || 0;
@@ -646,8 +654,8 @@ function closedMetrics(period, empNames) {
     m.n_ultra_cheap = scope.n_ultra_cheap || 0;
     m.fraud_pct = scope.fraud_pct || 0;
   } else {
-    // Фоллбек: суммируем по сотрудникам (корректно для secondary, верхняя оценка для inn_* — каждый ИНН в скопе сотрудника уникален,
-    // но один ИНН может подключаться разными сотрудниками команды)
+    // Р¤РѕР»Р»Р±РµРє: СЃСѓРјРјРёСЂСѓРµРј РїРѕ СЃРѕС‚СЂСѓРґРЅРёРєР°Рј (РєРѕСЂСЂРµРєС‚РЅРѕ РґР»СЏ secondary, РІРµСЂС…РЅСЏСЏ РѕС†РµРЅРєР° РґР»СЏ inn_* вЂ” РєР°Р¶РґС‹Р№ РРќРќ РІ СЃРєРѕРїРµ СЃРѕС‚СЂСѓРґРЅРёРєР° СѓРЅРёРєР°Р»РµРЅ,
+    // РЅРѕ РѕРґРёРЅ РРќРќ РјРѕР¶РµС‚ РїРѕРґРєР»СЋС‡Р°С‚СЊСЃСЏ СЂР°Р·РЅС‹РјРё СЃРѕС‚СЂСѓРґРЅРёРєР°РјРё РєРѕРјР°РЅРґС‹)
     const empSum = aggByEmployees('closed', period, empNames, ['n_inn_connected','n_inn_multi']);
     m.n_inn_connected = empSum?.n_inn_connected || 0;
     m.n_inn_multi = empSum?.n_inn_multi || 0;
@@ -657,9 +665,9 @@ function closedMetrics(period, empNames) {
   return m;
 }
 
-// Возвращает scope-уровневый bucket closed-метрик, если активный набор фильтров
-// ровно совпадает с одной из осей (direction / director / teamlead / total без фильтров).
-// Это позволяет избежать сумм по сотрудникам для уникальных ИНН.
+// Р’РѕР·РІСЂР°С‰Р°РµС‚ scope-СѓСЂРѕРІРЅРµРІС‹Р№ bucket closed-РјРµС‚СЂРёРє, РµСЃР»Рё Р°РєС‚РёРІРЅС‹Р№ РЅР°Р±РѕСЂ С„РёР»СЊС‚СЂРѕРІ
+// СЂРѕРІРЅРѕ СЃРѕРІРїР°РґР°РµС‚ СЃ РѕРґРЅРѕР№ РёР· РѕСЃРµР№ (direction / director / teamlead / total Р±РµР· С„РёР»СЊС‚СЂРѕРІ).
+// Р­С‚Рѕ РїРѕР·РІРѕР»СЏРµС‚ РёР·Р±РµР¶Р°С‚СЊ СЃСѓРјРј РїРѕ СЃРѕС‚СЂСѓРґРЅРёРєР°Рј РґР»СЏ СѓРЅРёРєР°Р»СЊРЅС‹С… РРќРќ.
 function bestScopeBucket(aggType, period) {
   const f = currentFilters();
   const kind = period.kind === 'month' ? 'by_month' : 'by_week';
@@ -671,10 +679,10 @@ function bestScopeBucket(aggType, period) {
   if (cnt === 1 && f.teamlead) return per.teamlead?.[f.teamlead] || null;
   if (cnt === 1 && f.director) return per.director?.[f.director] || null;
   if (cnt === 1 && f.direction) return per.direction?.[f.direction] || null;
-  return null; // mrf или комбинация — считаем из employee-скопа
+  return null; // mrf РёР»Рё РєРѕРјР±РёРЅР°С†РёСЏ вЂ” СЃС‡РёС‚Р°РµРј РёР· employee-СЃРєРѕРїР°
 }
 
-// Агрегация по открытым заявкам для списка сотрудников
+// РђРіСЂРµРіР°С†РёСЏ РїРѕ РѕС‚РєСЂС‹С‚С‹Рј Р·Р°СЏРІРєР°Рј РґР»СЏ СЃРїРёСЃРєР° СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ
 function openMetrics(empNames) {
   const set = new Set(empNames);
   let n_open = 0, n_stale = 0;
@@ -697,8 +705,8 @@ function openMetrics(empNames) {
 // ==================== RENDER ====================
 function renderHeader() {
   const m = DATA.meta;
-  document.getElementById('hdr-from').textContent = m.data_from ? m.data_from.slice(0,10) : '—';
-  document.getElementById('hdr-to').textContent = m.data_to ? m.data_to.slice(0,10) : '—';
+  document.getElementById('hdr-from').textContent = m.data_from ? m.data_from.slice(0,10) : 'вЂ”';
+  document.getElementById('hdr-to').textContent = m.data_to ? m.data_to.slice(0,10) : 'вЂ”';
   document.getElementById('hdr-rows').textContent = fmtInt(m.n_rows_total);
   document.getElementById('hdr-build').textContent = BUILD_TIME;
 }
@@ -710,63 +718,65 @@ function renderMain() {
   const emps = filteredEmployees();
   const empNames = emps.map(e => e.name);
 
-  // Метрики текущего периода
+  // РњРµС‚СЂРёРєРё С‚РµРєСѓС‰РµРіРѕ РїРµСЂРёРѕРґР°
   const r = regMetrics(period, empNames) || {};
   const c = closedMetrics(period, empNames) || {};
   const op = openMetrics(empNames);
 
-  // Метрики предыдущего периода
+  // РњРµС‚СЂРёРєРё РїСЂРµРґС‹РґСѓС‰РµРіРѕ РїРµСЂРёРѕРґР°
   const rPrev = prev ? (regMetrics(prev, empNames) || {}) : null;
   const cPrev = prev ? (closedMetrics(prev, empNames) || {}) : null;
 
-  // Нагрузка = n_total / число сотрудников с >=1 заявкой в периоде
+  // РќР°РіСЂСѓР·РєР° = n_total / С‡РёСЃР»Рѕ СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ СЃ >=1 Р·Р°СЏРІРєРѕР№ РІ РїРµСЂРёРѕРґРµ
   const kind = period.kind === 'month' ? 'by_month' : 'by_week';
   const curActive = empNames.filter(n => (DATA.registered[kind][period.key]?.employee?.[n]?.n_total || 0) > 0).length || 1;
   const prevActive = prev ? (empNames.filter(n => (DATA.registered[prev.kind === 'month' ? 'by_month' : 'by_week'][prev.key]?.employee?.[n]?.n_total || 0) > 0).length || 1) : 1;
   const curLoad = (r.n_total || 0) / curActive;
   const prevLoad = rPrev ? ((rPrev.n_total || 0) / prevActive) : null;
 
-  // АЛЁРТЫ
+  // РђР›РЃР РўР«
   renderAlerts(emps, period, r, c, op);
 
-  // ЛИДИРУЮЩИЕ (leading)
+  // Р›РР”РР РЈР®Р©РР• (leading)
   const leading = [
-    { lbl: 'Заявок (регистрация)', cur: r.n_total, prev: rPrev?.n_total, fmt: fmtInt, metric: 'n_total' },
-    { lbl: 'SLA принятия, наруш.', cur: r.sla_acc_rate, prev: rPrev?.sla_acc_rate, fmt: v=>fmtPct(v,1), metric: 'sla_acc_rate', kind:'pp' },
-    { lbl: 'Передачи %', cur: r.transfer_rate, prev: rPrev?.transfer_rate, fmt: v=>fmtPct(v,1), metric: 'transfer_rate', kind:'pp' },
-    { lbl: 'Повтор %', cur: r.repeat_pct, prev: rPrev?.repeat_pct, fmt: v=>fmtPct(v,1), metric: 'repeat_pct', kind:'pp' },
-    { lbl: 'Нагрузка/сотр.', cur: curLoad, prev: prevLoad, fmt: v=>v==null?'—':v.toFixed(1), metric: 'load', kind:'abs' },
+    { lbl: 'Р—Р°СЏРІРѕРє (СЂРµРіРёСЃС‚СЂР°С†РёСЏ)', cur: r.n_total, prev: rPrev?.n_total, fmt: fmtInt, metric: 'n_total' },
+    { lbl: 'SLA РїСЂРёРЅСЏС‚РёСЏ, РЅР°СЂСѓС€.', cur: r.sla_acc_rate, prev: rPrev?.sla_acc_rate, fmt: v=>fmtPct(v,1), metric: 'sla_acc_rate', kind:'pp' },
+    { lbl: 'РџРµСЂРµРґР°С‡Рё %', cur: r.transfer_rate, prev: rPrev?.transfer_rate, fmt: v=>fmtPct(v,1), metric: 'transfer_rate', kind:'pp' },
+    { lbl: 'РџРѕРІС‚РѕСЂ %', cur: r.repeat_pct, prev: rPrev?.repeat_pct, fmt: v=>fmtPct(v,1), metric: 'repeat_pct', kind:'pp' },
+    { lbl: 'Конв. обыч., %', cur: r.conv_exec_pct, prev: rPrev?.conv_exec_pct, fmt: v=>fmtPct(v,1), metric: 'conv_exec_pct', kind:'pp' },
+    { lbl: 'Конв. чист., %', cur: r.conv_primary_pct, prev: rPrev?.conv_primary_pct, fmt: v=>fmtPct(v,1), metric: 'conv_primary_pct', kind:'pp' },
+    { lbl: 'РќР°РіСЂСѓР·РєР°/СЃРѕС‚СЂ.', cur: curLoad, prev: prevLoad, fmt: v=>v==null?'вЂ”':v.toFixed(1), metric: 'load', kind:'abs' },
   ];
   document.getElementById('kpi-leading').innerHTML = leading.map(k => renderKpi(k, period.key)).join('');
 
-  // ОТСТАЮЩИЕ (lagging)
+  // РћРўРЎРўРђР®Р©РР• (lagging)
   const lagging = [
-    { lbl: 'Подключений (закрытия)', cur: c.n_connected, prev: cPrev?.n_connected, fmt: fmtInt, metric: 'n_connected' },
-    { lbl: 'НД закрытых', cur: c.nd_sum, prev: cPrev?.nd_sum, fmt: fmtMoney, metric: 'nd_sum', sub: v => fmtMoneyFull(v), kind:'money' },
-    { lbl: 'Close %', cur: c.close_conv, prev: cPrev?.close_conv, fmt: v=>fmtPct(v,2), metric: 'close_conv', kind:'pp', hint:'подкл/закр в периоде' },
-    { lbl: 'Услуги с оборуд. %', cur: c.equip_share, prev: cPrev?.equip_share, fmt: v=>fmtPct(v,1), metric: 'equip_share', kind:'pp' },
-    { lbl: 'Допродажи %', cur: c.crossell_pct, prev: cPrev?.crossell_pct, fmt: v=>fmtPct(v,1), metric: 'crossell_pct', kind:'pp',
-      sub: v => `${fmtInt(c.n_inn_multi)} из ${fmtInt(c.n_inn_connected)} ИНН ≥2 продукта` },
-    { lbl: 'Фрод-риск %', cur: c.fraud_pct, prev: cPrev?.fraud_pct, fmt: v=>fmtPct(v,1), metric: 'fraud_pct', kind:'pp',
-      sub: v => `${fmtInt(c.n_ultra_cheap)} из ${fmtInt(c.n_secondary)} 2-х продуктов ≤400₽/мес` },
+    { lbl: 'РџРѕРґРєР»СЋС‡РµРЅРёР№ (Р·Р°РєСЂС‹С‚РёСЏ)', cur: c.n_connected, prev: cPrev?.n_connected, fmt: fmtInt, metric: 'n_connected' },
+    { lbl: 'РќР” Р·Р°РєСЂС‹С‚С‹С…', cur: c.nd_sum, prev: cPrev?.nd_sum, fmt: fmtMoney, metric: 'nd_sum', sub: v => fmtMoneyFull(v), kind:'money' },
+    { lbl: 'Close %', cur: c.close_conv, prev: cPrev?.close_conv, fmt: v=>fmtPct(v,2), metric: 'close_conv', kind:'pp', hint:'РїРѕРґРєР»/Р·Р°РєСЂ РІ РїРµСЂРёРѕРґРµ' },
+    { lbl: 'РЈСЃР»СѓРіРё СЃ РѕР±РѕСЂСѓРґ. %', cur: c.equip_share, prev: cPrev?.equip_share, fmt: v=>fmtPct(v,1), metric: 'equip_share', kind:'pp' },
+    { lbl: 'Р”РѕРїСЂРѕРґР°Р¶Рё %', cur: c.crossell_pct, prev: cPrev?.crossell_pct, fmt: v=>fmtPct(v,1), metric: 'crossell_pct', kind:'pp',
+      sub: v => `${fmtInt(c.n_inn_multi)} РёР· ${fmtInt(c.n_inn_connected)} РРќРќ в‰Ґ2 РїСЂРѕРґСѓРєС‚Р°` },
+    { lbl: 'Р¤СЂРѕРґ-СЂРёСЃРє %', cur: c.fraud_pct, prev: cPrev?.fraud_pct, fmt: v=>fmtPct(v,1), metric: 'fraud_pct', kind:'pp',
+      sub: v => `${fmtInt(c.n_ultra_cheap)} РёР· ${fmtInt(c.n_secondary)} 2-С… РїСЂРѕРґСѓРєС‚РѕРІ в‰¤400в‚Ѕ/РјРµСЃ` },
   ];
   document.getElementById('kpi-lagging').innerHTML = lagging.map(k => renderKpi(k, period.key)).join('');
 
-  // Sparklines (рисуем после вставки в DOM)
+  // Sparklines (СЂРёСЃСѓРµРј РїРѕСЃР»Рµ РІСЃС‚Р°РІРєРё РІ DOM)
   leading.forEach((k, i) => drawSparkline(`spark-leading-${i}`, k.metric, 'registered', empNames));
   lagging.forEach((k, i) => drawSparkline(`spark-lagging-${i}`, k.metric, 'closed', empNames));
 
-  // КОГОРТЫ
+  // РљРћР“РћР РўР«
   renderCohort(period, empNames);
 
-  // ГРАФИКИ
+  // Р“Р РђР¤РРљР
   renderDynamicChart(empNames);
   renderConvChart(empNames);
 
-  // Таблица по направлениям
+  // РўР°Р±Р»РёС†Р° РїРѕ РЅР°РїСЂР°РІР»РµРЅРёСЏРј
   renderDirTable(period, prev, empNames);
   document.getElementById('dir-sub').textContent =
-    `период: ${period.label_full || period.label} · сравнение: ${prev ? (prev.label_full || prev.label) : '—'}`;
+    `РїРµСЂРёРѕРґ: ${period.label_full || period.label} В· СЃСЂР°РІРЅРµРЅРёРµ: ${prev ? (prev.label_full || prev.label) : 'вЂ”'}`;
 }
 
 function renderKpi(k, pkey) {
@@ -783,7 +793,7 @@ function renderKpi(k, pkey) {
   const subHtml = k.sub ? `<div class="kpi-sub">${k.sub(k.cur)}</div>` : (k.hint ? `<div class="kpi-sub">${k.hint}</div>` : '');
   const deltaHtml = (k.prev == null) ? '<div class="kpi-delta flat">—</div>' :
     `<div class="kpi-delta ${sign}">${arrow} <span class="prev">vs ${k.fmt(k.prev)}</span></div>`;
-  // уникальный id для sparkline
+  // СѓРЅРёРєР°Р»СЊРЅС‹Р№ id РґР»СЏ sparkline
   const idx = k.lbl.replace(/[^a-zA-Z0-9]/g,'_');
   const scope = LAGGING_METRICS.has(k.metric) ? 'lagging' : 'leading';
   const sparkId = `spark-${scope}-${k._idx ?? ''}`;
@@ -796,7 +806,7 @@ function renderKpi(k, pkey) {
   </div>`;
 }
 
-// Отрисовка sparkline по последним 12 неделям
+// РћС‚СЂРёСЃРѕРІРєР° sparkline РїРѕ РїРѕСЃР»РµРґРЅРёРј 12 РЅРµРґРµР»СЏРј
 function drawSparkline(canvasId, metric, aggType, empNames) {
   // Canvas id: spark-<scope>-<metric>
   const id = `spark-${aggType === 'closed' ? 'lagging' : 'leading'}-${metric}`;
@@ -837,14 +847,14 @@ function drawSparkline(canvasId, metric, aggType, empNames) {
 function renderAlerts(emps, period, r, c, op) {
   const host = document.getElementById('main-alerts');
   const alerts = [];
-  // Правило: если SLA > 60% — bad
+  // РџСЂР°РІРёР»Рѕ: РµСЃР»Рё SLA > 60% вЂ” bad
   if (r.sla_acc_rate > 60) alerts.push({ type:'bad', icon:'🚨', title:'SLA принятия критично', text:`${r.sla_acc_rate.toFixed(1)}% нарушено — плюс-минус 3 из 5 заявок` });
   else if (r.sla_acc_rate > 45) alerts.push({ type:'warn', icon:'⚠️', title:'SLA принятия высокое', text:`${r.sla_acc_rate.toFixed(1)}% нарушено — рекомендуется перераспределить нагрузку` });
 
-  // Застрявшие
-  if (op.stale_rate > 20) alerts.push({ type:'warn', icon:'⏰', title:'Много застрявших', text:`${op.n_stale} заявок стоят &gt;30 дней (${op.stale_rate.toFixed(1)}% от открытых)` });
+  // Р—Р°СЃС‚СЂСЏРІС€РёРµ
+  if (op.stale_rate > 20) alerts.push({ type:'warn', icon:'⏳', title:'Много застрявших', text:`${op.n_stale} заявок стоят &gt;30 дней (${op.stale_rate.toFixed(1)}% от открытых)` });
 
-  // Close % падает
+  // Close % РїР°РґР°РµС‚
   const prev = prevTl();
   if (prev && c.close_conv !== undefined) {
     const cP = closedMetrics(prev, emps.map(e => e.name));
@@ -854,7 +864,7 @@ function renderAlerts(emps, period, r, c, op) {
     }
   }
 
-  // Фрод-индикатор: команды с аномально большой долей «ультра-дешёвых» 2-х продуктов
+  // Р¤СЂРѕРґ-РёРЅРґРёРєР°С‚РѕСЂ: РєРѕРјР°РЅРґС‹ СЃ Р°РЅРѕРјР°Р»СЊРЅРѕ Р±РѕР»СЊС€РѕР№ РґРѕР»РµР№ В«СѓР»СЊС‚СЂР°-РґРµС€С‘РІС‹С…В» 2-С… РїСЂРѕРґСѓРєС‚РѕРІ
   const kindAl = period.kind === 'month' ? 'by_month' : 'by_week';
   const tlBuckets = (DATA.closed[kindAl][period.key] || {}).teamlead || {};
   const fraudTeams = [];
@@ -870,7 +880,7 @@ function renderAlerts(emps, period, r, c, op) {
     alerts.push({ type, icon:'🕵️', title:`Риск накрутки допродаж — ${fraudTeams.length} команд`, text: `${top} — доля 2-х продуктов ≤400₽/мес завышена` });
   }
 
-  // Топ-3 проблемных сотрудника по SLA
+  // РўРѕРї-3 РїСЂРѕР±Р»РµРјРЅС‹С… СЃРѕС‚СЂСѓРґРЅРёРєР° РїРѕ SLA
   const empProbs = [];
   const kind = period.kind === 'month' ? 'by_month' : 'by_week';
   const src = DATA.registered[kind][period.key] && DATA.registered[kind][period.key].employee || {};
@@ -893,15 +903,15 @@ function renderAlerts(emps, period, r, c, op) {
 
 function renderCohort(period, empNames) {
   const host = document.getElementById('cohort-body');
-  // Когорты только для месячных периодов (по текущей реализации ETL)
+  // РљРѕРіРѕСЂС‚С‹ С‚РѕР»СЊРєРѕ РґР»СЏ РјРµСЃСЏС‡РЅС‹С… РїРµСЂРёРѕРґРѕРІ (РїРѕ С‚РµРєСѓС‰РµР№ СЂРµР°Р»РёР·Р°С†РёРё ETL)
   if (period.kind !== 'month') {
-    host.innerHTML = `<div style="color:var(--muted);font-size:13px">Когортная разбивка доступна только для месячных периодов. Сейчас выбрана неделя <b>${period.label}</b>. Кликните на месяц в полосе сверху, чтобы увидеть, из каких когорт зарегистрированных заявок сложился результат.</div>`;
+    host.innerHTML = `<div style="color:var(--muted);font-size:13px">РљРѕРіРѕСЂС‚РЅР°СЏ СЂР°Р·Р±РёРІРєР° РґРѕСЃС‚СѓРїРЅР° С‚РѕР»СЊРєРѕ РґР»СЏ РјРµСЃСЏС‡РЅС‹С… РїРµСЂРёРѕРґРѕРІ. РЎРµР№С‡Р°СЃ РІС‹Р±СЂР°РЅР° РЅРµРґРµР»СЏ <b>${period.label}</b>. РљР»РёРєРЅРёС‚Рµ РЅР° РјРµСЃСЏС† РІ РїРѕР»РѕСЃРµ СЃРІРµСЂС…Сѓ, С‡С‚РѕР±С‹ СѓРІРёРґРµС‚СЊ, РёР· РєР°РєРёС… РєРѕРіРѕСЂС‚ Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅРЅС‹С… Р·Р°СЏРІРѕРє СЃР»РѕР¶РёР»СЃСЏ СЂРµР·СѓР»СЊС‚Р°С‚.</div>`;
     return;
   }
   const coh = DATA.cohort.by_month[period.key];
-  if (!coh) { host.innerHTML = '<div style="color:var(--muted)">нет данных</div>'; return; }
-  // Суммируем только по filtered empNames — к сожалению, cohort в ETL не разбит по сотрудникам;
-  // покажем общую картину с примечанием (если фильтры активны)
+  if (!coh) { host.innerHTML = '<div style="color:var(--muted)">РЅРµС‚ РґР°РЅРЅС‹С…</div>'; return; }
+  // РЎСѓРјРјРёСЂСѓРµРј С‚РѕР»СЊРєРѕ РїРѕ filtered empNames вЂ” Рє СЃРѕР¶Р°Р»РµРЅРёСЋ, cohort РІ ETL РЅРµ СЂР°Р·Р±РёС‚ РїРѕ СЃРѕС‚СЂСѓРґРЅРёРєР°Рј;
+  // РїРѕРєР°Р¶РµРј РѕР±С‰СѓСЋ РєР°СЂС‚РёРЅСѓ СЃ РїСЂРёРјРµС‡Р°РЅРёРµРј (РµСЃР»Рё С„РёР»СЊС‚СЂС‹ Р°РєС‚РёРІРЅС‹)
   const f = currentFilters();
   const hasFilters = f.direction || f.mrf || f.director || f.teamlead;
 
@@ -909,7 +919,7 @@ function renderCohort(period, empNames) {
   const rows = regPeriods.map(rp => ({ rp, ...coh[rp] }));
   const total = rows.reduce((s, r) => s + r.n_connected, 0);
   const totalNd = rows.reduce((s, r) => s + r.nd_sum, 0);
-  if (total === 0) { host.innerHTML = '<div style="color:var(--muted)">нет закрытий</div>'; return; }
+  if (total === 0) { host.innerHTML = '<div style="color:var(--muted)">РЅРµС‚ Р·Р°РєСЂС‹С‚РёР№</div>'; return; }
 
   const monthName = (mk) => {
     const t = DATA.timeline.find(x => x.key === mk);
@@ -917,7 +927,7 @@ function renderCohort(period, empNames) {
   };
   const colors = ['#94a3b8','#60a5fa','#34d399','#fbbf24','#f87171','#a78bfa','#22d3ee','#fb923c'];
 
-  // Колокольчик: из какого месяца больше всего пришло
+  // РљРѕР»РѕРєРѕР»СЊС‡РёРє: РёР· РєР°РєРѕРіРѕ РјРµСЃСЏС†Р° Р±РѕР»СЊС€Рµ РІСЃРµРіРѕ РїСЂРёС€Р»Рѕ
   const maxRow = rows.reduce((a,b) => a.n_connected > b.n_connected ? a : b);
   const maxShare = 100 * maxRow.n_connected / total;
 
@@ -925,14 +935,14 @@ function renderCohort(period, empNames) {
     const w = 100 * r.n_connected / total;
     return `<div class="seg" style="flex:${w};background:${colors[i%colors.length]}" title="${monthName(r.rp)}: ${r.n_connected} (${w.toFixed(1)}%)">${w > 8 ? monthName(r.rp) : ''}</div>`;
   }).join('');
-  const legend = rows.map((r, i) => `<span><span class="dot" style="background:${colors[i%colors.length]}"></span>${monthName(r.rp)}: ${r.n_connected} (${(100*r.n_connected/total).toFixed(1)}%) · ${fmtMoney(r.nd_sum)}</span>`).join('');
+  const legend = rows.map((r, i) => `<span><span class="dot" style="background:${colors[i%colors.length]}"></span>${monthName(r.rp)}: ${r.n_connected} (${(100*r.n_connected/total).toFixed(1)}%) В· ${fmtMoney(r.nd_sum)}</span>`).join('');
 
   host.innerHTML = `
     <div class="cohort-plate">
       <div class="cohort-text">
-        В периоде <b>${period.label}</b> закрылось <span class="big">${fmtInt(total)}</span> подключений на <b>${fmtMoneyFull(totalNd)}</b>.
-        Главная когорта — <b>${monthName(maxRow.rp)}</b>: ${maxShare.toFixed(0)}% всех подключений пришли из регистраций этого периода.
-        ${hasFilters ? '<br><small style="color:var(--muted)">⚠ Когорты считаются по всем сотрудникам (без фильтров)</small>' : ''}
+        Р’ РїРµСЂРёРѕРґРµ <b>${period.label}</b> Р·Р°РєСЂС‹Р»РѕСЃСЊ <span class="big">${fmtInt(total)}</span> РїРѕРґРєР»СЋС‡РµРЅРёР№ РЅР° <b>${fmtMoneyFull(totalNd)}</b>.
+        Р“Р»Р°РІРЅР°СЏ РєРѕРіРѕСЂС‚Р° вЂ” <b>${monthName(maxRow.rp)}</b>: ${maxShare.toFixed(0)}% РІСЃРµС… РїРѕРґРєР»СЋС‡РµРЅРёР№ РїСЂРёС€Р»Рё РёР· СЂРµРіРёСЃС‚СЂР°С†РёР№ СЌС‚РѕРіРѕ РїРµСЂРёРѕРґР°.
+        ${hasFilters ? '<br><small style="color:var(--muted)">⚠️ Когорты считаются по всем сотрудникам (без фильтров)</small>' : ''}
       </div>
       <div>
         <div class="cohort-bar">${barSegs}</div>
@@ -943,10 +953,10 @@ function renderCohort(period, empNames) {
 
 function renderDirTable(period, prev, empNames) {
   const tbody = document.querySelector('#table-directions tbody');
-  const dirs = ['НИР', 'НПП', 'НСП'];
+  const dirs = (DATA.directions && DATA.directions.length ? DATA.directions : ['НИР','НПП','НСП']);
   const rows = [];
   for (const d of dirs) {
-    // Фильтруем сотрудников этого направления
+    // Р¤РёР»СЊС‚СЂСѓРµРј СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ СЌС‚РѕРіРѕ РЅР°РїСЂР°РІР»РµРЅРёСЏ
     const empsD = empNames.filter(n => {
       const e = DATA.employees.find(e => e.name === n);
       return e && e.direction === d;
@@ -979,7 +989,7 @@ function renderDirTable(period, prev, empNames) {
       <td class="num">${fmtPct(row.c.close_conv,2)}${ddelta(row.c.close_conv, row.cP.close_conv, 'close_conv', null, 'pp')}</td>
       <td class="num">${fmtPct(row.c.equip_share)}${ddelta(row.c.equip_share, row.cP.equip_share, 'equip_share', null, 'pp')}</td>
     </tr>`;
-  }).join('') || '<tr><td colspan="9" class="empty">нет данных</td></tr>';
+  }).join('') || '<tr><td colspan="9" class="empty">РЅРµС‚ РґР°РЅРЅС‹С…</td></tr>';
 }
 
 function renderDynamicChart(empNames) {
@@ -992,9 +1002,9 @@ function renderDynamicChart(empNames) {
   CHARTS['ch-dynamic'] = new Chart(document.getElementById('ch-dynamic'), {
     data: {
       labels, datasets: [
-        { type:'bar', label:'Заявок (рег.)', data: regs, backgroundColor:'rgba(37,99,235,0.3)', borderColor:'#2563eb', yAxisID:'y', order:3 },
-        { type:'line', label:'Подключений (закр.)', data: conns, borderColor:'#059669', backgroundColor:'#059669', yAxisID:'y', tension:0.25, order:2 },
-        { type:'line', label:'SLA принятия, наруш. %', data: sla, borderColor:'#dc2626', backgroundColor:'#dc2626', yAxisID:'y2', tension:0.25, order:1 },
+        { type:'bar', label:'Р—Р°СЏРІРѕРє (СЂРµРі.)', data: regs, backgroundColor:'rgba(37,99,235,0.3)', borderColor:'#2563eb', yAxisID:'y', order:3 },
+        { type:'line', label:'РџРѕРґРєР»СЋС‡РµРЅРёР№ (Р·Р°РєСЂ.)', data: conns, borderColor:'#059669', backgroundColor:'#059669', yAxisID:'y', tension:0.25, order:2 },
+        { type:'line', label:'SLA РїСЂРёРЅСЏС‚РёСЏ, РЅР°СЂСѓС€. %', data: sla, borderColor:'#dc2626', backgroundColor:'#dc2626', yAxisID:'y2', tension:0.25, order:1 },
       ]
     },
     options: chartOpts({ y:{pos:'left'}, y2:{pos:'right', pct:true} })
@@ -1009,8 +1019,8 @@ function renderConvChart(empNames) {
   CHARTS['ch-conv'] = new Chart(document.getElementById('ch-conv'), {
     data: {
       labels, datasets: [
-        { type:'bar', label:'НД закрытых, тыс ₽', data: nd, backgroundColor:'rgba(217,119,6,0.3)', borderColor:'#d97706', yAxisID:'y', order:2 },
-        { type:'line', label:'Конв. когорты (clean) %', data: conv, borderColor:'#2563eb', backgroundColor:'#2563eb', yAxisID:'y2', tension:0.25, order:1 },
+        { type:'bar', label:'РќР” Р·Р°РєСЂС‹С‚С‹С…, С‚С‹СЃ в‚Ѕ', data: nd, backgroundColor:'rgba(217,119,6,0.3)', borderColor:'#d97706', yAxisID:'y', order:2 },
+        { type:'line', label:'РљРѕРЅРІ. РєРѕРіРѕСЂС‚С‹ (clean) %', data: conv, borderColor:'#2563eb', backgroundColor:'#2563eb', yAxisID:'y2', tension:0.25, order:1 },
       ]
     },
     options: chartOpts({ y:{pos:'left', money:true}, y2:{pos:'right', pct:true} })
@@ -1027,7 +1037,7 @@ function chartOpts(axs) {
       ticks: {
         callback: v => {
           if (cfg.pct) return v.toFixed(0) + '%';
-          if (cfg.money) return v >= 1000 ? (v/1000).toFixed(0)+'М' : v.toLocaleString('ru-RU');
+          if (cfg.money) return v >= 1000 ? (v/1000).toFixed(0)+'Рњ' : v.toLocaleString('ru-RU');
           return v.toLocaleString('ru-RU');
         }
       }
@@ -1044,7 +1054,7 @@ function chartOpts(axs) {
             let v = ctx.parsed.y; const y = ctx.dataset.yAxisID || 'y'; const cfg = axs[y] || {};
             let s;
             if (cfg.pct) s = v.toFixed(2) + '%';
-            else if (cfg.money) s = Math.round(v*1000).toLocaleString('ru-RU') + ' ₽';
+            else if (cfg.money) s = Math.round(v*1000).toLocaleString('ru-RU') + ' в‚Ѕ';
             else s = Number.isInteger(v) ? v.toLocaleString('ru-RU') : v.toFixed(2);
             return ctx.dataset.label + ': ' + s;
           }
@@ -1071,20 +1081,22 @@ function renderTeams() {
     const c = closedMetrics(period, t.emps) || {};
     const kind = period.kind === 'month' ? 'by_month' : 'by_week';
     const active = t.emps.filter(n => (DATA.registered[kind][period.key]?.employee?.[n]?.n_total || 0) > 0).length || 1;
-    // Для команды берём scope-bucket тимлида напрямую (уникальные ИНН не задваиваются)
+    // Р”Р»СЏ РєРѕРјР°РЅРґС‹ Р±РµСЂС‘Рј scope-bucket С‚РёРјР»РёРґР° РЅР°РїСЂСЏРјСѓСЋ (СѓРЅРёРєР°Р»СЊРЅС‹Рµ РРќРќ РЅРµ Р·Р°РґРІР°РёРІР°СЋС‚СЃСЏ)
     const tlBucket = DATA.closed[kind][period.key]?.teamlead?.[t.tl] || {};
     return {
-      name: t.tl, director: t.director || '—',
+      name: t.tl, director: t.director || 'вЂ”',
       emp_cnt: t.emps.length,
       n_total: r.n_total || 0,
       sla_acc_rate: r.sla_acc_rate || 0,
       transfer_rate: r.transfer_rate || 0,
       repeat_pct: r.repeat_pct || 0,
+      conv_exec_pct: r.conv_exec_pct || 0,
+      conv_primary_pct: r.conv_primary_pct || 0,
       load: (r.n_total || 0) / active,
       n_connected: c.n_connected || 0,
       nd_sum: c.nd_sum || 0,
       close_conv: c.close_conv || 0,
-      // Cross-sell + фрод из teamlead-бакета
+      // Cross-sell + С„СЂРѕРґ РёР· teamlead-Р±Р°РєРµС‚Р°
       crossell_pct: tlBucket.crossell_pct || 0,
       fraud_pct: tlBucket.fraud_pct || 0,
       n_inn_connected: tlBucket.n_inn_connected || 0,
@@ -1105,16 +1117,18 @@ function renderTeams() {
     <td class="num">${pillPct(r.sla_acc_rate, [40, 60], true)}</td>
     <td class="num">${pillPct(r.transfer_rate, [25, 40], true)}</td>
     <td class="num">${pillPct(r.repeat_pct, [6, 10], true)}</td>
+    <td class="num">${pillPct(r.conv_exec_pct, [10, 15], false, 1)}</td>
+    <td class="num">${pillPct(r.conv_primary_pct, [10, 15], false, 1)}</td>
     <td class="num mono">${r.load.toFixed(1)}</td>
     <td class="num">${fmtInt(r.n_connected)}</td>
     <td class="num">${fmtMoney(r.nd_sum)}</td>
     <td class="num">${pillPct(r.close_conv, [10, 20], false, 2)}</td>
-    <td class="num" title="${fmtInt(r.n_inn_multi)} из ${fmtInt(r.n_inn_connected)} уник. ИНН">${pillPct(r.crossell_pct, [3, 6], false, 1)}</td>
-    <td class="num" title="${fmtInt(r.n_ultra_cheap)} из ${fmtInt(r.n_secondary)} 2-х продуктов ≤400₽/мес">${pillPct(r.fraud_pct, [15, 30], true, 1)}</td>
+    <td class="num" title="${fmtInt(r.n_inn_multi)} РёР· ${fmtInt(r.n_inn_connected)} СѓРЅРёРє. РРќРќ">${pillPct(r.crossell_pct, [3, 6], false, 1)}</td>
+    <td class="num" title="${fmtInt(r.n_ultra_cheap)} РёР· ${fmtInt(r.n_secondary)} 2-С… РїСЂРѕРґСѓРєС‚РѕРІ в‰¤400в‚Ѕ/РјРµСЃ">${pillPct(r.fraud_pct, [15, 30], true, 1)}</td>
     <td class="spark"><canvas id="tspark-${i}" width="120" height="28"></canvas></td>
-  </tr>`).join('') || '<tr><td colspan="14" class="empty">нет данных</td></tr>';
+  </tr>`).join('') || '<tr><td colspan="16" class="empty">РЅРµС‚ РґР°РЅРЅС‹С…</td></tr>';
 
-  // Sparklines для команд — тренд подключений (12 недель)
+  // Sparklines РґР»СЏ РєРѕРјР°РЅРґ вЂ” С‚СЂРµРЅРґ РїРѕРґРєР»СЋС‡РµРЅРёР№ (12 РЅРµРґРµР»СЊ)
   rows.forEach((r, i) => {
     const weeks = DATA.weeks.slice(-12);
     const data = weeks.map(w => { const cc = closedMetrics({key:w.key, kind:'week'}, r.emps); return cc ? cc.n_connected : 0; });
@@ -1130,7 +1144,7 @@ function renderTeams() {
   });
 
   document.getElementById('teams-sub').textContent =
-    `период: ${period.label_full || period.label} · команд: ${rows.length}`;
+    `РїРµСЂРёРѕРґ: ${period.label_full || period.label} В· РєРѕРјР°РЅРґ: ${rows.length}`;
   enableSort('table-teams', rows, (sorted) => {
     const tbody = document.querySelector('#table-teams tbody');
     tbody.innerHTML = sorted.map((r, i) => tbody.querySelector(`tr[data-idx="${rows.indexOf(r)}"]`)?.outerHTML || '').join('');
@@ -1150,12 +1164,14 @@ function renderEmployees() {
     const op = DATA.open.employee[e.name] || {};
     return {
       name: e.name,
-      teamlead: e.teamlead || '—',
-      mrf: e.mrf || '—',
+      teamlead: e.teamlead || 'вЂ”',
+      mrf: e.mrf || 'вЂ”',
       n_total: r.n_total || 0,
       sla_acc_rate: r.sla_acc_rate || 0,
       transfer_rate: r.transfer_rate || 0,
       repeat_pct: r.repeat_pct || 0,
+      conv_exec_pct: r.conv_exec_pct || 0,
+      conv_primary_pct: r.conv_primary_pct || 0,
       n_connected: c.n_connected || 0,
       nd_sum: c.nd_sum || 0,
       equip_share: c.equip_share || 0,
@@ -1179,16 +1195,18 @@ function renderEmployees() {
     <td class="num">${pillPct(r.sla_acc_rate, [40, 60], true)}</td>
     <td class="num">${pillPct(r.transfer_rate, [25, 40], true)}</td>
     <td class="num">${pillPct(r.repeat_pct, [6, 10], true)}</td>
+    <td class="num">${pillPct(r.conv_exec_pct, [10, 15], false, 1)}</td>
+    <td class="num">${pillPct(r.conv_primary_pct, [10, 15], false, 1)}</td>
     <td class="num">${fmtInt(r.n_connected)}</td>
     <td class="num">${fmtMoney(r.nd_sum)}</td>
     <td class="num">${fmtPct(r.equip_share)}</td>
-    <td class="num" title="${fmtInt(r.n_inn_multi)}/${fmtInt(r.n_inn_connected)} ИНН">${r.n_inn_connected ? pillPct(r.crossell_pct, [3, 6], false, 1) : '—'}</td>
-    <td class="num" title="${fmtInt(r.n_ultra_cheap)}/${fmtInt(r.n_secondary)} 2-х ≤400₽">${r.n_secondary ? pillPct(r.fraud_pct, [15, 30], true, 1) : '—'}</td>
+    <td class="num" title="${fmtInt(r.n_inn_multi)}/${fmtInt(r.n_inn_connected)} РРќРќ">${r.n_inn_connected ? pillPct(r.crossell_pct, [3, 6], false, 1) : 'вЂ”'}</td>
+    <td class="num" title="${fmtInt(r.n_ultra_cheap)}/${fmtInt(r.n_secondary)} 2-С… в‰¤400в‚Ѕ">${r.n_secondary ? pillPct(r.fraud_pct, [15, 30], true, 1) : 'вЂ”'}</td>
     <td class="num">${fmtInt(r.n_open)}</td>
-    <td class="num">${r.n_stale > 0 ? `<span class="cell-pill pill-r">${r.n_stale}</span>` : '—'}</td>
-  </tr>`).join('') || '<tr><td colspan="14" class="empty">нет данных</td></tr>';
+    <td class="num">${r.n_stale > 0 ? `<span class="cell-pill pill-r">${r.n_stale}</span>` : 'вЂ”'}</td>
+  </tr>`).join('') || '<tr><td colspan="16" class="empty">РЅРµС‚ РґР°РЅРЅС‹С…</td></tr>';
   document.getElementById('emp-sub').textContent =
-    `период: ${period.label_full || period.label} · сотрудников с активностью: ${rows.length}`;
+    `РїРµСЂРёРѕРґ: ${period.label_full || period.label} В· СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ СЃ Р°РєС‚РёРІРЅРѕСЃС‚СЊСЋ: ${rows.length}`;
   enableSort('table-emp', rows);
 }
 
@@ -1199,10 +1217,10 @@ function renderOpen() {
   const op = openMetrics(empNames);
   const host = document.getElementById('open-kpis');
   const kpis = [
-    { lbl: 'Открытых (снэпшот)', cur: op.n_open, prev: null, fmt: fmtInt, metric:'n_open' },
-    { lbl: 'Застрявших &gt;30 дн.', cur: op.n_stale, prev: null, fmt: fmtInt, metric:'n_stale' },
-    { lbl: '% застрявших', cur: op.stale_rate, prev: null, fmt: v=>fmtPct(v,1), metric:'stale_rate' },
-    { lbl: 'Средний застой', cur: null, prev: null, fmt: v=>v==null?'—':v, metric:'' },
+    { lbl: 'РћС‚РєСЂС‹С‚С‹С… (СЃРЅСЌРїС€РѕС‚)', cur: op.n_open, prev: null, fmt: fmtInt, metric:'n_open' },
+    { lbl: 'Р—Р°СЃС‚СЂСЏРІС€РёС… &gt;30 РґРЅ.', cur: op.n_stale, prev: null, fmt: fmtInt, metric:'n_stale' },
+    { lbl: '% Р·Р°СЃС‚СЂСЏРІС€РёС…', cur: op.stale_rate, prev: null, fmt: v=>fmtPct(v,1), metric:'stale_rate' },
+    { lbl: 'РЎСЂРµРґРЅРёР№ Р·Р°СЃС‚РѕР№', cur: null, prev: null, fmt: v=>v==null?'вЂ”':v, metric:'' },
   ];
   host.innerHTML = kpis.map(k => {
     const subHtml = k.sub ? `<div class="kpi-sub">${k.sub(k.cur)}</div>` : '';
@@ -1213,7 +1231,7 @@ function renderOpen() {
     </div>`;
   }).join('');
 
-  // Открытые по неделе
+  // РћС‚РєСЂС‹С‚С‹Рµ РїРѕ РЅРµРґРµР»Рµ
   const weeks = DATA.weeks.slice(-16);
   const labels = weeks.map(w => w.label);
   const byw = weeks.map(w => op.by_week[w.key] || 0);
@@ -1222,13 +1240,13 @@ function renderOpen() {
   CHARTS['ch-open-weeks'] = new Chart(document.getElementById('ch-open-weeks'), {
     type:'bar',
     data: { labels, datasets: [
-      { label:'Открыто', data: byw, backgroundColor:'rgba(37,99,235,0.5)' },
-      { label:'Из них застряли', data: staleByw, backgroundColor:'rgba(220,38,38,0.7)' },
+      { label:'РћС‚РєСЂС‹С‚Рѕ', data: byw, backgroundColor:'rgba(37,99,235,0.5)' },
+      { label:'РР· РЅРёС… Р·Р°СЃС‚СЂСЏР»Рё', data: staleByw, backgroundColor:'rgba(220,38,38,0.7)' },
     ]},
     options: { ...chartOpts({y:{pos:'left'}}), scales: { y: { beginAtZero: true, stacked:false }}}
   });
 
-  // Застрявшие по тимлидам
+  // Р—Р°СЃС‚СЂСЏРІС€РёРµ РїРѕ С‚РёРјР»РёРґР°Рј
   const byTL = {};
   for (const e of emps) {
     if (!e.teamlead) continue;
@@ -1241,16 +1259,16 @@ function renderOpen() {
   CHARTS['ch-stale-teams'] = new Chart(document.getElementById('ch-stale-teams'), {
     type:'bar',
     data: { labels: tlList.map(x => x[0].split(' ').slice(0,2).join(' ')), datasets: [
-      { label:'Застрявших &gt;30 дн.', data: tlList.map(x => x[1]), backgroundColor:'rgba(220,38,38,0.6)' }
+      { label:'Р—Р°СЃС‚СЂСЏРІС€РёС… &gt;30 РґРЅ.', data: tlList.map(x => x[1]), backgroundColor:'rgba(220,38,38,0.6)' }
     ]},
     options: { ...chartOpts({y:{pos:'left'}}), indexAxis: 'y' }
   });
 
-  // Таблица — сотрудники с застрявшими
+  // РўР°Р±Р»РёС†Р° вЂ” СЃРѕС‚СЂСѓРґРЅРёРєРё СЃ Р·Р°СЃС‚СЂСЏРІС€РёРјРё
   const rows = op.per_emp.filter(p => p.n_stale30 > 0).map(p => {
     const e = DATA.employees.find(x => x.name === p.name) || {};
     return {
-      name: p.name, teamlead: e.teamlead || '—',
+      name: p.name, teamlead: e.teamlead || 'вЂ”',
       n_open: p.n_open, n_stale: p.n_stale30,
       stale_rate: p.n_open ? 100*p.n_stale30/p.n_open : 0,
     };
@@ -1262,7 +1280,7 @@ function renderOpen() {
     <td class="num">${fmtInt(r.n_open)}</td>
     <td class="num"><span class="cell-pill pill-r">${fmtInt(r.n_stale)}</span></td>
     <td class="num">${fmtPct(r.stale_rate)}</td>
-  </tr>`).join('') || '<tr><td colspan="5" class="empty">застрявших нет</td></tr>';
+  </tr>`).join('') || '<tr><td colspan="5" class="empty">Р·Р°СЃС‚СЂСЏРІС€РёС… РЅРµС‚</td></tr>';
   enableSort('table-stale', rows);
 }
 
@@ -1290,15 +1308,14 @@ function renderServices() {
     };
   }).sort((a,b) => b.cur - a.cur);
 
-  // Pie share chart
-  // Круговая диаграмма долей
+  // РљСЂСѓРіРѕРІР°СЏ РґРёР°РіСЂР°РјРјР° РґРѕР»РµР№
   const top = items.slice(0, 8);
   destroyChart('ch-serv-share');
   CHARTS['ch-serv-share'] = new Chart(document.getElementById('ch-serv-share'), {
     type:'bar',
     data: { labels: top.map(x => x.service), datasets: [
-      { label:'Тек. период', data: top.map(x => x.cur), backgroundColor:'rgba(37,99,235,0.5)' },
-      { label:'Пред. период', data: top.map(x => x.prev), backgroundColor:'rgba(148,163,184,0.5)' },
+      { label:'РўРµРє. РїРµСЂРёРѕРґ', data: top.map(x => x.cur), backgroundColor:'rgba(37,99,235,0.5)' },
+      { label:'РџСЂРµРґ. РїРµСЂРёРѕРґ', data: top.map(x => x.prev), backgroundColor:'rgba(148,163,184,0.5)' },
     ]},
     options: chartOpts({y:{pos:'left'}})
   });
@@ -1307,13 +1324,13 @@ function renderServices() {
   CHARTS['ch-serv-equip'] = new Chart(document.getElementById('ch-serv-equip'), {
     type:'bar',
     data: { labels: eqTop.map(x => x.service), datasets: [
-      { label:'Всего подключений', data: eqTop.map(x => x.cur), backgroundColor:'rgba(37,99,235,0.4)' },
-      { label:'С оборудованием', data: eqTop.map(x => x.eq_cur), backgroundColor:'#d97706' },
+      { label:'Р’СЃРµРіРѕ РїРѕРґРєР»СЋС‡РµРЅРёР№', data: eqTop.map(x => x.cur), backgroundColor:'rgba(37,99,235,0.4)' },
+      { label:'РЎ РѕР±РѕСЂСѓРґРѕРІР°РЅРёРµРј', data: eqTop.map(x => x.eq_cur), backgroundColor:'#d97706' },
     ]},
     options: chartOpts({y:{pos:'left'}})
   });
   document.getElementById('serv-sub').textContent =
-    `период: ${period.label_full || period.label} · сравнение: ${prev ? (prev.label_full || prev.label) : '—'}`;
+    `РїРµСЂРёРѕРґ: ${period.label_full || period.label} В· СЃСЂР°РІРЅРµРЅРёРµ: ${prev ? (prev.label_full || prev.label) : 'вЂ”'}`;
 
   const tbody = document.querySelector('#table-services tbody');
   tbody.innerHTML = items.map(r => {
@@ -1327,7 +1344,7 @@ function renderServices() {
       <td class="num">${fmtInt(r.eq_cur)}</td>
       <td class="num">${fmtPct(r.eq_share)}</td>
     </tr>`;
-  }).join('') || '<tr><td colspan="7" class="empty">нет данных</td></tr>';
+  }).join('') || '<tr><td colspan="7" class="empty">РЅРµС‚ РґР°РЅРЅС‹С…</td></tr>';
   enableSort('table-services', items);
 }
 
@@ -1362,7 +1379,7 @@ function enableSort(tableId, rows, onSort) {
         if (typeof av === 'number' && typeof bv === 'number') return cur === 'asc' ? av-bv : bv-av;
         return cur === 'asc' ? String(av).localeCompare(String(bv),'ru') : String(bv).localeCompare(String(av),'ru');
       });
-      // Перерисуем (упрощённо)
+      // РџРµСЂРµСЂРёСЃСѓРµРј (СѓРїСЂРѕС‰С‘РЅРЅРѕ)
       const tbody = table.querySelector('tbody');
       if (onSort) onSort(sorted);
       else {
@@ -1382,13 +1399,13 @@ function exportTableCSV(tableId, filename) {
   for (const tr of table.querySelectorAll('tr')) {
     const cells = [];
     for (const c of tr.children) {
-      // Убираем HTML разметку из ячейки
+      // РЈР±РёСЂР°РµРј HTML СЂР°Р·РјРµС‚РєСѓ РёР· СЏС‡РµР№РєРё
       const txt = c.textContent.replace(/\s+/g,' ').trim();
       cells.push('"' + txt.replace(/"/g,'""') + '"');
     }
     rows.push(cells.join(','));
   }
-  const csv = '\uFEFF' + rows.join('\n'); // BOM для Excel
+  const csv = '\uFEFF' + rows.join('\n'); // BOM РґР»СЏ Excel
   const blob = new Blob([csv], { type:'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -1411,12 +1428,12 @@ function initTabs() {
       document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
       t.classList.add('active');
       document.querySelector(`.tab-content[data-tab="${t.dataset.tab}"]`).classList.add('active');
-      renderAll(); writeUrlFilters();
+      safeRenderAll(); writeUrlFilters();
     });
   });
 }
 
-// ==================== ГЛАВНЫЙ ДИСПАТЧЕР ====================
+// ==================== Р“Р›РђР’РќР«Р™ Р”РРЎРџРђРўР§Р•Р  ====================
 function renderAll() {
   const activeTab = document.querySelector('.tab.active').dataset.tab;
   if (activeTab === 'main') renderMain();
@@ -1426,20 +1443,32 @@ function renderAll() {
   else if (activeTab === 'services') renderServices();
 }
 
-// ==================== ЗАПУСК ====================
+// ==================== Р—РђРџРЈРЎРљ ====================
+function safeRenderAll() {
+  try {
+    renderAll();
+  } catch (e) {
+    console.error(e);
+    const host = document.getElementById('main-alerts') || document.body;
+    const msg = (e && (e.stack || e.message)) ? (e.stack || e.message) : String(e);
+    host.innerHTML = `<div class="alert bad"><b>JS error</b><div style="font-family:ui-monospace,Consolas,monospace;font-size:12px;white-space:pre-wrap;margin-top:6px">${msg}</div></div>`;
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   renderHeader();
 
   const u = readUrlFilters();
-  // По умолчанию — current_week (текущая неделя открытого месяца)
+  // РџРѕ СѓРјРѕР»С‡Р°РЅРёСЋ вЂ” current_week (С‚РµРєСѓС‰Р°СЏ РЅРµРґРµР»СЏ РѕС‚РєСЂС‹С‚РѕРіРѕ РјРµСЃСЏС†Р°)
   STATE.activePeriod = u.period || DATA.meta.current_week;
 
   initFilters();
   renderTimeline();
   initTabs();
-  renderAll();
+  safeRenderAll();
 });
 </script>
 
 </body>
 </html>
+

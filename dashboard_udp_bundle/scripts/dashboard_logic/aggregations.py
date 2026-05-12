@@ -10,6 +10,11 @@ def new_reg_metrics():
         'n_repeat': 0,
         'n_connected_stayed_from_period': 0,
         'nd_sum_from_period': 0.0,
+        # Conversion (requested): by "exec_name" and by "primary_name"
+        'n_conv_exec_total': 0,
+        'n_conv_exec_connected': 0,
+        'n_conv_primary_total': 0,
+        'n_conv_primary_connected': 0,
     }
 
 

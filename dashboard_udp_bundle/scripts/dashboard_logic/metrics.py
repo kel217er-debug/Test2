@@ -49,6 +49,10 @@ def apply_open_metrics(rec, wkey_reg, is_stale):
 
 def reg_dict(m):
     n_t = m['n_total']
+    n_exec_total = m.get('n_conv_exec_total', 0)
+    n_exec_conn = m.get('n_conv_exec_connected', 0)
+    n_prim_total = m.get('n_conv_primary_total', 0)
+    n_prim_conn = m.get('n_conv_primary_connected', 0)
     return {
         'n_total': n_t,
         'n_base_all': m['n_base_all'],
@@ -65,6 +69,15 @@ def reg_dict(m):
         'conv_clean': pct(m['n_connected_stayed_from_period'], m['n_base_all']),
         'conv_regular': pct(m['n_connected_stayed_from_period'], m['n_stayed_base']),
         'nd_sum_from_period': round(m['nd_sum_from_period'], 2),
+        # New conversions:
+        # - exec: connected / total, where grouping uses "ФИО исполнителя (на кого назначена)"
+        # - primary: connected / total, where grouping uses "ФИО сотрудника, принявшего... первичное"
+        'n_conv_exec_total': n_exec_total,
+        'n_conv_exec_connected': n_exec_conn,
+        'conv_exec_pct': pct(n_exec_conn, n_exec_total),
+        'n_conv_primary_total': n_prim_total,
+        'n_conv_primary_connected': n_prim_conn,
+        'conv_primary_pct': pct(n_prim_conn, n_prim_total),
     }
 
 
