@@ -323,8 +323,6 @@ td.spark canvas{vertical-align:middle}
       <th class="num" data-k="equip_share">РћР±РѕСЂСѓРґ. %</th>
       <th class="num" data-k="crossell_pct" title="Р”РѕР»СЏ РРќРќ СЃ в‰Ґ2 СѓРЅРёРєР°Р»СЊРЅС‹С… РїСЂРѕРґСѓРєС‚РѕРІ">Р”РѕРїСЂРѕРґ. %</th>
       <th class="num" data-k="fraud_pct" title="% 2-С… РїСЂРѕРґСѓРєС‚РѕРІ в‰¤400в‚Ѕ/РјРµСЃ">Р¤СЂРѕРґ %</th>
-      <th class="num" data-k="n_open">РћС‚РєСЂ.</th>
-      <th class="num" data-k="n_stale">Р—Р°СЃС‚СЂ.</th>
     </tr></thead><tbody></tbody></table>
   </div>
 </div>
@@ -1207,35 +1205,47 @@ function renderEmployees() {
       n_inn_multi: c.n_inn_multi || 0,
       n_secondary: c.n_secondary || 0,
       n_ultra_cheap: c.n_ultra_cheap || 0,
-      n_open: op.n_open || 0,
-      n_stale: op.n_stale30 || 0,
     };
-  }).filter(r => r.n_total > 0 || r.n_connected > 0 || r.n_open > 0);
+  }).filter(r => r.n_total > 0 || r.n_connected > 0);
   const unknownCount = allRows.filter(isUnknownEmployeeRow).length;
   const rows = STATE.hideUnknownEmployees ? allRows.filter(r => !isUnknownEmployeeRow(r)) : allRows;
   rows.sort((a, b) => b.n_total - a.n_total);
-  const tbody = document.querySelector('#table-emp tbody');
-  tbody.innerHTML = rows.map(r => `<tr>
-    <td class="name">${r.name}</td>
-    <td>${r.teamlead}</td>
-    <td>${r.mrf}</td>
-    <td class="num">${fmtInt(r.n_total)}</td>
-    <td class="num">${pillPct(r.sla_acc_rate, [40, 60], true)}</td>
-    <td class="num">${pillPct(r.transfer_rate, [25, 40], true)}</td>
-    <td class="num">${pillPct(r.repeat_pct, [6, 10], true)}</td>
-    <td class="num">${pillPct(r.conv_exec_pct, [10, 15], false, 1)}</td>
-    <td class="num">${pillPct(r.conv_primary_pct, [10, 15], false, 1)}</td>
-    <td class="num">${fmtInt(r.n_connected)}</td>
-    <td class="num">${fmtMoney(r.nd_sum)}</td>
-    <td class="num">${fmtPct(r.equip_share)}</td>
-    <td class="num" title="${fmtInt(r.n_inn_multi)}/${fmtInt(r.n_inn_connected)} РРќРќ">${r.n_inn_connected ? pillPct(r.crossell_pct, [3, 6], false, 1) : 'вЂ”'}</td>
-    <td class="num" title="${fmtInt(r.n_ultra_cheap)}/${fmtInt(r.n_secondary)} 2-С… в‰¤400в‚Ѕ">${r.n_secondary ? pillPct(r.fraud_pct, [15, 30], true, 1) : 'вЂ”'}</td>
-    <td class="num">${fmtInt(r.n_open)}</td>
-    <td class="num">${r.n_stale > 0 ? `<span class="cell-pill pill-r">${r.n_stale}</span>` : 'вЂ”'}</td>
-  </tr>`).join('') || '<tr><td colspan="16" class="empty">РЅРµС‚ РґР°РЅРЅС‹С…</td></tr>';
+  const table = document.getElementById('table-emp');
+  const tbody = table?.querySelector('tbody');
+
+  const renderBody = (list) => {
+    if (!tbody) return;
+    tbody.innerHTML = list.map(r => `<tr>
+      <td class="name">${r.name}</td>
+      <td>${r.teamlead}</td>
+      <td>${r.mrf}</td>
+      <td class="num">${fmtInt(r.n_total)}</td>
+      <td class="num">${pillPct(r.sla_acc_rate, [40, 60], true)}</td>
+      <td class="num">${pillPct(r.transfer_rate, [25, 40], true)}</td>
+      <td class="num">${pillPct(r.repeat_pct, [6, 10], true)}</td>
+      <td class="num">${pillPct(r.conv_exec_pct, [10, 15], false, 1)}</td>
+      <td class="num">${pillPct(r.conv_primary_pct, [10, 15], false, 1)}</td>
+      <td class="num">${fmtInt(r.n_connected)}</td>
+      <td class="num">${fmtMoney(r.nd_sum)}</td>
+      <td class="num">${fmtPct(r.equip_share)}</td>
+      <td class="num" title="${fmtInt(r.n_inn_multi)}/${fmtInt(r.n_inn_connected)} РРќРќ">${r.n_inn_connected ? pillPct(r.crossell_pct, [3, 6], false, 1) : 'вЂ”'}</td>
+      <td class="num" title="${fmtInt(r.n_ultra_cheap)}/${fmtInt(r.n_secondary)} 2-С… в‰¤400в‚Ѕ">${r.n_secondary ? pillPct(r.fraud_pct, [15, 30], true, 1) : 'вЂ”'}</td>
+    </tr>`).join('') || '<tr><td colspan="14" class="empty">РЅРµС‚ РґР°РЅРЅС‹С…</td></tr>';
+  };
+
+  enableSort('table-emp', rows, (sorted) => renderBody(sorted));
+
+  let initial = rows;
+  const ths = table?.querySelectorAll('thead th[data-k]') || [];
+  if (table && table._sortKey) {
+    initial = sortRows(rows, table._sortKey, table._sortDir || 'asc');
+    ths.forEach(t => t.classList.remove('sorted-asc', 'sorted-desc'));
+    const activeTh = table.querySelector(`thead th[data-k="${table._sortKey}"]`);
+    if (activeTh) activeTh.classList.add('sorted-' + (table._sortDir || 'asc'));
+  }
+  renderBody(initial);
   document.getElementById('emp-sub').textContent =
     `РїРµСЂРёРѕРґ: ${period.label_full || period.label} В· СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ: ${rows.length}${unknownCount ? ` (без МРФ/ТЛ: ${unknownCount})` : ''}`;
-  enableSort('table-emp', rows);
 }
 
 // --------- Open tab ---------
@@ -1391,33 +1401,52 @@ function pillPct(v, thresh, inverse, dig=1) {
   return `<span class="cell-pill ${cls}">${fmtPct(v, dig)}</span>`;
 }
 
+function sortRows(rows, k, dir) {
+  const cur = dir === 'desc' ? 'desc' : 'asc';
+  return [...rows].sort((a, b) => {
+    const av = a?.[k] ?? '';
+    const bv = b?.[k] ?? '';
+    if (typeof av === 'number' && typeof bv === 'number') return cur === 'asc' ? av - bv : bv - av;
+    return cur === 'asc'
+      ? String(av).localeCompare(String(bv), 'ru')
+      : String(bv).localeCompare(String(av), 'ru');
+  });
+}
+
 function enableSort(tableId, rows, onSort) {
   const table = document.getElementById(tableId);
-  if (!table || table._sortInit) return;
-  table._sortInit = true;
+  if (!table) return;
+
+  // Allow re-binding data on every render
+  table._sortRows = rows;
+  table._sortOnSort = onSort;
+
   const ths = table.querySelectorAll('thead th[data-k]');
-  ths.forEach(th => {
-    th.addEventListener('click', () => {
-      const k = th.dataset.k;
-      const cur = th.classList.contains('sorted-asc') ? 'desc' : 'asc';
-      ths.forEach(t => t.classList.remove('sorted-asc','sorted-desc'));
-      th.classList.add('sorted-' + cur);
-      const sorted = [...rows].sort((a,b) => {
-        const av = a[k] ?? ''; const bv = b[k] ?? '';
-        if (typeof av === 'number' && typeof bv === 'number') return cur === 'asc' ? av-bv : bv-av;
-        return cur === 'asc' ? String(av).localeCompare(String(bv),'ru') : String(bv).localeCompare(String(av),'ru');
+  if (!table._sortInit) {
+    table._sortInit = true;
+    ths.forEach(th => {
+      th.addEventListener('click', () => {
+        const k = th.dataset.k;
+        const cur = th.classList.contains('sorted-asc') ? 'desc' : 'asc';
+        table._sortKey = k;
+        table._sortDir = cur;
+
+        ths.forEach(t => t.classList.remove('sorted-asc', 'sorted-desc'));
+        th.classList.add('sorted-' + cur);
+
+        const src = table._sortRows || [];
+        const sorted = sortRows(src, k, cur);
+        const cb = table._sortOnSort;
+        if (cb) cb(sorted, k, cur);
+        else {
+          const curTab = document.querySelector('.tab.active').dataset.tab;
+          if (curTab === 'employees') renderEmployees();
+          else if (curTab === 'services') renderServices();
+          else if (curTab === 'open') renderOpen();
+        }
       });
-      // РџРµСЂРµСЂРёСЃСѓРµРј (СѓРїСЂРѕС‰С‘РЅРЅРѕ)
-      const tbody = table.querySelector('tbody');
-      if (onSort) onSort(sorted);
-      else {
-        const curTab = document.querySelector('.tab.active').dataset.tab;
-        if (curTab === 'employees') renderEmployees();
-        else if (curTab === 'services') renderServices();
-        else if (curTab === 'open') renderOpen();
-      }
     });
-  });
+  }
 }
 
 function exportTableCSV(tableId, filename) {

@@ -208,6 +208,53 @@ def load_hierarchy(hierarchy_path):
         return _load_hierarchy_from_xlsx(hierarchy_path)
     return _load_hierarchy_from_json(hierarchy_path)
 
+# -------- filter visibility (teamleads/directors) --------
+def _load_filter_people_config(cfg_path, all_teamleads, all_directors):
+    """
+    Config schema:
+      { version: 1, teamleads: {name: bool}, directors: {name: bool} }
+
+    The file is designed to be edited often.
+    On every run we:
+      - read existing values
+      - add new names from hierarchy with default True
+      - save back (stable, sorted)
+    """
+    cfg = {'version': 1, 'teamleads': {}, 'directors': {}}
+    if os.path.exists(cfg_path):
+        try:
+            with open(cfg_path, 'r', encoding='utf-8') as f:
+                raw = json.load(f) or {}
+            if isinstance(raw, dict):
+                cfg['version'] = int(raw.get('version', 1) or 1)
+                if isinstance(raw.get('teamleads'), dict):
+                    cfg['teamleads'] = {clean_name(k): bool(v) for k, v in raw['teamleads'].items() if clean_name(k)}
+                if isinstance(raw.get('directors'), dict):
+                    cfg['directors'] = {clean_name(k): bool(v) for k, v in raw['directors'].items() if clean_name(k)}
+        except Exception as e:
+            print(f"[ETL v2] WARN: failed to read filter config {cfg_path}: {e}", file=sys.stderr)
+
+    changed = False
+    for n in sorted(all_teamleads):
+        if n not in cfg['teamleads']:
+            cfg['teamleads'][n] = True
+            changed = True
+    for n in sorted(all_directors):
+        if n not in cfg['directors']:
+            cfg['directors'][n] = True
+            changed = True
+
+    cfg['teamleads'] = {k: cfg['teamleads'][k] for k in sorted(cfg['teamleads'])}
+    cfg['directors'] = {k: cfg['directors'][k] for k in sorted(cfg['directors'])}
+
+    if changed:
+        os.makedirs(os.path.dirname(cfg_path), exist_ok=True)
+        with open(cfg_path, 'w', encoding='utf-8') as f:
+            json.dump(cfg, f, ensure_ascii=False, indent=2)
+        print(f"[ETL v2] Filter config updated: {cfg_path}", flush=True)
+
+    return cfg
+
 # -------- основной проход --------
 
 def run_etl(muz_path, hierarchy_path, out_path):
@@ -647,10 +694,16 @@ def run_etl(muz_path, hierarchy_path, out_path):
                 'direction': '', 'mrf': '', 'is_active': True, 'in_data': True,
             })
 
-    teamleads = sorted({e['teamlead'] for e in emp_list if e['teamlead']})
-    directors = sorted({e['director'] for e in emp_list if e['director']})
+    teamleads_all = sorted({e['teamlead'] for e in emp_list if e['teamlead']})
+    directors_all = sorted({e['director'] for e in emp_list if e['director']})
     directions = sorted({e['direction'] for e in emp_list if e['direction']})
     mrfs = sorted({e['mrf'] for e in emp_list if e['mrf']})
+
+    # Filter visibility for selectors (config lives next to hierarchy file)
+    filter_cfg_path = os.path.join(os.path.dirname(hierarchy_path), 'filter_people.json')
+    filter_cfg = _load_filter_people_config(filter_cfg_path, teamleads_all, directors_all)
+    teamleads = sorted([n for n in teamleads_all if filter_cfg['teamleads'].get(n, True)])
+    directors = sorted([n for n in directors_all if filter_cfg['directors'].get(n, True)])
 
     timeline = build_timeline(closed_months, open_weeks, months_meta, weeks_meta, current_week)
 
