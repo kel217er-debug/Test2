@@ -705,7 +705,7 @@ def run_etl(muz_path, hierarchy_path, out_path):
     teamleads = sorted([n for n in teamleads_all if filter_cfg['teamleads'].get(n, True)])
     directors = sorted([n for n in directors_all if filter_cfg['directors'].get(n, True)])
 
-    timeline = build_timeline(closed_months, open_weeks, months_meta, weeks_meta, current_week)
+    timeline = build_timeline(closed_months, open_month, open_weeks, months_meta, weeks_meta, current_week)
 
     # -------- Repeat обращения (по комментариям; дата = самая ранняя по телефону) --------
     out = {

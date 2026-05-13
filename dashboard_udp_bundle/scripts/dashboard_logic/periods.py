@@ -65,7 +65,7 @@ def split_timeline_periods(dates_max, weeks_sorted, weeks_meta, months_sorted, m
     return current_week, current_month, closed_months, open_month, open_weeks
 
 
-def build_timeline(closed_months, open_weeks, months_meta, weeks_meta, current_week):
+def build_timeline(closed_months, open_month, open_weeks, months_meta, weeks_meta, current_week):
     timeline = []
     for mk in closed_months:
         s, e = months_meta[mk]
@@ -76,6 +76,18 @@ def build_timeline(closed_months, open_weeks, months_meta, weeks_meta, current_w
             'start': s.strftime('%Y-%m-%d'), 'end': e.strftime('%Y-%m-%d'),
             'closed': True,
         })
+
+    # Current (open) month as totals-to-date.
+    if open_month and open_month in months_meta:
+        s, e = months_meta[open_month]
+        timeline.append({
+            'key': open_month, 'kind': 'month',
+            'label': month_label(open_month),
+            'label_full': f"{month_label(open_month)} {open_month.split('-')[0]}",
+            'start': s.strftime('%Y-%m-%d'), 'end': e.strftime('%Y-%m-%d'),
+            'closed': False,
+        })
+
     for w in open_weeks:
         ws, we = weeks_meta[w]
         timeline.append({
