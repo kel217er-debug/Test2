@@ -1,10 +1,9 @@
-"""Metric calculation and output conversion helpers."""
+"""Metric calculation and output helpers."""
+
+from dashboard_logic.conversions import closed_conversion_fields, pct, reg_conversion_fields
+
 
 ULTRA_CHEAP_RUB = 400.0
-
-
-def pct(a, b):
-    return round(100.0 * a / b, 2) if b else 0.0
 
 
 def apply_reg_metrics(m, in_base, stayed, transferred, connected, sla_acc_viol, sla_cont_viol, nd_val):
@@ -49,10 +48,7 @@ def apply_open_metrics(rec, wkey_reg, is_stale):
 
 def reg_dict(m):
     n_t = m['n_total']
-    n_exec_total = m.get('n_conv_exec_total', 0)
-    n_exec_conn = m.get('n_conv_exec_connected', 0)
-    n_prim_total = m.get('n_conv_primary_total', 0)
-    n_prim_conn = m.get('n_conv_primary_connected', 0)
+    conv = reg_conversion_fields(m)
     return {
         'n_total': n_t,
         'n_base_all': m['n_base_all'],
@@ -66,24 +62,36 @@ def reg_dict(m):
         'sla_cont_rate': pct(m['n_sla_cont_viol'], n_t),
         'repeat_pct': pct(m.get('n_repeat', 0), n_t),
         'n_connected_stayed_from_period': m['n_connected_stayed_from_period'],
-        'conv_clean': pct(m['n_connected_stayed_from_period'], m['n_base_all']),
-        'conv_regular': pct(m['n_connected_stayed_from_period'], m['n_stayed_base']),
+        'conv_clean': conv['conv_clean'],
+        'conv_regular': conv['conv_regular'],
         'nd_sum_from_period': round(m['nd_sum_from_period'], 2),
+        # Month-only conversion counters (0 for weekly slices)
+        'n_month_conv_primary_total': m.get('n_month_conv_primary_total', 0),
+        'n_month_conv_primary_connected': m.get('n_month_conv_primary_connected', 0),
+        'n_month_conv_exec_total': m.get('n_month_conv_exec_total', 0),
+        'n_month_conv_exec_connected': m.get('n_month_conv_exec_connected', 0),
         # New conversions:
         # - exec: connected / total, where grouping uses "ФИО исполнителя (на кого назначена)"
         # - primary: connected / total, where grouping uses "ФИО сотрудника, принявшего... первичное"
-        'n_conv_exec_total': n_exec_total,
-        'n_conv_exec_connected': n_exec_conn,
-        'conv_exec_pct': pct(n_exec_conn, n_exec_total),
-        'n_conv_primary_total': n_prim_total,
-        'n_conv_primary_connected': n_prim_conn,
-        'conv_primary_pct': pct(n_prim_conn, n_prim_total),
+        'n_conv_exec_total': conv['n_conv_exec_total'],
+        'n_conv_exec_connected': conv['n_conv_exec_connected'],
+        'conv_exec_pct': conv['conv_exec_pct'],
+        'n_conv_primary_total': conv['n_conv_primary_total'],
+        'n_conv_primary_connected': conv['n_conv_primary_connected'],
+        'conv_primary_pct': conv['conv_primary_pct'],
+        # Clean-conversion denominator across all channels (used only in UI formula for conv_clean)
+        'n_conv_primary_total_all': m.get('n_conv_primary_total_all', 0),
+        'n_month_conv_primary_total_all': m.get('n_month_conv_primary_total_all', 0),
+        # Clean-conversion numerator (our channels; requires both FIOs)
+        'n_conv_clean_exec_connected': m.get('n_conv_clean_exec_connected', 0),
+        'n_month_conv_clean_exec_connected': m.get('n_month_conv_clean_exec_connected', 0),
     }
 
 
 def closed_dict(m):
     n_cl = m['n_closed']
     n_conn = m['n_connected']
+    conv = closed_conversion_fields(m)
     n_inn_connected = len(m['inn_services'])
     n_inn_multi = sum(1 for s in m['inn_services'].values() if len(s) >= 2)
     secondaries = m['secondaries']
@@ -94,7 +102,7 @@ def closed_dict(m):
         'n_connected': n_conn,
         'n_with_equip': m['n_with_equip'],
         'nd_sum': round(m['nd_sum'], 2),
-        'close_conv': pct(n_conn, n_cl),
+        'close_conv': conv['close_conv'],
         'equip_share': pct(m['n_with_equip'], n_conn) if n_conn else 0.0,
         'by_service': dict(m['by_service']),
         'by_service_equip': dict(m['by_service_equip']),

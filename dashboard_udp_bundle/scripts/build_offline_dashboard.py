@@ -15,6 +15,7 @@ Output:
 from __future__ import annotations
 
 import datetime
+import json
 import os
 import re
 
@@ -24,6 +25,7 @@ DATA_PATH = os.path.join(PROJECT_ROOT, 'data', 'processed', 'daily_dashboard_dat
 TEMPLATE_PATH = os.path.join(PROJECT_ROOT, 'templates', 'daily_dashboard_template.html')
 CHARTJS_PATH = os.path.join(PROJECT_ROOT, 'vendor', 'chartjs.umd.js')
 OUT_PATH = os.path.join(PROJECT_ROOT, 'dist', 'udp_daily_dashboard.html')
+RAW_JS_PATH = os.path.join(PROJECT_ROOT, 'dist', 'udp_daily_dashboard_raw.js')
 
 os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
 
@@ -77,6 +79,23 @@ def maybe_fix_mojibake_cp1251_utf8(s: str) -> str:
 with open(DATA_PATH, 'r', encoding='utf-8') as f:
     data_raw = f.read()
 
+# Split huge raw rows into a separate JS file to keep HTML size reasonable and loading faster.
+raw_script = "window.DASH_RAW = null; window.DASH_RAW_SRC = 'udp_daily_dashboard_raw.js';"
+try:
+    data_obj = json.loads(data_raw)
+    raw_obj = data_obj.pop('raw', None)
+    if raw_obj is not None:
+        with open(RAW_JS_PATH, 'w', encoding='utf-8') as f:
+            f.write('window.DASH_RAW = ')
+            json.dump(raw_obj, f, ensure_ascii=False, separators=(',', ':'))
+            f.write(';')
+        # Do not auto-load raw (can be ~100MB and slow the dashboard). UI loads on demand for exports.
+        raw_script = "window.DASH_RAW = null; window.DASH_RAW_SRC = 'udp_daily_dashboard_raw.js';"
+    data_raw = json.dumps(data_obj, ensure_ascii=False, separators=(',', ':'))
+except Exception:
+    # Fallback: keep the raw data inlined as-is if parsing/splitting fails.
+    pass
+
 with open(TEMPLATE_PATH, 'r', encoding='utf-8') as f:
     tpl = f.read()
 
@@ -98,6 +117,7 @@ data_json = maybe_fix_mojibake_cp1251_utf8(data_json)
 
 out = tpl.replace('/*__DATA__*/', data_json)
 out = out.replace('/*__CHARTJS__*/', chartjs_safe)
+out = out.replace('/*__RAW_SCRIPT__*/', raw_script)
 out = out.replace('/*__BUILD_TIME__*/', datetime.datetime.now().strftime('%Y-%m-%d %H:%M'))
 
 with open(OUT_PATH, 'w', encoding='utf-8') as f:

@@ -11,16 +11,17 @@
 import json
 import os
 import re
-from typing import Dict, Iterable, List, Optional, Set, Tuple
+from datetime import datetime
+from typing import Dict, List, Set, Tuple
 
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font
 
 
 # -------- ПЕРИОД (править тут) --------
-# Используй "current", чтобы взять meta.current_week текущю неделю (недельный режим).
+# Используй "current", чтобы взять meta.current_week текущую неделю (недельный режим).
 # Или задай явный ключ, например "2026-W19" (неделя) или "2026-04" (месяц).
-PERIOD_KEY = "2026-04"
+PERIOD_KEY = "2026-05"
 # Один из вариантов: "week", "month", "auto"
 PERIOD_KIND = "month"
 
@@ -67,19 +68,6 @@ def clean_name(v: object) -> str:
     return " ".join(tokens).strip()
 
 
-def _names_for_period(data: Dict, period_key: str, period_kind: str) -> Set[str]:
-    kind_key = "by_month" if period_kind == "month" else "by_week"
-
-    names: Set[str] = set()
-    for agg_name in ("registered", "closed"):
-        bucket = data.get(agg_name, {}).get(kind_key, {}).get(period_key, {})
-        emp = bucket.get("employee", {})
-        if isinstance(emp, dict):
-            names.update(clean_name(k) for k in emp.keys())
-
-    return {n for n in names if n}
-
-
 def _is_missing(info: Dict) -> bool:
     # "Не определилось" трактуем как пустые значения.
     return (not info.get("mrf")) or (not info.get("director")) or (not info.get("teamlead"))
@@ -100,21 +88,27 @@ def export_missing(processed_json_path: str, out_path: str) -> int:
     data = _read_json(processed_json_path)
     period_key, period_kind = _detect_period(data, PERIOD_KEY, PERIOD_KIND)
 
-    allowed_names = _names_for_period(data, period_key, period_kind)
-
-    # Map from normalized name -> info dict (keep original name from JSON if needed)
-    by_name: Dict[str, Dict] = {}
+    # Берём сотрудников так же, как вкладка "Сотрудники" в HTML:
+    # DATA.employees, но только e.in_data === true.
+    missing: List[Dict] = []
+    seen: Set[str] = set()
     for e in data.get("employees", []):
+        if not isinstance(e, dict):
+            continue
+        if not e.get("in_data"):
+            continue
         name = clean_name(e.get("name", ""))
         if not name:
             continue
-        by_name[name] = e
+        if name in seen:
+            continue
+        seen.add(name)
+        row = dict(e)
+        row["name"] = name
+        if _is_missing(row):
+            missing.append(row)
 
-    missing = []
-    for name in sorted(allowed_names):
-        info = by_name.get(name, {"name": name})
-        if _is_missing(info):
-            missing.append(info)
+    missing.sort(key=lambda x: x.get("name", ""))
 
     wb = Workbook()
     ws = wb.active
@@ -151,8 +145,16 @@ def export_missing(processed_json_path: str, out_path: str) -> int:
 
     _autosize(ws)
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
-    wb.save(out_path)
-    print(f"Saved: {os.path.abspath(out_path)}")
+    saved_path = out_path
+    try:
+        wb.save(saved_path)
+    except PermissionError:
+        base, ext = os.path.splitext(out_path)
+        saved_path = f"{base}_{datetime.now().strftime('%Y%m%d_%H%M%S')}{ext}"
+        wb.save(saved_path)
+        print(f"WARN: could not overwrite (file may be open). Saved to: {os.path.abspath(saved_path)}")
+    else:
+        print(f"Saved: {os.path.abspath(saved_path)}")
     print(f"Period: {period_key} ({period_kind})")
     print(f"Rows: {len(missing)}")
     return 0

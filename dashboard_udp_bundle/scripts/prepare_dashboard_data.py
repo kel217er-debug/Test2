@@ -44,6 +44,7 @@ from dashboard_logic.metrics import (
     open_to_dict,
     reg_dict,
 )
+from dashboard_logic.conversions import apply_conv_exec, apply_conv_primary
 from dashboard_logic.periods import (
     build_months_info,
     build_timeline,
@@ -74,6 +75,27 @@ def parse_dt(v):
             except ValueError: return None
     return None
 
+
+def next_month_key(mkey: str) -> str:
+    """Return YYYY-MM for the month after `mkey` (YYYY-MM)."""
+    try:
+        y_s, m_s = mkey.split('-', 1)
+        y = int(y_s)
+        mo = int(m_s)
+    except Exception:
+        return mkey
+    if mo >= 12:
+        return f"{y + 1}-01"
+    return f"{y}-{mo + 1:02d}"
+
+
+def month_connected_in_window(reg_mkey: str, final_dt: datetime) -> bool:
+    """True if final_dt month is reg_mkey or the next month after reg_mkey."""
+    mkey_final = month_key(final_dt)
+    if mkey_final == reg_mkey:
+        return True
+    return mkey_final == next_month_key(reg_mkey)
+
 def parse_num(v):
     if v is None: return 0.0
     if isinstance(v, (int, float)): return float(v)
@@ -103,7 +125,15 @@ def clean_name(v):
     # Normalize FIO: if there are extra symbols before/after (or inside) the name,
     # keep only letter/hyphen groups and re-join by single spaces.
     # Example: '***Воронин Александр Александрович***' -> 'Воронин Александр Александрович'
-    tokens = re.findall(r"[A-Za-zА-Яа-яЁё-]+", s)
+    tokens = re.findall(r"[A-Za-zА-Яа-яЁёЀ-ӿ-]+", s)
+
+    # Common anomaly: FIO + login/latin words without '@', e.g. "Фамилия Имя Отчество login name".
+    # Prefer Cyrillic-only sequence when present.
+    cyr = [t for t in tokens if re.search(r"[А-Яа-яЁёЀ-ӿ]", t)]
+    if len(cyr) >= 2:
+        # Typical FIO length is 2-3 tokens; trim trailing notes.
+        return ' '.join(cyr[:3]).strip()
+
     return ' '.join(tokens).strip()
 
 
@@ -314,6 +344,12 @@ def run_etl(muz_path, hierarchy_path, out_path):
         'Контактный телефон',
     )
 
+    # -------- Raw rows export for offline UI --------
+    # Store the full MUZ row (up to header length) so exports show the exact original lines used in calculations.
+    # Note: this can be large; build_offline_dashboard.py splits raw into a separate JS file.
+    header_len = len(header_row)
+    raw_export = {'headers': list(header_row), 'rows': []}
+
     # --- структуры ---
     # Для каждой корзины и периода — метрики
     # weekly (registered) для графиков-sparklines — по неделям, 5 срезов:
@@ -357,14 +393,14 @@ def run_etl(muz_path, hierarchy_path, out_path):
             print(f"  ... {n_read} rows, {time.time()-t_iter:.1f}s")
 
         podr_prim = norm_str(row[COL['primary_podr']])
-        if not is_our_channel(podr_prim):
-            continue
-        n_our += 1
-
         reg_dt = parse_dt(row[COL['reg_dt']])
         if reg_dt is None:
             n_skip_no_date += 1
             continue
+
+        is_our = is_our_channel(podr_prim)
+        if is_our:
+            n_our += 1
 
         phone_digits = ''
 
@@ -380,6 +416,12 @@ def run_etl(muz_path, hierarchy_path, out_path):
         final_status = norm_str(row[COL['final_status']])
         _connected = is_connected(final_status)
         _has_final = bool(final_status)
+        final_dt = parse_dt(row[COL['final_dt']]) if _has_final else None
+        wkey_cl = None
+        mkey_cl = None
+        if _has_final and final_dt is not None:
+            wkey_cl, _, _ = iso_week_key(final_dt)
+            mkey_cl = month_key(final_dt)
         _in_conv_base = is_base_service(service)
         sla_acc = norm_str(row[COL['sla_acc']]).lower()
         sla_cont = norm_str(row[COL['sla_cont']]).lower()
@@ -410,14 +452,45 @@ def run_etl(muz_path, hierarchy_path, out_path):
         emp_info = emp_map.get(primary_name, {})
         teamlead = emp_info.get('teamlead', '')
         director = emp_info.get('director', '')
+        mrf = emp_info.get('mrf', '')
         exec_name = clean_name(row[COL['exec_name']])
         exec_info = emp_map.get(exec_name, {})
         exec_teamlead = exec_info.get('teamlead', '')
         exec_director = exec_info.get('director', '')
+        exec_mrf = exec_info.get('mrf', '')
         exec_direction = exec_info.get('direction', direction_for_channel(exec_info.get('podr') or '') if exec_info else '')
         if not exec_direction:
             # Fallback: if hierarchy doesn't contain direction, use direction from channel (same as current logic).
             exec_direction = direction
+
+        # Периоды регистрации (нужны и для our, и для all-channel clean numerator)
+        wkey_reg, mon_r, sun_r = iso_week_key(reg_dt)
+        mkey_reg = month_key(reg_dt)
+        if wkey_reg not in weeks_meta: weeks_meta[wkey_reg] = (mon_r, sun_r)
+        if mkey_reg not in months_meta: months_meta[mkey_reg] = month_bounds(mkey_reg)
+
+        # -------- Clean conversion DENOMINATOR across ALL channels --------
+        # Only the denominator part of "clean conversion" should consider all channels.
+        # We increment totals by primary FIO (registered rows) for all channels; other metrics remain "our channel" only.
+        def _apply_clean_denom_all(m):
+            m['n_conv_primary_total_all'] += 1
+            m['n_month_conv_primary_total_all'] += 1
+
+        _apply_clean_denom_all(weekly_reg[wkey_reg]['total']['all'])
+        _apply_clean_denom_all(monthly_reg[mkey_reg]['total']['all'])
+        if director:
+            _apply_clean_denom_all(weekly_reg[wkey_reg]['director'][director])
+            _apply_clean_denom_all(monthly_reg[mkey_reg]['director'][director])
+        if teamlead:
+            _apply_clean_denom_all(weekly_reg[wkey_reg]['teamlead'][teamlead])
+            _apply_clean_denom_all(monthly_reg[mkey_reg]['teamlead'][teamlead])
+        if primary_name:
+            _apply_clean_denom_all(weekly_reg[wkey_reg]['employee'][primary_name])
+            _apply_clean_denom_all(monthly_reg[mkey_reg]['employee'][primary_name])
+
+        # Everything else stays "our channel" only.
+        if not is_our:
+            continue
 
         # ------ Метрика повторов (комментарий + телефон) ------
         # Повтор определяем по ключевым словам в колонке комментариев.
@@ -440,14 +513,10 @@ def run_etl(muz_path, hierarchy_path, out_path):
                 repeat_rows.append(phone_digits)
 
 
-        # Периоды регистрации
-        wkey_reg, mon_r, sun_r = iso_week_key(reg_dt)
-        mkey_reg = month_key(reg_dt)
-        if wkey_reg not in weeks_meta: weeks_meta[wkey_reg] = (mon_r, sun_r)
-        if mkey_reg not in months_meta: months_meta[mkey_reg] = month_bounds(mkey_reg)
+        # Периоды регистрации уже посчитаны выше
 
         # ------ REGISTERED агрегация ------
-        def apply_reg(m):
+        def apply_reg_weekly(m):
             apply_reg_metrics(
                 m,
                 _in_conv_base,
@@ -459,62 +528,89 @@ def run_etl(muz_path, hierarchy_path, out_path):
                 nd_val,
             )
 
-        def apply_conv_exec(m):
-            m['n_conv_exec_total'] += 1
-            if _connected:
-                m['n_conv_exec_connected'] += 1
+        def apply_reg_monthly(m):
+            apply_reg_weekly(m)
+            # Month-only conversion counters:
+            # - clean   (primary FIO): connected in reg_month or next_month / all registered in reg_month
+            # - regular (exec FIO):    same window, but kept as a separate counter to match semantics
+            m['n_month_conv_primary_total'] += 1
+            m['n_month_conv_exec_total'] += 1
+            if _connected and final_dt is not None and month_connected_in_window(mkey_reg, final_dt):
+                m['n_month_conv_primary_connected'] += 1
+                m['n_month_conv_exec_connected'] += 1
+                # Clean numerator: only when both primary_name and exec_name are present
+                if primary_name and exec_name:
+                    m['n_month_conv_clean_exec_connected'] += 1
 
-        def apply_conv_primary(m):
-            m['n_conv_primary_total'] += 1
-            if _connected:
-                m['n_conv_primary_connected'] += 1
+        # total/all
+        apply_reg_weekly(weekly_reg[wkey_reg]['total']['all'])
+        apply_conv_exec(weekly_reg[wkey_reg]['total']['all'], _connected)
+        apply_conv_primary(weekly_reg[wkey_reg]['total']['all'], _connected)
+        if _connected and primary_name and exec_name:
+            weekly_reg[wkey_reg]['total']['all']['n_conv_clean_exec_connected'] += 1
 
-        for ag, key, name in [
-            (weekly_reg[wkey_reg], 'total', 'all'),
-            (monthly_reg[mkey_reg], 'total', 'all'),
-        ]:
-            apply_reg(ag[key][name])
-            apply_conv_exec(ag[key][name])
-            apply_conv_primary(ag[key][name])
+        apply_reg_monthly(monthly_reg[mkey_reg]['total']['all'])
+        apply_conv_exec(monthly_reg[mkey_reg]['total']['all'], _connected)
+        apply_conv_primary(monthly_reg[mkey_reg]['total']['all'], _connected)
+        if _connected and primary_name and exec_name:
+            monthly_reg[mkey_reg]['total']['all']['n_conv_clean_exec_connected'] += 1
         if direction:
-            apply_reg(weekly_reg[wkey_reg]['direction'][direction])
-            apply_reg(monthly_reg[mkey_reg]['direction'][direction])
+            apply_reg_weekly(weekly_reg[wkey_reg]['direction'][direction])
+            apply_reg_monthly(monthly_reg[mkey_reg]['direction'][direction])
             # Primary conversion buckets follow "primary_name" hierarchy, same as other registered metrics.
-            apply_conv_primary(weekly_reg[wkey_reg]['direction'][direction])
-            apply_conv_primary(monthly_reg[mkey_reg]['direction'][direction])
+            apply_conv_primary(weekly_reg[wkey_reg]['direction'][direction], _connected)
+            apply_conv_primary(monthly_reg[mkey_reg]['direction'][direction], _connected)
         if exec_direction:
-            apply_conv_exec(weekly_reg[wkey_reg]['direction'][exec_direction])
-            apply_conv_exec(monthly_reg[mkey_reg]['direction'][exec_direction])
+            apply_conv_exec(weekly_reg[wkey_reg]['direction'][exec_direction], _connected)
+            apply_conv_exec(monthly_reg[mkey_reg]['direction'][exec_direction], _connected)
+            if _connected and primary_name and exec_name:
+                weekly_reg[wkey_reg]['direction'][exec_direction]['n_conv_clean_exec_connected'] += 1
+                monthly_reg[mkey_reg]['direction'][exec_direction]['n_conv_clean_exec_connected'] += 1
         if director:
-            apply_reg(weekly_reg[wkey_reg]['director'][director])
-            apply_reg(monthly_reg[mkey_reg]['director'][director])
-            apply_conv_primary(weekly_reg[wkey_reg]['director'][director])
-            apply_conv_primary(monthly_reg[mkey_reg]['director'][director])
+            apply_reg_weekly(weekly_reg[wkey_reg]['director'][director])
+            apply_reg_monthly(monthly_reg[mkey_reg]['director'][director])
+            apply_conv_primary(weekly_reg[wkey_reg]['director'][director], _connected)
+            apply_conv_primary(monthly_reg[mkey_reg]['director'][director], _connected)
         if exec_director:
-            apply_conv_exec(weekly_reg[wkey_reg]['director'][exec_director])
-            apply_conv_exec(monthly_reg[mkey_reg]['director'][exec_director])
+            apply_conv_exec(weekly_reg[wkey_reg]['director'][exec_director], _connected)
+            apply_conv_exec(monthly_reg[mkey_reg]['director'][exec_director], _connected)
+            if _connected and primary_name and exec_name:
+                weekly_reg[wkey_reg]['director'][exec_director]['n_conv_clean_exec_connected'] += 1
+                monthly_reg[mkey_reg]['director'][exec_director]['n_conv_clean_exec_connected'] += 1
         if teamlead:
-            apply_reg(weekly_reg[wkey_reg]['teamlead'][teamlead])
-            apply_reg(monthly_reg[mkey_reg]['teamlead'][teamlead])
-            apply_conv_primary(weekly_reg[wkey_reg]['teamlead'][teamlead])
-            apply_conv_primary(monthly_reg[mkey_reg]['teamlead'][teamlead])
+            apply_reg_weekly(weekly_reg[wkey_reg]['teamlead'][teamlead])
+            apply_reg_monthly(monthly_reg[mkey_reg]['teamlead'][teamlead])
+            apply_conv_primary(weekly_reg[wkey_reg]['teamlead'][teamlead], _connected)
+            apply_conv_primary(monthly_reg[mkey_reg]['teamlead'][teamlead], _connected)
         if exec_teamlead:
-            apply_conv_exec(weekly_reg[wkey_reg]['teamlead'][exec_teamlead])
-            apply_conv_exec(monthly_reg[mkey_reg]['teamlead'][exec_teamlead])
+            apply_conv_exec(weekly_reg[wkey_reg]['teamlead'][exec_teamlead], _connected)
+            apply_conv_exec(monthly_reg[mkey_reg]['teamlead'][exec_teamlead], _connected)
+            if _connected and primary_name and exec_name:
+                weekly_reg[wkey_reg]['teamlead'][exec_teamlead]['n_conv_clean_exec_connected'] += 1
+                monthly_reg[mkey_reg]['teamlead'][exec_teamlead]['n_conv_clean_exec_connected'] += 1
         if primary_name:
-            apply_reg(weekly_reg[wkey_reg]['employee'][primary_name])
-            apply_reg(monthly_reg[mkey_reg]['employee'][primary_name])
-            apply_conv_primary(weekly_reg[wkey_reg]['employee'][primary_name])
-            apply_conv_primary(monthly_reg[mkey_reg]['employee'][primary_name])
+            apply_reg_weekly(weekly_reg[wkey_reg]['employee'][primary_name])
+            apply_reg_monthly(monthly_reg[mkey_reg]['employee'][primary_name])
+            apply_conv_primary(weekly_reg[wkey_reg]['employee'][primary_name], _connected)
+            apply_conv_primary(monthly_reg[mkey_reg]['employee'][primary_name], _connected)
         if exec_name:
-            apply_conv_exec(weekly_reg[wkey_reg]['employee'][exec_name])
-            apply_conv_exec(monthly_reg[mkey_reg]['employee'][exec_name])
+            apply_conv_exec(weekly_reg[wkey_reg]['employee_exec'][exec_name], _connected)
+            apply_conv_exec(monthly_reg[mkey_reg]['employee_exec'][exec_name], _connected)
+            # Month-window conversion for exec employee bucket (so month conv_* can use exec-based numerator).
+            monthly_exec_bucket = monthly_reg[mkey_reg]['employee_exec'][exec_name]
+            monthly_exec_bucket['n_month_conv_exec_total'] += 1
+            if _connected and final_dt is not None and month_connected_in_window(mkey_reg, final_dt):
+                monthly_exec_bucket['n_month_conv_exec_connected'] += 1
+                if primary_name:
+                    monthly_exec_bucket['n_month_conv_clean_exec_connected'] += 1
+            if _connected and primary_name:
+                weekly_reg[wkey_reg]['employee_exec'][exec_name]['n_conv_clean_exec_connected'] += 1
+                monthly_reg[mkey_reg]['employee_exec'][exec_name]['n_conv_clean_exec_connected'] += 1
 
         daily_reg[reg_dt.strftime('%Y-%m-%d')]['n_total'] += 1
 
         # ------ CLOSED агрегация (по дате итогового статуса) ------
         if _has_final:
-            final_dt = parse_dt(row[COL['final_dt']])
             if final_dt is not None:
                 if close_min is None or final_dt < close_min: close_min = final_dt
                 if close_max is None or final_dt > close_max: close_max = final_dt
@@ -574,6 +670,40 @@ def run_etl(muz_path, hierarchy_path, out_path):
             if director: apply_open(open_snap['director'][director])
             if teamlead: apply_open(open_snap['teamlead'][teamlead])
             if primary_name: apply_open(open_snap['employee'][primary_name])
+
+        # ------ RAW rows export (for UI) ------
+        try:
+            raw_export['rows'].append({
+                'v': list(row[:header_len]),
+                'reg_w': wkey_reg,
+                'reg_m': mkey_reg,
+                'cl_w': wkey_cl,
+                'cl_m': mkey_cl,
+                # primary dims
+                'direction': direction,
+                'mrf': mrf,
+                'director': director,
+                'teamlead': teamlead,
+                'employee': primary_name,
+                # exec dims (for conv_exec buckets)
+                'exec_direction': exec_direction,
+                'exec_director': exec_director,
+                'exec_teamlead': exec_teamlead,
+                'exec_mrf': exec_mrf,
+                'employee_exec': exec_name,
+                # flags
+                'in_base': bool(_in_conv_base),
+                'stayed': bool(_stayed),
+                'transferred': bool(_transferred),
+                'connected': bool(_connected),
+                'has_final': bool(wkey_cl and mkey_cl),
+                'with_equip': bool(_with_equip),
+                'sla_acc_viol': bool(_sla_acc_viol),
+                'sla_cont_viol': bool(_sla_cont_viol),
+                'is_stale30': bool((not _has_final) and (parse_num(row[COL['hrs_in_status']]) > STALE_HOURS)),
+            })
+        except Exception:
+            pass
 
     print(f"[ETL v2] Read {n_read}, our={n_our}, skip_no_date={n_skip_no_date}, {time.time()-t0:.1f}s")
     print(f"[ETL v2] Reg dates: {dates_min} — {dates_max}")
@@ -749,6 +879,7 @@ def run_etl(muz_path, hierarchy_path, out_path):
                 'n_missing_min_dt': repeat_attribution_missing_min_dt,
             },
         },
+        'raw': raw_export,
     }
 
     with open(out_path, 'w', encoding='utf-8') as f:

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -248,7 +248,6 @@ td.spark canvas{vertical-align:middle}
         <h2>РџРѕ РЅР°РїСЂР°РІР»РµРЅРёСЏРј</h2>
         <div class="card-sub" id="dir-sub">вЂ”</div>
       </div>
-      <button class="export-btn" onclick="exportTableCSV('table-directions','РїРѕ_РЅР°РїСЂР°РІР»РµРЅРёСЏРј')">CSV</button>
     </div>
     <table id="table-directions"><thead><tr>
       <th data-k="name">РќР°РїСЂР°РІР»РµРЅРёРµ</th>
@@ -272,7 +271,7 @@ td.spark canvas{vertical-align:middle}
         <h2>РљРѕРјР°РЅРґС‹ (С‚РёРјР»РёРґС‹)</h2>
         <div class="card-sub" id="teams-sub">вЂ”</div>
       </div>
-      <button class="export-btn" onclick="exportTableCSV('table-teams','РєРѕРјР°РЅРґС‹')">CSV</button>
+      <button class="export-btn" onclick="exportRawRowsForActiveTab()">Заявки XLS</button>
     </div>
     <table id="table-teams"><thead><tr>
       <th data-k="name">РўРёРјР»РёРґ</th>
@@ -283,7 +282,7 @@ td.spark canvas{vertical-align:middle}
       <th class="num" data-k="transfer_rate">РџРµСЂРµРґ. %</th>
       <th class="num" data-k="repeat_pct">РџРѕРІС‚РѕСЂ %</th>
       <th class="num" data-k="conv_exec_pct" title="Обычная: (Клиент подключен) / все заявки, атрибуция по 'ФИО исполнителя (на кого назначена)'">Конв. обыч.</th>
-      <th class="num" data-k="conv_primary_pct" title="Чистая: (Клиент подключен) / все заявки, атрибуция по 'ФИО сотрудника, принявшего заявку в работу, первичное'">Конв. чист.</th>
+      <th class="num" data-k="conv_primary_pct" title="Чистая (v2): числитель по 'ФИО исполнителя (на кого назначена)', знаменатель по 'ФИО сотрудника, принявшего заявку в работу, первичное'">Конв. чист.</th>
       <th class="num" data-k="load">РќР°РіСЂ.</th>
       <th class="num" data-k="n_connected">РџРѕРґРєР».</th>
       <th class="num" data-k="nd_sum">РќР” в‚Ѕ</th>
@@ -305,20 +304,20 @@ td.spark canvas{vertical-align:middle}
       </div>
       <div class="card-actions">
         <button class="export-btn toggle-btn" id="btn-emp-hide-unknown" type="button">Скрыть без МРФ/ТЛ</button>
-        <button class="export-btn" onclick="exportTableCSV('table-emp','СЃРѕС‚СЂСѓРґРЅРёРєРё')">CSV</button>
+        <button class="export-btn" onclick="exportRawRowsForActiveTab()">Заявки XLS</button>
       </div>
     </div>
     <table id="table-emp"><thead><tr>
       <th data-k="name">РЎРѕС‚СЂСѓРґРЅРёРє</th>
       <th data-k="teamlead">РўРёРјР»РёРґ</th>
       <th data-k="mrf">РњР Р¤</th>
-      <th class="num" data-k="n_total">Р—Р°СЏРІРєРё</th>
+      <th class="num" data-k="n_conv_exec_total">Р—Р°СЏРІРєРё</th>
       <th class="num" data-k="sla_acc_rate">SLA %</th>
       <th class="num" data-k="transfer_rate">РџРµСЂРµРґ. %</th>
       <th class="num" data-k="repeat_pct">РџРѕРІС‚РѕСЂ %</th>
       <th class="num" data-k="conv_exec_pct" title="Обычная: (Клиент подключен) / все заявки, атрибуция по 'ФИО исполнителя (на кого назначена)'">Конв. обыч.</th>
-      <th class="num" data-k="conv_primary_pct" title="Чистая: (Клиент подключен) / все заявки, атрибуция по 'ФИО сотрудника, принявшего заявку в работу, первичное'">Конв. чист.</th>
-      <th class="num" data-k="n_connected">РџРѕРґРєР».</th>
+      <th class="num" data-k="conv_primary_pct" title="Чистая (v2): числитель по 'ФИО исполнителя (на кого назначена)', знаменатель по 'ФИО сотрудника, принявшего заявку в работу, первичное'">Конв. чист.</th>
+      <th class="num" data-k="n_conv_exec_connected">РџРѕРґРєР».</th>
       <th class="num" data-k="nd_sum">РќР” в‚Ѕ</th>
       <th class="num" data-k="equip_share">РћР±РѕСЂСѓРґ. %</th>
       <th class="num" data-k="crossell_pct" title="Р”РѕР»СЏ РРќРќ СЃ в‰Ґ2 СѓРЅРёРєР°Р»СЊРЅС‹С… РїСЂРѕРґСѓРєС‚РѕРІ">Р”РѕРїСЂРѕРґ. %</th>
@@ -343,7 +342,7 @@ td.spark canvas{vertical-align:middle}
   <div class="card">
     <div class="card-head">
       <div><h2>Р—Р°СЃС‚СЂСЏРІС€РёРµ РїРѕ СЃРѕС‚СЂСѓРґРЅРёРєР°Рј</h2><div class="card-sub">РѕС‚РєСЂС‹С‚С‹Рµ Р·Р°СЏРІРєРё, РіРґРµ С‡Р°СЃРѕРІ РІ С‚РµРєСѓС‰РµРј СЃС‚Р°С‚СѓСЃРµ &gt; 720 (30 РґРЅ)</div></div>
-      <button class="export-btn" onclick="exportTableCSV('table-stale','Р·Р°СЃС‚СЂСЏРІС€РёРµ')">CSV</button>
+      <button class="export-btn" onclick="exportRawRowsForActiveTab()">Заявки XLS</button>
     </div>
     <table id="table-stale"><thead><tr>
       <th data-k="name">РЎРѕС‚СЂСѓРґРЅРёРє</th>
@@ -370,7 +369,7 @@ td.spark canvas{vertical-align:middle}
   <div class="card">
     <div class="card-head">
       <div><h2>РЈСЃР»СѓРіРё вЂ” РґРµС‚Р°Р»РёР·Р°С†РёСЏ</h2></div>
-      <button class="export-btn" onclick="exportTableCSV('table-services','СѓСЃР»СѓРіРё')">CSV</button>
+      <button class="export-btn" onclick="exportRawRowsForActiveTab()">Заявки XLS</button>
     </div>
     <table id="table-services"><thead><tr>
       <th data-k="service">РЈСЃР»СѓРіР°</th>
@@ -390,8 +389,14 @@ td.spark canvas{vertical-align:middle}
 /*__CHARTJS__*/
 </script>
 <script>
+/*__RAW_SCRIPT__*/
+</script>
+<script>
 // ==================== Р”РђРќРќР«Р• ====================
 const DATA = /*__DATA__*/;
+function getRAW() {
+  return (window.DASH_RAW || DATA.raw) || { cols: [], rows: [] };
+}
 const BUILD_TIME = "/*__BUILD_TIME__*/";
 
 // ==================== РЈРўРР›РРўР« ====================
@@ -618,7 +623,7 @@ function getBucket(period, aggType, level, id) {
 
 // ==================== РђР“Р Р•Р“РђРўР« РџРћ Р¤РР›Р¬РўР РђРњ ====================
 // РЎСѓРјРјРёСЂСѓРµС‚ РјРµС‚СЂРёРєРё РїРѕ СЃРїРёСЃРєСѓ СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ Р·Р° РєРѕРЅРєСЂРµС‚РЅС‹Р№ РїРµСЂРёРѕРґ Рё С‚РёРї
-function aggByEmployees(aggType, period, empNames, fields) {
+function aggByEmployees(aggType, period, empNames, fields, mapKey='employee') {
   const kind = period.kind === 'month' ? 'by_month' : 'by_week';
   const src = DATA[aggType][kind][period.key];
   if (!src) return null;
@@ -627,7 +632,7 @@ function aggByEmployees(aggType, period, empNames, fields) {
   for (const f of fields) out[f] = 0;
   const byService = {};
   const byServiceEq = {};
-  for (const [name, m] of Object.entries(src.employee || {})) {
+  for (const [name, m] of Object.entries(src[mapKey] || {})) {
     if (!set.has(name)) continue;
     for (const f of fields) out[f] += (m[f] || 0);
     if (aggType === 'closed') {
@@ -644,18 +649,36 @@ function regMetrics(period, empNames) {
     'n_total','n_base_all','n_stayed_base','n_transferred','n_repeat',
     'n_sla_acc_viol','n_sla_cont_viol',
     'n_connected_stayed_from_period','nd_sum_from_period',
+    'n_month_conv_primary_total','n_month_conv_primary_connected',
+    'n_month_conv_exec_total','n_month_conv_exec_connected',
     'n_conv_exec_total','n_conv_exec_connected',
-    'n_conv_primary_total','n_conv_primary_connected'
+    'n_conv_primary_total','n_conv_primary_connected',
+    'n_conv_primary_total_all','n_month_conv_primary_total_all',
+    'n_conv_clean_exec_connected','n_month_conv_clean_exec_connected'
   ]);
   if (!m) return null;
+  const mExec = aggByEmployees('registered', period, empNames, [
+    'n_month_conv_exec_total','n_month_conv_exec_connected',
+    'n_conv_exec_total','n_conv_exec_connected',
+    'n_conv_clean_exec_connected','n_month_conv_clean_exec_connected',
+  ], 'employee_exec') || {};
   m.transfer_rate = m.n_total ? 100 * m.n_transferred / m.n_total : 0;
   m.repeat_pct = m.n_total ? 100 * (m.n_repeat || 0) / m.n_total : 0;
   m.sla_acc_rate = m.n_total ? 100 * m.n_sla_acc_viol / m.n_total : 0;
   m.sla_cont_rate = m.n_total ? 100 * m.n_sla_cont_viol / m.n_total : 0;
-  m.conv_clean = m.n_base_all ? 100 * m.n_connected_stayed_from_period / m.n_base_all : 0;
-  m.conv_regular = m.n_stayed_base ? 100 * m.n_connected_stayed_from_period / m.n_stayed_base : 0;
-  m.conv_exec_pct = m.n_conv_exec_total ? 100 * m.n_conv_exec_connected / m.n_conv_exec_total : 0;
-  m.conv_primary_pct = m.n_conv_primary_total ? 100 * m.n_conv_primary_connected / m.n_conv_primary_total : 0;
+  if (period.kind === 'month' && ((m.n_month_conv_primary_total || 0) > 0 || (m.n_month_conv_exec_total || 0) > 0)) {
+    // Variant 2: clean = exec_connected / primary_total (same filter scope)
+    m.conv_clean = (m.n_month_conv_primary_total_all || 0) ? 100 * (mExec.n_month_conv_clean_exec_connected || 0) / m.n_month_conv_primary_total_all : 0;
+    m.conv_regular = (mExec.n_month_conv_exec_total || 0) ? 100 * (mExec.n_month_conv_exec_connected || 0) / mExec.n_month_conv_exec_total : 0;
+  } else {
+    // Variant 2: clean = exec_connected / primary_total (same filter scope)
+    m.conv_clean = (m.n_conv_primary_total_all || 0) ? 100 * (mExec.n_conv_clean_exec_connected || 0) / m.n_conv_primary_total_all : 0;
+    m.conv_regular = (mExec.n_conv_exec_total || 0) ? 100 * (mExec.n_conv_exec_connected || 0) / mExec.n_conv_exec_total : 0;
+  }
+  m.conv_exec_pct = (mExec.n_conv_exec_total || 0) ? 100 * (mExec.n_conv_exec_connected || 0) / mExec.n_conv_exec_total : 0;
+  // UI meaning: "Конв. чист." uses variant-2 clean conversion (exec numerator / primary denominator).
+  // Keep the raw primary conversion available via m.n_conv_primary_* if needed elsewhere.
+  m.conv_primary_pct = m.conv_clean || 0;
   return m;
 }
 
@@ -779,8 +802,8 @@ function renderMain() {
     { lbl: 'РќР” Р·Р°РєСЂС‹С‚С‹С…', cur: c.nd_sum, prev: cPrev?.nd_sum, fmt: fmtMoney, metric: 'nd_sum', sub: v => fmtMoneyFull(v), kind:'money' },
     { lbl: 'Close %', cur: c.close_conv, prev: cPrev?.close_conv, fmt: v=>fmtPct(v,2), metric: 'close_conv', kind:'pp', hint:'РїРѕРґРєР»/Р·Р°РєСЂ РІ РїРµСЂРёРѕРґРµ' },
     { lbl: 'РЈСЃР»СѓРіРё СЃ РѕР±РѕСЂСѓРґ. %', cur: c.equip_share, prev: cPrev?.equip_share, fmt: v=>fmtPct(v,1), metric: 'equip_share', kind:'pp' },
-    { lbl: 'Р”РѕРїСЂРѕРґР°Р¶Рё %', cur: c.crossell_pct, prev: cPrev?.crossell_pct, fmt: v=>fmtPct(v,1), metric: 'crossell_pct', kind:'pp',
-      sub: v => `${fmtInt(c.n_inn_multi)} РёР· ${fmtInt(c.n_inn_connected)} РРќРќ в‰Ґ2 РїСЂРѕРґСѓРєС‚Р°` },
+    { lbl: 'Допродажи %', cur: c.crossell_pct, prev: cPrev?.crossell_pct, fmt: v=>fmtPct(v,1), metric: 'crossell_pct', kind:'pp',
+      sub: v => `${fmtInt(c.n_inn_multi)} из ${fmtInt(c.n_inn_connected)} ИНН ≥2 продукта` },
     { lbl: 'Р¤СЂРѕРґ-СЂРёСЃРє %', cur: c.fraud_pct, prev: cPrev?.fraud_pct, fmt: v=>fmtPct(v,1), metric: 'fraud_pct', kind:'pp',
       sub: v => `${fmtInt(c.n_ultra_cheap)} РёР· ${fmtInt(c.n_secondary)} 2-С… РїСЂРѕРґСѓРєС‚РѕРІ в‰¤400в‚Ѕ/РјРµСЃ` },
   ];
@@ -977,7 +1000,8 @@ function renderCohort(period, empNames) {
 
 function renderDirTable(period, prev, empNames) {
   const tbody = document.querySelector('#table-directions tbody');
-  const dirs = (DATA.directions && DATA.directions.length ? DATA.directions : ['НИР','НПП','НСП']);
+  const dirsRaw = (DATA.directions && DATA.directions.length ? DATA.directions : ['НИР','НПП','НСП']);
+  const dirs = dirsRaw.filter(d => String(d || '').trim().toLowerCase() !== 'развитие');
   const rows = [];
   for (const d of dirs) {
     // Р¤РёР»СЊС‚СЂСѓРµРј СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ СЌС‚РѕРіРѕ РЅР°РїСЂР°РІР»РµРЅРёСЏ
@@ -1181,22 +1205,27 @@ function renderEmployees() {
   const emps = filteredEmployees();
   const kind = period.kind === 'month' ? 'by_month' : 'by_week';
   const srcReg = DATA.registered[kind][period.key]?.employee || {};
+  const srcRegExec = DATA.registered[kind][period.key]?.employee_exec || {};
   const srcCl = DATA.closed[kind][period.key]?.employee || {};
   const allRows = emps.map(e => {
     const r = srcReg[e.name] || {};
+    const rExec = srcRegExec[e.name] || {};
     const c = srcCl[e.name] || {};
     const op = DATA.open.employee[e.name] || {};
+    const convCleanV2 = (r.n_conv_primary_total_all || 0) ? 100 * (rExec.n_conv_clean_exec_connected || 0) / r.n_conv_primary_total_all : 0;
     return {
       name: e.name,
       teamlead: e.teamlead || 'вЂ”',
       mrf: e.mrf || 'вЂ”',
       n_total: r.n_total || 0,
+      n_conv_exec_total: rExec.n_conv_exec_total || 0,
       sla_acc_rate: r.sla_acc_rate || 0,
       transfer_rate: r.transfer_rate || 0,
       repeat_pct: r.repeat_pct || 0,
-      conv_exec_pct: r.conv_exec_pct || 0,
-      conv_primary_pct: r.conv_primary_pct || 0,
+      conv_exec_pct: rExec.conv_exec_pct || 0,
+      conv_primary_pct: convCleanV2 || 0,
       n_connected: c.n_connected || 0,
+      n_conv_exec_connected: rExec.n_conv_exec_connected || 0,
       nd_sum: c.nd_sum || 0,
       equip_share: c.equip_share || 0,
       crossell_pct: c.crossell_pct || 0,
@@ -1209,7 +1238,7 @@ function renderEmployees() {
   }).filter(r => r.n_total > 0 || r.n_connected > 0);
   const unknownCount = allRows.filter(isUnknownEmployeeRow).length;
   const rows = STATE.hideUnknownEmployees ? allRows.filter(r => !isUnknownEmployeeRow(r)) : allRows;
-  rows.sort((a, b) => b.n_total - a.n_total);
+  rows.sort((a, b) => b.n_conv_exec_total - a.n_conv_exec_total);
   const table = document.getElementById('table-emp');
   const tbody = table?.querySelector('tbody');
 
@@ -1219,13 +1248,13 @@ function renderEmployees() {
       <td class="name">${r.name}</td>
       <td>${r.teamlead}</td>
       <td>${r.mrf}</td>
-      <td class="num">${fmtInt(r.n_total)}</td>
+      <td class="num">${fmtInt(r.n_conv_exec_total)}</td>
       <td class="num">${pillPct(r.sla_acc_rate, [40, 60], true)}</td>
       <td class="num">${pillPct(r.transfer_rate, [25, 40], true)}</td>
       <td class="num">${pillPct(r.repeat_pct, [6, 10], true)}</td>
       <td class="num">${pillPct(r.conv_exec_pct, [10, 15], false, 1)}</td>
       <td class="num">${pillPct(r.conv_primary_pct, [10, 15], false, 1)}</td>
-      <td class="num">${fmtInt(r.n_connected)}</td>
+      <td class="num">${fmtInt(r.n_conv_exec_connected)}</td>
       <td class="num">${fmtMoney(r.nd_sum)}</td>
       <td class="num">${fmtPct(r.equip_share)}</td>
       <td class="num" title="${fmtInt(r.n_inn_multi)}/${fmtInt(r.n_inn_connected)} РРќРќ">${r.n_inn_connected ? pillPct(r.crossell_pct, [3, 6], false, 1) : 'вЂ”'}</td>
@@ -1449,25 +1478,144 @@ function enableSort(tableId, rows, onSort) {
   }
 }
 
-function exportTableCSV(tableId, filename) {
-  const table = document.getElementById(tableId);
-  if (!table) return;
-  const rows = [];
-  for (const tr of table.querySelectorAll('tr')) {
-    const cells = [];
-    for (const c of tr.children) {
-      // РЈР±РёСЂР°РµРј HTML СЂР°Р·РјРµС‚РєСѓ РёР· СЏС‡РµР№РєРё
-      const txt = c.textContent.replace(/\s+/g,' ').trim();
-      cells.push('"' + txt.replace(/"/g,'""') + '"');
+function _rawMatchesFilters(rr, useExecDims=false) {
+  const f = currentFilters();
+  const dir = useExecDims ? (rr.exec_direction || '') : (rr.direction || '');
+  const mrf = useExecDims ? (rr.exec_mrf || '') : (rr.mrf || '');
+  const dre = useExecDims ? (rr.exec_director || '') : (rr.director || '');
+  const tl = useExecDims ? (rr.exec_teamlead || '') : (rr.teamlead || '');
+  if (f.direction && dir !== f.direction) return false;
+  if (f.mrf && mrf !== f.mrf) return false;
+  if (f.director && dre !== f.director) return false;
+  if (f.teamlead && tl !== f.teamlead) return false;
+  return true;
+}
+
+function ensureRawLoaded() {
+  return new Promise((resolve, reject) => {
+    if (window.DASH_RAW && window.DASH_RAW.rows && window.DASH_RAW.rows.length) return resolve();
+    const src = window.DASH_RAW_SRC || 'udp_daily_dashboard_raw.js';
+
+    // If already loading, just wait.
+    if (window.__RAW_LOADING) {
+      const t0 = Date.now();
+      const tick = () => {
+        if (window.DASH_RAW && window.DASH_RAW.rows && window.DASH_RAW.rows.length) return resolve();
+        if (Date.now() - t0 > 30000) return reject(new Error('timeout'));
+        setTimeout(tick, 250);
+      };
+      tick();
+      return;
     }
-    rows.push(cells.join(','));
-  }
-  const csv = '\uFEFF' + rows.join('\n'); // BOM РґР»СЏ Excel
-  const blob = new Blob([csv], { type:'text/csv;charset=utf-8' });
+    window.__RAW_LOADING = true;
+
+    try {
+      const s = document.createElement('script');
+      s.src = src;
+      s.onload = () => {
+        window.__RAW_LOADING = false;
+        if (window.DASH_RAW && window.DASH_RAW.rows && window.DASH_RAW.rows.length) resolve();
+        else reject(new Error('empty raw'));
+      };
+      s.onerror = () => { window.__RAW_LOADING = false; reject(new Error('load error')); };
+      document.head.appendChild(s);
+    } catch (e) {
+      window.__RAW_LOADING = false;
+      reject(e);
+    }
+  });
+}
+
+function _exportRawXLS(rows, filename) {
+  const RAW = getRAW();
+  const header = RAW.headers || [];
+
+  const esc = (v) => {
+    const s = v === null || v === undefined ? '' : String(v);
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  };
+  const td = (v) => `<td>${esc(v)}</td>`;
+  const tr = (cells) => `<tr>${cells.join('')}</tr>`;
+
+  const bodyRows = rows.map(rr => {
+    const vals = rr.v || [];
+    return tr(vals.map(td));
+  }).join('') || tr([`<td colspan="${header.length}">нет данных</td>`]);
+
+  const html = [
+    '<!doctype html>',
+    '<html><head><meta charset="utf-8"></head><body>',
+    '<table border="1">',
+    tr(header.map(h => `<th>${esc(h)}</th>`)),
+    bodyRows,
+    '</table>',
+    '</body></html>',
+  ].join('');
+
+  const blob = new Blob([html], { type:'application/vnd.ms-excel;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = `${filename}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.href = url; a.download = `${filename}_${new Date().toISOString().slice(0,10)}.xls`;
   a.click(); URL.revokeObjectURL(url);
+}
+
+function exportRawRowsForActiveTab() {
+  const RAW = getRAW();
+  if (!(RAW && RAW.rows && RAW.rows.length)) {
+    ensureRawLoaded().then(() => exportRawRowsForActiveTab()).catch((e) => {
+      alert('RAW-данные не загружены. Убедитесь, что рядом с HTML лежит файл udp_daily_dashboard_raw.js.');
+    });
+    return;
+  }
+  const tab = document.querySelector('.tab.active')?.dataset?.tab || 'main';
+  if (tab === 'main') {
+    alert('Экспорт сырьевых строк доступен только для вкладок, кроме главной.');
+    return;
+  }
+  const period = activeTl();
+  const emps = filteredEmployees();
+  const empSet = new Set(emps.map(e => e.name));
+
+  const periodKey = period.key;
+  const periodKind = period.kind; // 'week' | 'month'
+
+  const out = [];
+  for (const rr of (RAW.rows || [])) {
+    if (tab === 'open') {
+      if (!_rawMatchesFilters(rr, false)) continue;
+      if (rr.has_final) continue;
+      if (!empSet.has(rr.employee)) continue;
+      out.push(rr);
+      continue;
+    }
+
+    if (tab === 'services') {
+      if (!_rawMatchesFilters(rr, false)) continue;
+      if (!rr.has_final) continue;
+      if (!rr.connected) continue;
+      if (!empSet.has(rr.employee)) continue;
+      if (periodKind === 'month') { if (rr.cl_m !== periodKey) continue; }
+      else { if (rr.cl_w !== periodKey) continue; }
+      out.push(rr);
+      continue;
+    }
+
+    if (tab === 'teams' || tab === 'employees') {
+      const inRegPeriod = periodKind === 'month' ? (rr.reg_m === periodKey) : (rr.reg_w === periodKey);
+      const inClPeriod = periodKind === 'month' ? (rr.cl_m === periodKey) : (rr.cl_w === periodKey);
+
+      const regHitPrimary = inRegPeriod && empSet.has(rr.employee) && _rawMatchesFilters(rr, false);
+      const regHitExec = inRegPeriod && empSet.has(rr.employee_exec) && _rawMatchesFilters(rr, true);
+      const regHit = regHitPrimary || regHitExec;
+
+      const clHit = inClPeriod && rr.has_final && empSet.has(rr.employee) && _rawMatchesFilters(rr, false);
+      if (regHit || clHit) out.push(rr);
+      continue;
+    }
+  }
+
+  const fname = `raw_${tab}_${period.key}`;
+  _exportRawXLS(out, fname);
 }
 
 // ==================== TABS ====================
@@ -1538,4 +1686,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
-
