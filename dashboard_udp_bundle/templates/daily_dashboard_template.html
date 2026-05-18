@@ -271,7 +271,7 @@ td.spark canvas{vertical-align:middle}
         <h2>РљРѕРјР°РЅРґС‹ (С‚РёРјР»РёРґС‹)</h2>
         <div class="card-sub" id="teams-sub">вЂ”</div>
       </div>
-      <button class="export-btn" onclick="exportRawRowsForActiveTab()">Заявки XLS</button>
+      <button class="export-btn" onclick="exportMuzRowsXlsxForActiveTab()">Заявки XLSX</button>
     </div>
     <table id="table-teams"><thead><tr>
       <th data-k="name">РўРёРјР»РёРґ</th>
@@ -304,7 +304,7 @@ td.spark canvas{vertical-align:middle}
       </div>
       <div class="card-actions">
         <button class="export-btn toggle-btn" id="btn-emp-hide-unknown" type="button">Скрыть без МРФ/ТЛ</button>
-        <button class="export-btn" onclick="exportRawRowsForActiveTab()">Заявки XLS</button>
+        <button class="export-btn" onclick="exportMuzRowsXlsxForActiveTab()">Заявки XLSX</button>
       </div>
     </div>
     <table id="table-emp"><thead><tr>
@@ -342,7 +342,7 @@ td.spark canvas{vertical-align:middle}
   <div class="card">
     <div class="card-head">
       <div><h2>Р—Р°СЃС‚СЂСЏРІС€РёРµ РїРѕ СЃРѕС‚СЂСѓРґРЅРёРєР°Рј</h2><div class="card-sub">РѕС‚РєСЂС‹С‚С‹Рµ Р·Р°СЏРІРєРё, РіРґРµ С‡Р°СЃРѕРІ РІ С‚РµРєСѓС‰РµРј СЃС‚Р°С‚СѓСЃРµ &gt; 720 (30 РґРЅ)</div></div>
-      <button class="export-btn" onclick="exportRawRowsForActiveTab()">Заявки XLS</button>
+      <button class="export-btn" onclick="exportMuzRowsXlsxForActiveTab()">Заявки XLSX</button>
     </div>
     <table id="table-stale"><thead><tr>
       <th data-k="name">РЎРѕС‚СЂСѓРґРЅРёРє</th>
@@ -369,7 +369,7 @@ td.spark canvas{vertical-align:middle}
   <div class="card">
     <div class="card-head">
       <div><h2>РЈСЃР»СѓРіРё вЂ” РґРµС‚Р°Р»РёР·Р°С†РёСЏ</h2></div>
-      <button class="export-btn" onclick="exportRawRowsForActiveTab()">Заявки XLS</button>
+      <button class="export-btn" onclick="exportMuzRowsXlsxForActiveTab()">Заявки XLSX</button>
     </div>
     <table id="table-services"><thead><tr>
       <th data-k="service">РЈСЃР»СѓРіР°</th>
@@ -1616,6 +1616,298 @@ function exportRawRowsForActiveTab() {
 
   const fname = `raw_${tab}_${period.key}`;
   _exportRawXLS(out, fname);
+}
+
+function exportMuzRowsXlsxForActiveTab() {
+  // Export MUZ rows using RAW (no server). Requires dist/udp_daily_dashboard_raw.js next to HTML.
+  const RAW = getRAW();
+  if (!(RAW && RAW.rows && RAW.rows.length)) {
+    ensureRawLoaded().then(() => exportMuzRowsXlsxForActiveTab()).catch(() => {
+      alert('RAW-данные не загружены. Убедись, что рядом с HTML лежит файл udp_daily_dashboard_raw.js.');
+    });
+    return;
+  }
+
+  const tab = document.querySelector('.tab.active')?.dataset?.tab || 'main';
+  if (tab === 'main') {
+    alert('Экспорт заявок доступен только для вкладок: Команды/Сотрудники/Открытые/Услуги.');
+    return;
+  }
+
+  const period = activeTl();
+  let emps = filteredEmployees();
+  if (STATE.hideUnknownEmployees) emps = emps.filter(e => !isUnknownEmployeeRow(e));
+  const empSet = new Set(emps.map(e => e.name));
+
+  const periodKey = period.key;
+  const periodKind = period.kind; // 'week' | 'month'
+
+  const out = [];
+  for (const rr of (RAW.rows || [])) {
+    if (tab === 'open') {
+      if (!_rawMatchesFilters(rr, false)) continue;
+      if (rr.has_final) continue;
+      if (!empSet.has(rr.employee)) continue;
+      out.push(rr);
+      continue;
+    }
+
+    if (tab === 'services') {
+      if (!_rawMatchesFilters(rr, false)) continue;
+      if (!rr.has_final) continue;
+      if (!rr.connected) continue;
+      if (!empSet.has(rr.employee)) continue;
+      if (periodKind === 'month') { if (rr.cl_m !== periodKey) continue; }
+      else { if (rr.cl_w !== periodKey) continue; }
+      out.push(rr);
+      continue;
+    }
+
+    if (tab === 'teams' || tab === 'employees') {
+      const inRegPeriod = periodKind === 'month' ? (rr.reg_m === periodKey) : (rr.reg_w === periodKey);
+      const inClPeriod = periodKind === 'month' ? (rr.cl_m === periodKey) : (rr.cl_w === periodKey);
+
+      const regHitPrimary = inRegPeriod && empSet.has(rr.employee) && _rawMatchesFilters(rr, false);
+      const regHitExec = inRegPeriod && empSet.has(rr.employee_exec) && _rawMatchesFilters(rr, true);
+      const regHit = regHitPrimary || regHitExec;
+
+      const clHit = inClPeriod && rr.has_final && empSet.has(rr.employee) && _rawMatchesFilters(rr, false);
+      if (regHit || clHit) out.push(rr);
+      continue;
+    }
+  }
+
+  const fname = `muz_rows_${tab}_${period.key}`;
+  exportRawRowsToXlsx(out, fname);
+}
+
+function exportRawRowsToXlsx(rows, filename) {
+  const RAW = getRAW();
+  const headers = RAW.headers || [];
+
+  const crc32Table = (() => {
+    const t = new Uint32Array(256);
+    for (let i = 0; i < 256; i++) {
+      let c = i;
+      for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      t[i] = c >>> 0;
+    }
+    return t;
+  })();
+
+  function crc32(bytes) {
+    let c = 0xFFFFFFFF;
+    for (let i = 0; i < bytes.length; i++) c = crc32Table[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  function u16le(v) { return new Uint8Array([v & 0xFF, (v >>> 8) & 0xFF]); }
+  function u32le(v) { return new Uint8Array([v & 0xFF, (v >>> 8) & 0xFF, (v >>> 16) & 0xFF, (v >>> 24) & 0xFF]); }
+  function concat(chunks) {
+    const total = chunks.reduce((s, a) => s + a.length, 0);
+    const out = new Uint8Array(total);
+    let off = 0;
+    for (const a of chunks) { out.set(a, off); off += a.length; }
+    return out;
+  }
+
+  const te = new TextEncoder();
+  const xml = (s) => te.encode(s);
+
+  function escapeXml(s) {
+    return String(s ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+  }
+
+  function colName(n0) {
+    // 0-based column index -> Excel column name
+    let n = n0 + 1;
+    let s = '';
+    while (n > 0) {
+      const r = (n - 1) % 26;
+      s = String.fromCharCode(65 + r) + s;
+      n = Math.floor((n - 1) / 26);
+    }
+    return s;
+  }
+
+  function sheetXml() {
+    const rowsXml = [];
+    const all = [{ v: headers }, ...(rows || [])];
+    for (let r = 0; r < all.length; r++) {
+      const rr = all[r];
+      const vals = (r === 0) ? (rr.v || []) : (rr.v || []);
+      const cells = [];
+      for (let c = 0; c < vals.length; c++) {
+        const ref = `${colName(c)}${r + 1}`;
+        const v = vals[c];
+        // Inline string: simplest + no sharedStrings.xml needed.
+        cells.push(`<c r="${ref}" t="inlineStr"><is><t>${escapeXml(v)}</t></is></c>`);
+      }
+      rowsXml.push(`<row r="${r + 1}">${cells.join('')}</row>`);
+    }
+
+    return `<?xml version="1.0" encoding="UTF-8"?>` +
+      `<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">` +
+      `<sheetData>${rowsXml.join('')}</sheetData>` +
+      `</worksheet>`;
+  }
+
+  const now = new Date();
+  const created = now.toISOString();
+
+  const files = [
+    ['[Content_Types].xml',
+      `<?xml version="1.0" encoding="UTF-8"?>` +
+      `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">` +
+      `<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>` +
+      `<Default Extension="xml" ContentType="application/xml"/>` +
+      `<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>` +
+      `<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>` +
+      `<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>` +
+      `<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>` +
+      `<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>` +
+      `</Types>`
+    ],
+    ['_rels/.rels',
+      `<?xml version="1.0" encoding="UTF-8"?>` +
+      `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">` +
+      `<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>` +
+      `<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>` +
+      `<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>` +
+      `</Relationships>`
+    ],
+    ['docProps/core.xml',
+      `<?xml version="1.0" encoding="UTF-8"?>` +
+      `<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" ` +
+      `xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">` +
+      `<dc:creator>dashboard</dc:creator>` +
+      `<cp:lastModifiedBy>dashboard</cp:lastModifiedBy>` +
+      `<dcterms:created xsi:type="dcterms:W3CDTF">${created}</dcterms:created>` +
+      `<dcterms:modified xsi:type="dcterms:W3CDTF">${created}</dcterms:modified>` +
+      `</cp:coreProperties>`
+    ],
+    ['docProps/app.xml',
+      `<?xml version="1.0" encoding="UTF-8"?>` +
+      `<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" ` +
+      `xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">` +
+      `<Application>dashboard</Application>` +
+      `</Properties>`
+    ],
+    ['xl/workbook.xml',
+      `<?xml version="1.0" encoding="UTF-8"?>` +
+      `<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" ` +
+      `xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">` +
+      `<sheets><sheet name="MUZ" sheetId="1" r:id="rId1"/></sheets>` +
+      `</workbook>`
+    ],
+    ['xl/_rels/workbook.xml.rels',
+      `<?xml version="1.0" encoding="UTF-8"?>` +
+      `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">` +
+      `<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>` +
+      `<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>` +
+      `</Relationships>`
+    ],
+    ['xl/styles.xml',
+      `<?xml version="1.0" encoding="UTF-8"?>` +
+      `<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">` +
+      `<fonts count="1"><font><sz val="11"/><color theme="1"/><name val="Calibri"/><family val="2"/></font></fonts>` +
+      `<fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills>` +
+      `<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>` +
+      `<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>` +
+      `<cellXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/></cellXfs>` +
+      `<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>` +
+      `</styleSheet>`
+    ],
+    ['xl/worksheets/sheet1.xml', sheetXml()],
+  ];
+
+  function buildZipStore(entries) {
+    const localParts = [];
+    const centralParts = [];
+    let offset = 0;
+    const cdEntries = [];
+
+    for (const [name, contentStr] of entries) {
+      const nameBytes = te.encode(name);
+      const dataBytes = (contentStr instanceof Uint8Array) ? contentStr : te.encode(contentStr);
+      const crc = crc32(dataBytes);
+      const size = dataBytes.length >>> 0;
+
+      const lfh = concat([
+        u32le(0x04034b50),
+        u16le(20),
+        u16le(0),
+        u16le(0),
+        u16le(0),
+        u16le(0),
+        u32le(crc),
+        u32le(size),
+        u32le(size),
+        u16le(nameBytes.length),
+        u16le(0),
+        nameBytes,
+      ]);
+      localParts.push(lfh, dataBytes);
+
+      const cdh = concat([
+        u32le(0x02014b50),
+        u16le(20),
+        u16le(20),
+        u16le(0),
+        u16le(0),
+        u16le(0),
+        u16le(0),
+        u32le(crc),
+        u32le(size),
+        u32le(size),
+        u16le(nameBytes.length),
+        u16le(0),
+        u16le(0),
+        u16le(0),
+        u16le(0),
+        u32le(0),
+        u32le(offset),
+        nameBytes,
+      ]);
+      centralParts.push(cdh);
+      cdEntries.push(cdh);
+
+      offset += lfh.length + dataBytes.length;
+    }
+
+    const cdOffset = offset;
+    const cdData = concat(centralParts);
+    const cdSize = cdData.length;
+
+    const eocd = concat([
+      u32le(0x06054b50),
+      u16le(0),
+      u16le(0),
+      u16le(entries.length),
+      u16le(entries.length),
+      u32le(cdSize),
+      u32le(cdOffset),
+      u16le(0),
+    ]);
+
+    return concat([...localParts, cdData, eocd]);
+  }
+
+  const zipBytes = buildZipStore(files);
+  const blob = new Blob([zipBytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${filename}_${new Date().toISOString().slice(0,10)}.xlsx`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 // ==================== TABS ====================
