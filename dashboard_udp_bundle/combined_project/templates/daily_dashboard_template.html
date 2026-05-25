@@ -1,0 +1,1973 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Р•Р¶РµРґРЅРµРІРЅС‹Р№ РґР°С€Р±РѕСЂРґ В· РЈР”Рџ</title>
+<style>
+:root{
+  --bg:#f8fafc; --card:#fff; --border:#e2e8f0; --text:#0f172a; --muted:#64748b;
+  --blue:#2563eb; --green:#059669; --red:#dc2626; --amber:#d97706; --violet:#7c3aed;
+  --green-bg:#dcfce7; --amber-bg:#fef3c7; --red-bg:#fee2e2; --blue-bg:#dbeafe;
+  --good:#059669; --bad:#dc2626; --neutral:#64748b;
+}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:var(--text);background:var(--bg)}
+h1,h2,h3{margin:0;font-weight:600}
+h1{font-size:18px} h2{font-size:15px;margin-bottom:8px} h3{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:500}
+a{color:var(--blue);text-decoration:none}
+
+.header{background:var(--card);border-bottom:1px solid var(--border);padding:12px 20px;position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.header .title{font-weight:600;font-size:16px;white-space:nowrap}
+.header .meta{color:var(--muted);font-size:12px;display:flex;gap:16px;flex-wrap:wrap}
+.header .meta b{color:var(--text)}
+
+.container{max-width:1600px;margin:0 auto;padding:16px 20px 60px}
+
+/* Р¤РёР»СЊС‚СЂС‹ */
+.filters{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:12px}
+.f-group{display:flex;flex-direction:column;gap:3px}
+.f-group label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px}
+.f-group select{min-width:140px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:13px}
+.actions{display:flex;gap:8px;margin-left:auto}
+.actions button{padding:6px 12px;border:1px solid var(--border);background:#fff;border-radius:6px;cursor:pointer;font-size:13px}
+.actions button:hover{background:#f1f5f9}
+.actions button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.actions button.primary:hover{background:#1e40af}
+
+/* РџРѕР»РѕСЃР° РїРµСЂРёРѕРґР° */
+.timeline{display:flex;align-items:stretch;gap:0;margin-bottom:16px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px;overflow-x:auto}
+.tl-item{flex:1;min-width:110px;padding:10px 12px;border-radius:7px;cursor:pointer;transition:all 0.15s;border:1px solid transparent;user-select:none;position:relative}
+.tl-item:hover{background:#f1f5f9}
+.tl-item.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.tl-item.active .tl-sub{color:#cfe0ff}
+.tl-item .tl-label{font-weight:600;font-size:13px}
+.tl-item .tl-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.tl-item .tl-badge{position:absolute;top:4px;right:6px;font-size:9px;padding:1px 5px;border-radius:8px;font-weight:600}
+.tl-item .tl-badge.open{background:var(--amber-bg);color:var(--amber)}
+.tl-item.active .tl-badge.open{background:rgba(255,255,255,0.25);color:#fff}
+.tl-divider{width:1px;background:var(--border);margin:4px 4px}
+
+/* Р’РєР»Р°РґРєРё */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:16px;overflow-x:auto}
+.tab{padding:10px 18px;cursor:pointer;border-bottom:2px solid transparent;color:var(--muted);font-weight:500;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* РђР»С‘СЂС‚С‹ */
+.alerts{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.alert{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border-left:3px solid;font-size:13px}
+.alert.warn{background:var(--amber-bg);border-color:var(--amber);color:#92400e}
+.alert.bad{background:var(--red-bg);border-color:var(--red);color:#991b1b}
+.alert.good{background:var(--green-bg);border-color:var(--green);color:#065f46}
+.alert .a-icon{font-weight:bold}
+.alert .a-title{font-weight:600}
+
+/* KPI */
+.kpi-section{margin-bottom:20px}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media (max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;position:relative}
+.kpi.good{border-left:3px solid var(--good)}
+.kpi.bad{border-left:3px solid var(--bad)}
+.kpi.neutral{border-left:3px solid var(--neutral)}
+.kpi .kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;font-weight:500}
+.kpi .kpi-val{font-size:24px;font-weight:600;margin-top:4px;line-height:1.2}
+.kpi .kpi-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.kpi .kpi-delta{font-size:12px;margin-top:6px;display:flex;align-items:center;gap:6px}
+.kpi .kpi-delta.up-good,.kpi .kpi-delta.down-good{color:var(--good)}
+.kpi .kpi-delta.up-bad,.kpi .kpi-delta.down-bad{color:var(--bad)}
+.kpi .kpi-delta.flat{color:var(--neutral)}
+.kpi .kpi-delta .prev{color:var(--muted);font-size:11px}
+.kpi .kpi-spark{margin-top:8px;display:block}
+
+.kpi-group-label{display:flex;align-items:center;gap:8px;margin:18px 0 10px;padding:0}
+.kpi-group-label h3{margin:0}
+.kpi-group-label .hint{font-size:11px;color:var(--muted);font-style:italic}
+
+/* РљР°СЂС‚РѕС‡РєРё */
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px}
+.card .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.card .card-sub{font-size:11px;color:var(--muted)}
+
+/* РљРѕРіРѕСЂС‚РЅР°СЏ С‚Р°Р±Р»РёС†Р° */
+.cohort-plate{display:grid;grid-template-columns:1.2fr 3fr;gap:16px;align-items:start}
+@media (max-width:900px){.cohort-plate{grid-template-columns:1fr}}
+.cohort-text{font-size:13px;color:var(--text)}
+.cohort-text .big{font-size:22px;font-weight:600;color:var(--blue)}
+.cohort-bar{display:flex;height:40px;border-radius:6px;overflow:hidden;border:1px solid var(--border)}
+.cohort-bar .seg{display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:500;white-space:nowrap;min-width:12px}
+.cohort-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:12px}
+.cohort-legend .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:middle}
+
+/* Р“СЂР°С„РёРєРё */
+.chart-wrap{height:280px;position:relative}
+.chart-wrap.tall{height:340px}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:900px){.chart-grid{grid-template-columns:1fr}}
+
+/* РўР°Р±Р»РёС†С‹ */
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{text-align:left;font-weight:500;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:0.3px;padding:8px 10px;border-bottom:1px solid var(--border);background:#f8fafc;cursor:pointer;user-select:none;white-space:nowrap}
+thead th.num{text-align:right}
+thead th:hover{background:#f1f5f9}
+thead th.sorted-asc::after{content:' ↑';color:var(--blue)}
+thead th.sorted-desc::after{content:' ↓';color:var(--blue)}
+tbody td{padding:7px 10px;border-bottom:1px solid var(--border)}
+tbody td.num{text-align:right;font-variant-numeric:tabular-nums}
+tbody td.name{font-weight:500}
+tbody tr:hover{background:#f8fafc}
+tbody td.empty{text-align:center;color:var(--muted);padding:20px}
+
+/* РџР»Р°С€РєРё РІ СЏС‡РµР№РєР°С… */
+.cell-pill{display:inline-block;padding:2px 6px;border-radius:4px;font-size:11px;font-variant-numeric:tabular-nums}
+.pill-g{background:var(--green-bg);color:#065f46}
+.pill-y{background:var(--amber-bg);color:#92400e}
+.pill-r{background:var(--red-bg);color:#991b1b}
+.pill-b{background:var(--blue-bg);color:#1e40af}
+.delta-up-good{color:var(--good)}
+.delta-down-good{color:var(--good)}
+.delta-up-bad{color:var(--bad)}
+.delta-down-bad{color:var(--bad)}
+.delta-flat{color:var(--neutral)}
+
+/* РЎРїР°СЂРєР»Р°Р№РЅС‹ РІ С‚Р°Р±Р»РёС†Р°С… */
+td.spark{padding:4px}
+td.spark canvas{vertical-align:middle}
+
+/* РЈС‚РёР»РёС‚С‹ */
+.hidden{display:none !important}
+.mono{font-variant-numeric:tabular-nums}
+.export-btn{font-size:11px;padding:4px 10px;background:#f1f5f9;border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--muted)}
+.export-btn:hover{background:#e2e8f0;color:var(--text)}
+.card-actions{display:flex;align-items:center;gap:8px}
+.toggle-btn.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.toggle-btn.active:hover{background:#1e40af;color:#fff}
+
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="title">📊 Ежедневный дашборд УДП</div>
+  <div class="meta">
+    <span>Данные: <b id="hdr-from">—</b> → <b id="hdr-to">—</b></span>
+    <span>Заявок: <b id="hdr-rows">—</b></span>
+    <span>Собрано: <b id="hdr-build">—</b></span>
+  </div>
+</div>
+
+<div class="container">
+
+<div class="filters">
+  <div class="f-group">
+    <label>Направление</label>
+    <select id="f-direction"><option value="">все</option></select>
+  </div>
+  <div class="f-group">
+    <label>МРФ</label>
+    <select id="f-mrf"><option value="">все</option></select>
+  </div>
+  <div class="f-group">
+    <label>Руководитель</label>
+    <select id="f-director"><option value="">все</option></select>
+  </div>
+  <div class="f-group">
+    <label>Тимлид</label>
+    <select id="f-teamlead"><option value="">все</option></select>
+  </div>
+  <div class="actions">
+    <button id="btn-reset">Сбросить фильтры</button>
+    <button id="btn-copy-link" title="Скопировать ссылку с текущими фильтрами">🔗 Ссылка</button>
+  </div>
+</div>
+
+<!-- Timeline bar -->
+<div class="timeline" id="timeline"></div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" data-tab="main">Р“Р»Р°РІРЅРѕРµ</div>
+  <div class="tab" data-tab="teams">РљРѕРјР°РЅРґС‹</div>
+  <div class="tab" data-tab="employees">РЎРѕС‚СЂСѓРґРЅРёРєРё</div>
+  <div class="tab" data-tab="open">РћС‚РєСЂС‹С‚С‹Рµ Р·Р°СЏРІРєРё</div>
+  <div class="tab" data-tab="services">РЈСЃР»СѓРіРё</div>
+</div>
+
+<!-- ============ MAIN TAB ============ -->
+<div class="tab-content active" data-tab="main">
+  <div class="alerts" id="main-alerts"></div>
+
+  <div class="kpi-group-label">
+    <h3>📥 Входящий поток</h3>
+    <span class="hint">РїРѕ РґР°С‚Рµ СЂРµРіРёСЃС‚СЂР°С†РёРё вЂ” С‡С‚Рѕ РїСЂРёС€Р»Рѕ РІ РїРµСЂРёРѕРґРµ</span>
+  </div>
+  <div class="kpi-grid" id="kpi-leading"></div>
+
+  <div class="kpi-group-label">
+    <h3>💰 Результат</h3>
+    <span class="hint">РїРѕ РґР°С‚Рµ Р·Р°РєСЂС‹С‚РёСЏ вЂ” С‡С‚Рѕ Р·Р°РєСЂС‹Р»РѕСЃСЊ РІ РїРµСЂРёРѕРґРµ</span>
+  </div>
+  <div class="kpi-grid" id="kpi-lagging" style="grid-template-columns:repeat(6,1fr)"></div>
+
+  <div class="card" id="cohort-card" style="margin-top:18px">
+    <div class="card-head">
+      <div>
+        <h2>РљРѕРіРѕСЂС‚С‹ РїРѕРґРєР»СЋС‡РµРЅРёР№</h2>
+        <div class="card-sub">РёР· РєР°РєРёС… РїРµСЂРёРѕРґРѕРІ СЂРµРіРёСЃС‚СЂР°С†РёРё Р·Р°РєСЂС‹Р»РёСЃСЊ Р·Р°СЏРІРєРё РІ РІС‹Р±СЂР°РЅРЅРѕРј РїРµСЂРёРѕРґРµ</div>
+      </div>
+    </div>
+    <div id="cohort-body"></div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <h2>Р”РёРЅР°РјРёРєР° РїРѕС‚РѕРєР°</h2>
+          <div class="card-sub">СЃРёРЅРёР№ вЂ” Р·Р°СЏРІРєРё (РїРѕ СЂРµРіРёСЃС‚СЂР°С†РёРё); Р·РµР»С‘РЅС‹Р№ вЂ” РїРѕРґРєР»СЋС‡РµРЅРёСЏ (РїРѕ Р·Р°РєСЂС‹С‚РёСЋ); РєСЂР°СЃРЅС‹Р№ вЂ” SLA РЅР°СЂСѓС€.</div>
+        </div>
+      </div>
+      <div class="chart-wrap tall"><canvas id="ch-dynamic"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <h2>РќР” Рё РєРѕРЅРІРµСЂСЃРёСЏ</h2>
+          <div class="card-sub">РѕСЂР°РЅР¶РµРІС‹Р№ вЂ” РќР” Р·Р°РєСЂС‹С‚С‹С… (в‚Ѕ); СЃРёРЅРёР№ вЂ” РєРѕРЅРІРµСЂСЃРёСЏ РєРѕРіРѕСЂС‚С‹ СЂРµРіРёСЃС‚СЂР°С†РёРё, %</div>
+        </div>
+      </div>
+      <div class="chart-wrap tall"><canvas id="ch-conv"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <h2>РџРѕ РЅР°РїСЂР°РІР»РµРЅРёСЏРј</h2>
+        <div class="card-sub" id="dir-sub">вЂ”</div>
+      </div>
+    </div>
+    <table id="table-directions"><thead><tr>
+      <th data-k="name">РќР°РїСЂР°РІР»РµРЅРёРµ</th>
+      <th class="num" data-k="n_total">Р—Р°СЏРІРѕРє</th>
+      <th class="num" data-k="transfer_rate">РџРµСЂРµРґР°С‡Рё %</th>
+      <th class="num" data-k="repeat_pct">РџРѕРІС‚РѕСЂ %</th>
+      <th class="num" data-k="sla_acc_rate">SLA РїСЂРёРЅСЏС‚РёСЏ %</th>
+      <th class="num" data-k="n_connected">РџРѕРґРєР»СЋС‡РµРЅРёР№</th>
+      <th class="num" data-k="nd_sum">РќР” в‚Ѕ</th>
+      <th class="num" data-k="close_conv">Close %</th>
+      <th class="num" data-k="equip_share">РћР±РѕСЂСѓРґ. %</th>
+    </tr></thead><tbody></tbody></table>
+  </div>
+</div>
+
+<!-- ============ TEAMS TAB ============ -->
+<div class="tab-content" data-tab="teams">
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <h2>РљРѕРјР°РЅРґС‹ (С‚РёРјР»РёРґС‹)</h2>
+        <div class="card-sub" id="teams-sub">вЂ”</div>
+      </div>
+      <button class="export-btn" onclick="exportMuzRowsXlsxForActiveTab()">Заявки XLSX</button>
+    </div>
+    <table id="table-teams"><thead><tr>
+      <th data-k="name">РўРёРјР»РёРґ</th>
+      <th data-k="director">Р СѓРєРѕРІРѕРґРёС‚РµР»СЊ</th>
+      <th data-k="emp_cnt">РЎРѕС‚СЂ.</th>
+      <th class="num" data-k="n_total">Р—Р°СЏРІРєРё</th>
+      <th class="num" data-k="sla_acc_rate">SLA %</th>
+      <th class="num" data-k="transfer_rate">РџРµСЂРµРґ. %</th>
+      <th class="num" data-k="repeat_pct">РџРѕРІС‚РѕСЂ %</th>
+      <th class="num" data-k="conv_exec_pct" title="Обычная: (Клиент подключен) / все заявки, атрибуция по 'ФИО исполнителя (на кого назначена)'">Конв. обыч.</th>
+      <th class="num" data-k="conv_primary_pct" title="Чистая (v2): числитель по 'ФИО исполнителя (на кого назначена)', знаменатель по 'ФИО сотрудника, принявшего заявку в работу, первичное'">Конв. чист.</th>
+      <th class="num" data-k="load">РќР°РіСЂ.</th>
+      <th class="num" data-k="n_connected">РџРѕРґРєР».</th>
+      <th class="num" data-k="nd_sum">РќР” в‚Ѕ</th>
+      <th class="num" data-k="close_conv">Close %</th>
+      <th class="num" data-k="crossell_pct" title="Р”РѕР»СЏ РРќРќ СЃ в‰Ґ2 СѓРЅРёРєР°Р»СЊРЅС‹С… РїСЂРѕРґСѓРєС‚РѕРІ">Р”РѕРїСЂРѕРґ. %</th>
+      <th class="num" data-k="fraud_pct" title="Р”РѕР»СЏ 2-С… РїСЂРѕРґСѓРєС‚РѕРІ СЃ Р°Р±РѕРЅ. РїР»Р°С‚РѕР№ в‰¤400в‚Ѕ/РјРµСЃ (РёРЅРґРёРєР°С‚РѕСЂ РЅР°РєСЂСѓС‚РєРё KPI)">Р¤СЂРѕРґ %</th>
+      <th data-k="spark">РўСЂРµРЅРґ РїРѕРґРєР».</th>
+    </tr></thead><tbody></tbody></table>
+  </div>
+</div>
+
+<!-- ============ EMPLOYEES TAB ============ -->
+<div class="tab-content" data-tab="employees">
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <h2>РЎРѕС‚СЂСѓРґРЅРёРєРё</h2>
+        <div class="card-sub" id="emp-sub">вЂ”</div>
+      </div>
+      <div class="card-actions">
+        <button class="export-btn toggle-btn" id="btn-emp-hide-unknown" type="button">Скрыть без МРФ/ТЛ</button>
+        <button class="export-btn" onclick="exportMuzRowsXlsxForActiveTab()">Заявки XLSX</button>
+      </div>
+    </div>
+    <table id="table-emp"><thead><tr>
+      <th data-k="name">РЎРѕС‚СЂСѓРґРЅРёРє</th>
+      <th data-k="teamlead">РўРёРјР»РёРґ</th>
+      <th data-k="mrf">РњР Р¤</th>
+      <th class="num" data-k="n_conv_exec_total">Р—Р°СЏРІРєРё</th>
+      <th class="num" data-k="sla_acc_rate">SLA %</th>
+      <th class="num" data-k="transfer_rate">РџРµСЂРµРґ. %</th>
+      <th class="num" data-k="repeat_pct">РџРѕРІС‚РѕСЂ %</th>
+      <th class="num" data-k="conv_exec_pct" title="Обычная: (Клиент подключен) / все заявки, атрибуция по 'ФИО исполнителя (на кого назначена)'">Конв. обыч.</th>
+      <th class="num" data-k="conv_primary_pct" title="Чистая (v2): числитель по 'ФИО исполнителя (на кого назначена)', знаменатель по 'ФИО сотрудника, принявшего заявку в работу, первичное'">Конв. чист.</th>
+      <th class="num" data-k="n_conv_exec_connected">РџРѕРґРєР».</th>
+      <th class="num" data-k="nd_sum">РќР” в‚Ѕ</th>
+      <th class="num" data-k="equip_share">РћР±РѕСЂСѓРґ. %</th>
+      <th class="num" data-k="crossell_pct" title="Р”РѕР»СЏ РРќРќ СЃ в‰Ґ2 СѓРЅРёРєР°Р»СЊРЅС‹С… РїСЂРѕРґСѓРєС‚РѕРІ">Р”РѕРїСЂРѕРґ. %</th>
+      <th class="num" data-k="fraud_pct" title="% 2-С… РїСЂРѕРґСѓРєС‚РѕРІ в‰¤400в‚Ѕ/РјРµСЃ">Р¤СЂРѕРґ %</th>
+    </tr></thead><tbody></tbody></table>
+  </div>
+</div>
+
+<!-- ============ OPEN TAB ============ -->
+<div class="tab-content" data-tab="open">
+  <div class="kpi-grid" id="open-kpis" style="grid-template-columns:repeat(4,1fr)"></div>
+  <div class="chart-grid">
+    <div class="card">
+      <div class="card-head"><h2>РћС‚РєСЂС‹С‚С‹Рµ РїРѕ РЅРµРґРµР»Рµ СЂРµРіРёСЃС‚СЂР°С†РёРё</h2></div>
+      <div class="chart-wrap tall"><canvas id="ch-open-weeks"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Р—Р°СЃС‚СЂСЏРІС€РёРµ (&gt;30 РґРЅ) РїРѕ С‚РёРјР»РёРґР°Рј</h2></div>
+      <div class="chart-wrap tall"><canvas id="ch-stale-teams"></canvas></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div><h2>Р—Р°СЃС‚СЂСЏРІС€РёРµ РїРѕ СЃРѕС‚СЂСѓРґРЅРёРєР°Рј</h2><div class="card-sub">РѕС‚РєСЂС‹С‚С‹Рµ Р·Р°СЏРІРєРё, РіРґРµ С‡Р°СЃРѕРІ РІ С‚РµРєСѓС‰РµРј СЃС‚Р°С‚СѓСЃРµ &gt; 720 (30 РґРЅ)</div></div>
+      <button class="export-btn" onclick="exportMuzRowsXlsxForActiveTab()">Заявки XLSX</button>
+    </div>
+    <table id="table-stale"><thead><tr>
+      <th data-k="name">РЎРѕС‚СЂСѓРґРЅРёРє</th>
+      <th data-k="teamlead">РўРёРјР»РёРґ</th>
+      <th class="num" data-k="n_open">РћС‚РєСЂС‹С‚Рѕ</th>
+      <th class="num" data-k="n_stale">Р—Р°СЃС‚СЂ. 30+</th>
+      <th class="num" data-k="stale_rate">%</th>
+    </tr></thead><tbody></tbody></table>
+  </div>
+</div>
+
+<!-- ============ SERVICES TAB ============ -->
+<div class="tab-content" data-tab="services">
+  <div class="chart-grid">
+    <div class="card">
+      <div class="card-head"><h2>РџРѕРґРєР»СЋС‡РµРЅРёСЏ РїРѕ СѓСЃР»СѓРіР°Рј</h2><div class="card-sub" id="serv-sub">вЂ”</div></div>
+      <div class="chart-wrap tall"><canvas id="ch-serv-share"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Р”РѕР»СЏ СЃ РѕР±РѕСЂСѓРґРѕРІР°РЅРёРµРј</h2></div>
+      <div class="chart-wrap tall"><canvas id="ch-serv-equip"></canvas></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div><h2>РЈСЃР»СѓРіРё вЂ” РґРµС‚Р°Р»РёР·Р°С†РёСЏ</h2></div>
+      <button class="export-btn" onclick="exportMuzRowsXlsxForActiveTab()">Заявки XLSX</button>
+    </div>
+    <table id="table-services"><thead><tr>
+      <th data-k="service">РЈСЃР»СѓРіР°</th>
+      <th class="num" data-k="cur">РџРѕРґРєР»СЋС‡РµРЅРёР№</th>
+      <th class="num" data-k="cur_share">% РѕС‚ РІСЃРµС…</th>
+      <th class="num" data-k="prev">РџСЂРµРґ. РїРµСЂРёРѕРґ</th>
+      <th class="num" data-k="delta">О”</th>
+      <th class="num" data-k="eq_cur">РЎ РѕР±РѕСЂСѓРґРѕРІР°РЅРёРµРј</th>
+      <th class="num" data-k="eq_share">% РѕР±РѕСЂСѓРґ.</th>
+    </tr></thead><tbody></tbody></table>
+  </div>
+</div>
+
+</div> <!-- /container -->
+
+<script>
+/*__CHARTJS__*/
+</script>
+<script>
+/*__RAW_SCRIPT__*/
+</script>
+<script>
+// ==================== Р”РђРќРќР«Р• ====================
+const DATA = /*__DATA__*/;
+function getRAW() {
+  return (window.DASH_RAW || DATA.raw) || { cols: [], rows: [] };
+}
+const BUILD_TIME = "/*__BUILD_TIME__*/";
+
+// ==================== РЈРўРР›РРўР« ====================
+const fmtInt = v => (v == null || !isFinite(v)) ? '—' : Math.round(v).toLocaleString('ru-RU');
+const fmtPct = (v, dig=1) => (v == null || !isFinite(v)) ? '—' : v.toFixed(dig) + '%';
+const fmtMoney = v => {
+  if (v == null || !isFinite(v)) return '—';
+  if (Math.abs(v) >= 1e6) return (v/1e6).toFixed(2) + ' РјР»РЅ';
+  if (Math.abs(v) >= 1e3) return (v/1e3).toFixed(0) + ' С‚С‹СЃ';
+  return Math.round(v).toLocaleString('ru-RU');
+};
+const fmtMoneyFull = v => (v == null || !isFinite(v)) ? '—' : Math.round(v).toLocaleString('ru-RU') + ' ₽';
+
+// РњРµС‚СЂРёРєРё, РіРґРµ Р РћРЎРў = РџР›РћРҐРћ
+const INV_METRICS = new Set(['transfer_rate','sla_acc_rate','sla_cont_rate','stale_rate','fraud_pct']);
+// РњРµС‚СЂРёРєРё В«Р РµР·СѓР»СЊС‚Р°С‚В» (lagging) вЂ” РґР»СЏ РѕРїСЂРµРґРµР»РµРЅРёСЏ scope Сѓ sparkline-id Рё С‚РёРїР° Р°РіСЂРµРіР°С†РёРё
+const LAGGING_METRICS = new Set(['n_connected','nd_sum','close_conv','equip_share','crossell_pct','fraud_pct']);
+
+function deltaSign(metric, delta) {
+  if (delta === 0 || delta == null) return 'flat';
+  const up = delta > 0;
+  const inv = INV_METRICS.has(metric);
+  if (up && inv) return 'up-bad';
+  if (up && !inv) return 'up-good';
+  if (!up && inv) return 'down-good';
+  return 'down-bad';
+}
+
+function arrowFor(sign) {
+  if (sign === 'flat') return '•';
+  return sign.startsWith('up') ? '▲' : '▼';
+}
+
+// ==================== РЎРћРЎРўРћРЇРќРР• ====================
+const STATE = {
+  activePeriod: null,   // РєР»СЋС‡ timeline (mkey РёР»Рё wkey)
+  hideUnknownEmployees: false,
+};
+const CHARTS = {};
+
+// ==================== URL-state ====================
+function readUrlFilters() {
+  const p = new URLSearchParams(location.hash.slice(1));
+  return {
+    direction: p.get('dir') || '',
+    mrf: p.get('mrf') || '',
+    director: p.get('dre') || '',
+    teamlead: p.get('tl') || '',
+    period: p.get('p') || '',
+    tab: p.get('t') || 'main',
+    hideUnknownEmployees: p.get('hu') === '1',
+  };
+}
+function writeUrlFilters() {
+  const f = currentFilters();
+  const p = new URLSearchParams();
+  if (f.direction) p.set('dir', f.direction);
+  if (f.mrf) p.set('mrf', f.mrf);
+  if (f.director) p.set('dre', f.director);
+  if (f.teamlead) p.set('tl', f.teamlead);
+  if (STATE.activePeriod) p.set('p', STATE.activePeriod);
+  if (STATE.hideUnknownEmployees) p.set('hu', '1');
+  const activeTab = document.querySelector('.tab.active');
+  if (activeTab && activeTab.dataset.tab !== 'main') p.set('t', activeTab.dataset.tab);
+  const s = p.toString();
+  history.replaceState(null, '', s ? '#' + s : location.pathname + location.search);
+}
+
+function isDash(v) {
+  if (v === null || v === undefined) return true;
+  const s = String(v).trim();
+  return !s || s === 'вЂ”' || s === '—' || s === '-';
+}
+
+function isUnknownEmployeeRow(r) {
+  return isDash(r.teamlead) || isDash(r.mrf);
+}
+
+function syncEmpUnknownToggleUi() {
+  const btn = document.getElementById('btn-emp-hide-unknown');
+  if (!btn) return;
+  btn.classList.toggle('active', !!STATE.hideUnknownEmployees);
+  btn.textContent = STATE.hideUnknownEmployees ? 'Показать без МРФ/ТЛ' : 'Скрыть без МРФ/ТЛ';
+}
+
+// ==================== Р¤РР›Р¬РўР Р« ====================
+function currentFilters() {
+  return {
+    direction: document.getElementById('f-direction').value,
+    mrf: document.getElementById('f-mrf').value,
+    director: document.getElementById('f-director').value,
+    teamlead: document.getElementById('f-teamlead').value,
+  };
+}
+function filteredEmployees() {
+  const f = currentFilters();
+  return DATA.employees.filter(e => {
+    if (!e.in_data) return false;
+    if (f.direction && e.direction !== f.direction) return false;
+    if (f.mrf && e.mrf !== f.mrf) return false;
+    if (f.director && e.director !== f.director) return false;
+    if (f.teamlead && e.teamlead !== f.teamlead) return false;
+    return true;
+  });
+}
+
+function initFilters() {
+  const dirSel = document.getElementById('f-direction');
+  const mrfSel = document.getElementById('f-mrf');
+  const dreSel = document.getElementById('f-director');
+  const tlSel = document.getElementById('f-teamlead');
+
+  for (const d of DATA.directions) dirSel.add(new Option(d, d));
+  for (const m of (DATA.mrfs || [])) mrfSel.add(new Option(m, m));
+  for (const d of DATA.directors) dreSel.add(new Option(d, d));
+  for (const t of DATA.teamleads) tlSel.add(new Option(t, t));
+
+  // РџСЂРёРјРµРЅРёРј URL-С„РёР»СЊС‚СЂС‹
+  const u = readUrlFilters();
+  if (u.direction && [...dirSel.options].some(o => o.value === u.direction)) dirSel.value = u.direction;
+  if (u.mrf && [...mrfSel.options].some(o => o.value === u.mrf)) mrfSel.value = u.mrf;
+
+  dirSel.addEventListener('change', () => { updateCascading(); renderAll(); writeUrlFilters(); });
+  mrfSel.addEventListener('change', () => { updateCascading(); renderAll(); writeUrlFilters(); });
+  dreSel.addEventListener('change', () => { updateCascading(); renderAll(); writeUrlFilters(); });
+  tlSel.addEventListener('change', () => { renderAll(); writeUrlFilters(); });
+
+  updateCascading();
+
+  // РџРѕСЃР»Рµ РєР°СЃРєР°РґРЅРѕСЃС‚Рё РІРѕСЃСЃС‚Р°РЅРѕРІРёРј РІС‹Р±СЂР°РЅРЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ
+  if (u.director && [...dreSel.options].some(o => o.value === u.director)) dreSel.value = u.director;
+  if (u.director) updateCascading();
+  if (u.teamlead && [...tlSel.options].some(o => o.value === u.teamlead)) tlSel.value = u.teamlead;
+
+  document.getElementById('btn-reset').addEventListener('click', () => {
+    dirSel.value = ''; mrfSel.value = ''; dreSel.value = ''; tlSel.value = '';
+    updateCascading();
+    STATE.activePeriod = DATA.meta.current_week; // С‚РµРєСѓС‰Р°СЏ РЅРµРґРµР»СЏ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
+    renderTimeline();
+    renderAll();
+    writeUrlFilters();
+  });
+  document.getElementById('btn-copy-link').addEventListener('click', () => {
+    writeUrlFilters();
+    navigator.clipboard && navigator.clipboard.writeText(location.href);
+    alert('РЎСЃС‹Р»РєР° СЃ С„РёР»СЊС‚СЂР°РјРё СЃРєРѕРїРёСЂРѕРІР°РЅР°');
+  });
+}
+
+function updateCascading() {
+  const f = currentFilters();
+
+  const dreSel = document.getElementById('f-director');
+  const prevDre = dreSel.value;
+  dreSel.innerHTML = '<option value="">РІСЃРµ</option>';
+  const drAllowed = new Set();
+  for (const e of DATA.employees) {
+    if (!e.director) continue;
+    if (f.direction && e.direction !== f.direction) continue;
+    if (f.mrf && e.mrf !== f.mrf) continue;
+    drAllowed.add(e.director);
+  }
+  for (const d of DATA.directors) if (drAllowed.has(d)) dreSel.add(new Option(d, d));
+  if (drAllowed.has(prevDre)) dreSel.value = prevDre;
+
+  const tlSel = document.getElementById('f-teamlead');
+  const prevTl = tlSel.value;
+  tlSel.innerHTML = '<option value="">РІСЃРµ</option>';
+  const tlAllowed = new Set();
+  for (const e of DATA.employees) {
+    if (!e.teamlead) continue;
+    if (f.direction && e.direction !== f.direction) continue;
+    if (f.mrf && e.mrf !== f.mrf) continue;
+    if (dreSel.value && e.director !== dreSel.value) continue;
+    tlAllowed.add(e.teamlead);
+  }
+  for (const t of DATA.teamleads) if (tlAllowed.has(t)) tlSel.add(new Option(t, t));
+  if (tlAllowed.has(prevTl)) tlSel.value = prevTl;
+}
+
+// ==================== TIMELINE ====================
+function renderTimeline() {
+  const host = document.getElementById('timeline');
+  host.innerHTML = '';
+  const tl = DATA.timeline;
+  let lastKind = null;
+  tl.forEach((t, i) => {
+    if (lastKind && lastKind !== t.kind) {
+      const div = document.createElement('div');
+      div.className = 'tl-divider';
+      host.appendChild(div);
+    }
+    const d = document.createElement('div');
+    d.className = 'tl-item' + (t.key === STATE.activePeriod ? ' active' : '');
+    d.innerHTML = `
+      ${!t.closed ? '<span class="tl-badge open">С‚РµРєСѓС‰.</span>' : ''}
+      <div class="tl-label">${t.label}</div>
+      <div class="tl-sub">${t.kind === 'month' ? 'С‚РѕС‚Р°Р» Р·Р° РјРµСЃСЏС†' : t.label === t.label_full ? '' : t.label_full.split('В·').slice(1).join('').trim()}</div>
+    `;
+    d.onclick = () => { STATE.activePeriod = t.key; renderTimeline(); renderAll(); writeUrlFilters(); };
+    host.appendChild(d);
+    lastKind = t.kind;
+  });
+}
+
+// РџРѕР»СѓС‡РёС‚СЊ С‚РµРєСѓС‰СѓСЋ timeline-Р·Р°РїРёСЃСЊ
+function activeTl() {
+  return DATA.timeline.find(t => t.key === STATE.activePeriod) || DATA.timeline[DATA.timeline.length-1];
+}
+// РџСЂРµРґС‹РґСѓС‰Р°СЏ Р·Р°РїРёСЃСЊ РІ timeline (РґР»СЏ СЃСЂР°РІРЅРµРЅРёСЏ)
+function prevTl() {
+  const idx = DATA.timeline.findIndex(t => t.key === STATE.activePeriod);
+  if (idx > 0) return DATA.timeline[idx-1];
+  return null;
+}
+// РџРѕР»СѓС‡РёС‚СЊ Р±Р°РєРµС‚ РїРѕ РїРµСЂРёРѕРґСѓ Рё С‚РёРїСѓ Р°РіСЂРµРіР°С†РёРё
+function getBucket(period, aggType, level, id) {
+  // aggType: 'registered' | 'closed'
+  const kind = period.kind === 'month' ? 'by_month' : 'by_week';
+  const per = DATA[aggType][kind][period.key];
+  if (!per) return null;
+  return (per[level] && per[level][id]) || null;
+}
+
+// ==================== РђР“Р Р•Р“РђРўР« РџРћ Р¤РР›Р¬РўР РђРњ ====================
+// РЎСѓРјРјРёСЂСѓРµС‚ РјРµС‚СЂРёРєРё РїРѕ СЃРїРёСЃРєСѓ СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ Р·Р° РєРѕРЅРєСЂРµС‚РЅС‹Р№ РїРµСЂРёРѕРґ Рё С‚РёРї
+function aggByEmployees(aggType, period, empNames, fields, mapKey='employee') {
+  const kind = period.kind === 'month' ? 'by_month' : 'by_week';
+  const src = DATA[aggType][kind][period.key];
+  if (!src) return null;
+  const set = new Set(empNames);
+  const out = {};
+  for (const f of fields) out[f] = 0;
+  const byService = {};
+  const byServiceEq = {};
+  for (const [name, m] of Object.entries(src[mapKey] || {})) {
+    if (!set.has(name)) continue;
+    for (const f of fields) out[f] += (m[f] || 0);
+    if (aggType === 'closed') {
+      for (const [s, c] of Object.entries(m.by_service || {})) byService[s] = (byService[s] || 0) + c;
+      for (const [s, c] of Object.entries(m.by_service_equip || {})) byServiceEq[s] = (byServiceEq[s] || 0) + c;
+    }
+  }
+  if (aggType === 'closed') { out.by_service = byService; out.by_service_equip = byServiceEq; }
+  return out;
+}
+
+function regMetrics(period, empNames) {
+  const m = aggByEmployees('registered', period, empNames, [
+    'n_total','n_base_all','n_stayed_base','n_transferred','n_repeat',
+    'n_sla_acc_viol','n_sla_cont_viol',
+    'n_connected_stayed_from_period','nd_sum_from_period',
+    'n_month_conv_primary_total','n_month_conv_primary_connected',
+    'n_month_conv_exec_total','n_month_conv_exec_connected',
+    'n_month_conv_clean_connected',
+    'n_conv_exec_total','n_conv_exec_connected',
+    'n_conv_primary_total','n_conv_primary_connected',
+    'n_conv_clean_connected',
+  ]);
+  if (!m) return null;
+  const mExec = aggByEmployees('registered', period, empNames, [
+    'n_month_conv_exec_total','n_month_conv_exec_connected',
+    'n_conv_exec_total','n_conv_exec_connected',
+  ], 'employee_exec') || {};
+  m.transfer_rate = m.n_total ? 100 * m.n_transferred / m.n_total : 0;
+  m.repeat_pct = m.n_total ? 100 * (m.n_repeat || 0) / m.n_total : 0;
+  m.sla_acc_rate = m.n_total ? 100 * m.n_sla_acc_viol / m.n_total : 0;
+  m.sla_cont_rate = m.n_total ? 100 * m.n_sla_cont_viol / m.n_total : 0;
+  // Same logic for weeks and months; the only difference is aggregation bucket (by_week vs by_month).
+  m.conv_clean = (m.n_conv_primary_total || 0) ? 100 * (m.n_conv_clean_connected || 0) / m.n_conv_primary_total : 0;
+  m.conv_regular = (mExec.n_conv_exec_total || 0) ? 100 * (mExec.n_conv_exec_connected || 0) / mExec.n_conv_exec_total : 0;
+  m.conv_exec_pct = m.conv_regular || 0;
+  m.conv_primary_pct = m.conv_clean || 0;
+  return m;
+}
+
+function closedMetrics(period, empNames) {
+  const m = aggByEmployees('closed', period, empNames, [
+    'n_closed','n_connected','n_with_equip','nd_sum',
+    'n_secondary','n_ultra_cheap'
+  ]);
+  if (!m) return null;
+  m.close_conv = m.n_closed ? 100 * m.n_connected / m.n_closed : 0;
+  m.equip_share = m.n_connected ? 100 * m.n_with_equip / m.n_connected : 0;
+  // Cross-sell вЂ” РРќРќ СѓРЅРёРєР°Р»СЊРЅС‹, РїСЂРѕСЃС‚РѕРµ СЃСѓРјРјРёСЂРѕРІР°РЅРёРµ РїРѕ СЃРѕС‚СЂСѓРґРЅРёРєР°Рј РјРѕР¶РµС‚ РїРµСЂРµРѕС†РµРЅРёС‚СЊ РїСЂРё РјСѓР»СЊС‚Рё-СЃРѕС‚СЂСѓРґРЅРёС‡РµСЃС‚РІРµ,
+  // РїРѕСЌС‚РѕРјСѓ РїСЂРё РјРѕРЅРѕС„РёР»СЊС‚СЂРµ Р±РµСЂС‘Рј scope-bucket РЅР°РїСЂСЏРјСѓСЋ.
+  const scope = bestScopeBucket('closed', period);
+  if (scope) {
+    m.n_inn_connected = scope.n_inn_connected || 0;
+    m.n_inn_multi = scope.n_inn_multi || 0;
+    m.crossell_pct = scope.crossell_pct || 0;
+    m.n_secondary = scope.n_secondary || 0;
+    m.n_ultra_cheap = scope.n_ultra_cheap || 0;
+    m.fraud_pct = scope.fraud_pct || 0;
+  } else {
+    // Р¤РѕР»Р»Р±РµРє: СЃСѓРјРјРёСЂСѓРµРј РїРѕ СЃРѕС‚СЂСѓРґРЅРёРєР°Рј (РєРѕСЂСЂРµРєС‚РЅРѕ РґР»СЏ secondary, РІРµСЂС…РЅСЏСЏ РѕС†РµРЅРєР° РґР»СЏ inn_* вЂ” РєР°Р¶РґС‹Р№ РРќРќ РІ СЃРєРѕРїРµ СЃРѕС‚СЂСѓРґРЅРёРєР° СѓРЅРёРєР°Р»РµРЅ,
+    // РЅРѕ РѕРґРёРЅ РРќРќ РјРѕР¶РµС‚ РїРѕРґРєР»СЋС‡Р°С‚СЊСЃСЏ СЂР°Р·РЅС‹РјРё СЃРѕС‚СЂСѓРґРЅРёРєР°РјРё РєРѕРјР°РЅРґС‹)
+    const empSum = aggByEmployees('closed', period, empNames, ['n_inn_connected','n_inn_multi']);
+    m.n_inn_connected = empSum?.n_inn_connected || 0;
+    m.n_inn_multi = empSum?.n_inn_multi || 0;
+    m.crossell_pct = m.n_inn_connected ? 100 * m.n_inn_multi / m.n_inn_connected : 0;
+    m.fraud_pct = m.n_secondary ? 100 * m.n_ultra_cheap / m.n_secondary : 0;
+  }
+  return m;
+}
+
+// Р’РѕР·РІСЂР°С‰Р°РµС‚ scope-СѓСЂРѕРІРЅРµРІС‹Р№ bucket closed-РјРµС‚СЂРёРє, РµСЃР»Рё Р°РєС‚РёРІРЅС‹Р№ РЅР°Р±РѕСЂ С„РёР»СЊС‚СЂРѕРІ
+// СЂРѕРІРЅРѕ СЃРѕРІРїР°РґР°РµС‚ СЃ РѕРґРЅРѕР№ РёР· РѕСЃРµР№ (direction / director / teamlead / total Р±РµР· С„РёР»СЊС‚СЂРѕРІ).
+// Р­С‚Рѕ РїРѕР·РІРѕР»СЏРµС‚ РёР·Р±РµР¶Р°С‚СЊ СЃСѓРјРј РїРѕ СЃРѕС‚СЂСѓРґРЅРёРєР°Рј РґР»СЏ СѓРЅРёРєР°Р»СЊРЅС‹С… РРќРќ.
+function bestScopeBucket(aggType, period) {
+  const f = currentFilters();
+  const kind = period.kind === 'month' ? 'by_month' : 'by_week';
+  const per = DATA[aggType][kind][period.key];
+  if (!per) return null;
+  const has = (x) => !!x;
+  const cnt = [f.direction, f.mrf, f.director, f.teamlead].filter(has).length;
+  if (cnt === 0) return per.total?.all || null;
+  if (cnt === 1 && f.teamlead) return per.teamlead?.[f.teamlead] || null;
+  if (cnt === 1 && f.director) return per.director?.[f.director] || null;
+  if (cnt === 1 && f.direction) return per.direction?.[f.direction] || null;
+  return null; // mrf РёР»Рё РєРѕРјР±РёРЅР°С†РёСЏ вЂ” СЃС‡РёС‚Р°РµРј РёР· employee-СЃРєРѕРїР°
+}
+
+// РђРіСЂРµРіР°С†РёСЏ РїРѕ РѕС‚РєСЂС‹С‚С‹Рј Р·Р°СЏРІРєР°Рј РґР»СЏ СЃРїРёСЃРєР° СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ
+function openMetrics(empNames) {
+  const set = new Set(empNames);
+  let n_open = 0, n_stale = 0;
+  const by_week = {}, stale_by_week = {};
+  const per_emp = [];
+  for (const [name, r] of Object.entries(DATA.open.employee || {})) {
+    if (!set.has(name)) continue;
+    n_open += r.n_open; n_stale += r.n_stale30;
+    for (const [w, c] of Object.entries(r.by_week || {})) by_week[w] = (by_week[w] || 0) + c;
+    for (const [w, c] of Object.entries(r.stale_by_week || {})) stale_by_week[w] = (stale_by_week[w] || 0) + c;
+    per_emp.push({ name, ...r });
+  }
+  return {
+    n_open, n_stale,
+    stale_rate: n_open ? 100 * n_stale / n_open : 0,
+    by_week, stale_by_week, per_emp,
+  };
+}
+
+// ==================== RENDER ====================
+function renderHeader() {
+  const m = DATA.meta;
+  document.getElementById('hdr-from').textContent = m.data_from ? m.data_from.slice(0,10) : 'вЂ”';
+  document.getElementById('hdr-to').textContent = m.data_to ? m.data_to.slice(0,10) : 'вЂ”';
+  document.getElementById('hdr-rows').textContent = fmtInt(m.n_rows_total);
+  document.getElementById('hdr-build').textContent = BUILD_TIME;
+}
+
+// --------- Main tab ---------
+function renderMain() {
+  const period = activeTl();
+  const prev = prevTl();
+  const emps = filteredEmployees();
+  const empNames = emps.map(e => e.name);
+
+  // РњРµС‚СЂРёРєРё С‚РµРєСѓС‰РµРіРѕ РїРµСЂРёРѕРґР°
+  const r = regMetrics(period, empNames) || {};
+  const c = closedMetrics(period, empNames) || {};
+  const op = openMetrics(empNames);
+
+  // РњРµС‚СЂРёРєРё РїСЂРµРґС‹РґСѓС‰РµРіРѕ РїРµСЂРёРѕРґР°
+  const rPrev = prev ? (regMetrics(prev, empNames) || {}) : null;
+  const cPrev = prev ? (closedMetrics(prev, empNames) || {}) : null;
+
+  // РќР°РіСЂСѓР·РєР° = n_total / С‡РёСЃР»Рѕ СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ СЃ >=1 Р·Р°СЏРІРєРѕР№ РІ РїРµСЂРёРѕРґРµ
+  const kind = period.kind === 'month' ? 'by_month' : 'by_week';
+  const curActive = empNames.filter(n => (DATA.registered[kind][period.key]?.employee?.[n]?.n_total || 0) > 0).length || 1;
+  const prevActive = prev ? (empNames.filter(n => (DATA.registered[prev.kind === 'month' ? 'by_month' : 'by_week'][prev.key]?.employee?.[n]?.n_total || 0) > 0).length || 1) : 1;
+  const curLoad = (r.n_total || 0) / curActive;
+  const prevLoad = rPrev ? ((rPrev.n_total || 0) / prevActive) : null;
+
+  // РђР›РЃР РўР«
+  renderAlerts(emps, period, r, c, op);
+
+  // Р›РР”РР РЈР®Р©РР• (leading)
+  const leading = [
+    { lbl: 'Р—Р°СЏРІРѕРє (СЂРµРіРёСЃС‚СЂР°С†РёСЏ)', cur: r.n_total, prev: rPrev?.n_total, fmt: fmtInt, metric: 'n_total' },
+    { lbl: 'SLA РїСЂРёРЅСЏС‚РёСЏ, РЅР°СЂСѓС€.', cur: r.sla_acc_rate, prev: rPrev?.sla_acc_rate, fmt: v=>fmtPct(v,1), metric: 'sla_acc_rate', kind:'pp' },
+    { lbl: 'РџРµСЂРµРґР°С‡Рё %', cur: r.transfer_rate, prev: rPrev?.transfer_rate, fmt: v=>fmtPct(v,1), metric: 'transfer_rate', kind:'pp' },
+    { lbl: 'РџРѕРІС‚РѕСЂ %', cur: r.repeat_pct, prev: rPrev?.repeat_pct, fmt: v=>fmtPct(v,1), metric: 'repeat_pct', kind:'pp' },
+    { lbl: 'Конв. обыч., %', cur: r.conv_exec_pct, prev: rPrev?.conv_exec_pct, fmt: v=>fmtPct(v,1), metric: 'conv_exec_pct', kind:'pp' },
+    { lbl: 'Конв. чист., %', cur: r.conv_primary_pct, prev: rPrev?.conv_primary_pct, fmt: v=>fmtPct(v,1), metric: 'conv_primary_pct', kind:'pp' },
+    { lbl: 'РќР°РіСЂСѓР·РєР°/СЃРѕС‚СЂ.', cur: curLoad, prev: prevLoad, fmt: v=>v==null?'вЂ”':v.toFixed(1), metric: 'load', kind:'abs' },
+  ];
+  document.getElementById('kpi-leading').innerHTML = leading.map(k => renderKpi(k, period.key)).join('');
+
+  // РћРўРЎРўРђР®Р©РР• (lagging)
+  const lagging = [
+    { lbl: 'РџРѕРґРєР»СЋС‡РµРЅРёР№ (Р·Р°РєСЂС‹С‚РёСЏ)', cur: c.n_connected, prev: cPrev?.n_connected, fmt: fmtInt, metric: 'n_connected' },
+    { lbl: 'РќР” Р·Р°РєСЂС‹С‚С‹С…', cur: c.nd_sum, prev: cPrev?.nd_sum, fmt: fmtMoney, metric: 'nd_sum', sub: v => fmtMoneyFull(v), kind:'money' },
+    { lbl: 'Close %', cur: c.close_conv, prev: cPrev?.close_conv, fmt: v=>fmtPct(v,2), metric: 'close_conv', kind:'pp', hint:'РїРѕРґРєР»/Р·Р°РєСЂ РІ РїРµСЂРёРѕРґРµ' },
+    { lbl: 'РЈСЃР»СѓРіРё СЃ РѕР±РѕСЂСѓРґ. %', cur: c.equip_share, prev: cPrev?.equip_share, fmt: v=>fmtPct(v,1), metric: 'equip_share', kind:'pp' },
+    { lbl: 'Допродажи %', cur: c.crossell_pct, prev: cPrev?.crossell_pct, fmt: v=>fmtPct(v,1), metric: 'crossell_pct', kind:'pp',
+      sub: v => `${fmtInt(c.n_inn_multi)} из ${fmtInt(c.n_inn_connected)} ИНН ≥2 продукта` },
+    { lbl: 'Р¤СЂРѕРґ-СЂРёСЃРє %', cur: c.fraud_pct, prev: cPrev?.fraud_pct, fmt: v=>fmtPct(v,1), metric: 'fraud_pct', kind:'pp',
+      sub: v => `${fmtInt(c.n_ultra_cheap)} РёР· ${fmtInt(c.n_secondary)} 2-С… РїСЂРѕРґСѓРєС‚РѕРІ в‰¤400в‚Ѕ/РјРµСЃ` },
+  ];
+  document.getElementById('kpi-lagging').innerHTML = lagging.map(k => renderKpi(k, period.key)).join('');
+
+  // Sparklines (СЂРёСЃСѓРµРј РїРѕСЃР»Рµ РІСЃС‚Р°РІРєРё РІ DOM)
+  leading.forEach((k, i) => drawSparkline(`spark-leading-${i}`, k.metric, 'registered', empNames));
+  lagging.forEach((k, i) => drawSparkline(`spark-lagging-${i}`, k.metric, 'closed', empNames));
+
+  // РљРћР“РћР РўР«
+  renderCohort(period, empNames);
+
+  // Р“Р РђР¤РРљР
+  renderDynamicChart(empNames);
+  renderConvChart(empNames);
+
+  // РўР°Р±Р»РёС†Р° РїРѕ РЅР°РїСЂР°РІР»РµРЅРёСЏРј
+  renderDirTable(period, prev, empNames);
+  document.getElementById('dir-sub').textContent =
+    `РїРµСЂРёРѕРґ: ${period.label_full || period.label} В· СЃСЂР°РІРЅРµРЅРёРµ: ${prev ? (prev.label_full || prev.label) : 'вЂ”'}`;
+}
+
+function renderKpi(k, pkey) {
+  const d = (k.prev == null) ? null : (k.cur - k.prev);
+  const sign = (d == null) ? 'flat' : deltaSign(k.metric, d);
+  const cls = sign === 'flat' ? 'neutral' : (sign.endsWith('good') ? 'good' : 'bad');
+  let arrow = '';
+  if (d != null) {
+    if (k.kind === 'pp') arrow = `${arrowFor(sign)} ${d > 0 ? '+' : ''}${d.toFixed(1)} п.п.`;
+    else if (k.kind === 'money') arrow = `${arrowFor(sign)} ${d > 0 ? '+' : '-'}${fmtMoney(Math.abs(d))}`;
+    else if (k.kind === 'abs') arrow = `${arrowFor(sign)} ${d > 0 ? '+' : ''}${d.toFixed(1)}`;
+    else arrow = `${arrowFor(sign)} ${d > 0 ? '+' : ''}${Math.round(d).toLocaleString('ru-RU')}`;
+  }
+  const subHtml = k.sub ? `<div class="kpi-sub">${k.sub(k.cur)}</div>` : (k.hint ? `<div class="kpi-sub">${k.hint}</div>` : '');
+  const deltaHtml = (k.prev == null) ? '<div class="kpi-delta flat">—</div>' :
+    `<div class="kpi-delta ${sign}">${arrow} <span class="prev">vs ${k.fmt(k.prev)}</span></div>`;
+  // СѓРЅРёРєР°Р»СЊРЅС‹Р№ id РґР»СЏ sparkline
+  const idx = k.lbl.replace(/[^a-zA-Z0-9]/g,'_');
+  const scope = LAGGING_METRICS.has(k.metric) ? 'lagging' : 'leading';
+  const sparkId = `spark-${scope}-${k._idx ?? ''}`;
+  return `<div class="kpi ${cls}">
+    <div class="kpi-label">${k.lbl}</div>
+    <div class="kpi-val">${k.fmt(k.cur)}</div>
+    ${subHtml}
+    ${deltaHtml}
+    <canvas class="kpi-spark" id="spark-${scope}-${k.metric}" width="180" height="28"></canvas>
+  </div>`;
+}
+
+// РћС‚СЂРёСЃРѕРІРєР° sparkline РїРѕ РїРѕСЃР»РµРґРЅРёРј 12 РЅРµРґРµР»СЏРј
+function drawSparkline(canvasId, metric, aggType, empNames) {
+  // Canvas id: spark-<scope>-<metric>
+  const id = `spark-${aggType === 'closed' ? 'lagging' : 'leading'}-${metric}`;
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const weeks = DATA.weeks.slice(-12);
+  const data = weeks.map(w => {
+    const per = { key: w.key, kind: 'week' };
+    if (metric === 'load') {
+      const r = regMetrics(per, empNames);
+      const act = empNames.filter(n => (DATA.registered.by_week[w.key]?.employee?.[n]?.n_total || 0) > 0).length || 1;
+      return r ? (r.n_total || 0) / act : 0;
+    }
+    if (aggType === 'registered') {
+      const r = regMetrics(per, empNames);
+      return r ? (r[metric] || 0) : 0;
+    } else {
+      const c = closedMetrics(per, empNames);
+      return c ? (c[metric] || 0) : 0;
+    }
+  });
+  const sparkKey = `sp-${id}`;
+  if (CHARTS[sparkKey]) CHARTS[sparkKey].destroy();
+  CHARTS[sparkKey] = new Chart(canvas, {
+    type: 'line',
+    data: { labels: weeks.map(w => w.label), datasets: [{
+      data, borderColor: '#64748b', backgroundColor: 'rgba(100,116,139,0.1)',
+      fill: true, borderWidth: 1.5, pointRadius: 0, tension: 0.3,
+    }]},
+    options: {
+      responsive: false, maintainAspectRatio: false, animation: false,
+      plugins: { legend: {display:false}, tooltip: {enabled:false} },
+      scales: { x: { display: false }, y: { display: false, beginAtZero: true } },
+    }
+  });
+}
+
+function renderAlerts(emps, period, r, c, op) {
+  const host = document.getElementById('main-alerts');
+  const alerts = [];
+  // РџСЂР°РІРёР»Рѕ: РµСЃР»Рё SLA > 60% вЂ” bad
+  if (r.sla_acc_rate > 60) alerts.push({ type:'bad', icon:'🚨', title:'SLA принятия критично', text:`${r.sla_acc_rate.toFixed(1)}% нарушено — плюс-минус 3 из 5 заявок` });
+  else if (r.sla_acc_rate > 45) alerts.push({ type:'warn', icon:'⚠️', title:'SLA принятия высокое', text:`${r.sla_acc_rate.toFixed(1)}% нарушено — рекомендуется перераспределить нагрузку` });
+
+  // Р—Р°СЃС‚СЂСЏРІС€РёРµ
+  if (op.stale_rate > 20) alerts.push({ type:'warn', icon:'⏳', title:'Много застрявших', text:`${op.n_stale} заявок стоят &gt;30 дней (${op.stale_rate.toFixed(1)}% от открытых)` });
+
+  // Close % РїР°РґР°РµС‚
+  const prev = prevTl();
+  if (prev && c.close_conv !== undefined) {
+    const cP = closedMetrics(prev, emps.map(e => e.name));
+    if (cP && cP.close_conv > 0 && c.close_conv > 0) {
+      const dp = c.close_conv - cP.close_conv;
+      if (dp < -5) alerts.push({ type:'warn', icon:'📉', title:'Конверсия закрытий просела', text:`Close %: ${c.close_conv.toFixed(1)}% (-${Math.abs(dp).toFixed(1)} п.п. к предыдущему)` });
+    }
+  }
+
+  // Р¤СЂРѕРґ-РёРЅРґРёРєР°С‚РѕСЂ: РєРѕРјР°РЅРґС‹ СЃ Р°РЅРѕРјР°Р»СЊРЅРѕ Р±РѕР»СЊС€РѕР№ РґРѕР»РµР№ В«СѓР»СЊС‚СЂР°-РґРµС€С‘РІС‹С…В» 2-С… РїСЂРѕРґСѓРєС‚РѕРІ
+  const kindAl = period.kind === 'month' ? 'by_month' : 'by_week';
+  const tlBuckets = (DATA.closed[kindAl][period.key] || {}).teamlead || {};
+  const fraudTeams = [];
+  for (const [tl, b] of Object.entries(tlBuckets)) {
+    if ((b.n_secondary || 0) < 20) continue;
+    if ((b.fraud_pct || 0) >= 15) fraudTeams.push({ tl, pct: b.fraud_pct, cheap: b.n_ultra_cheap, total: b.n_secondary });
+  }
+  fraudTeams.sort((a, b) => b.pct - a.pct);
+  if (fraudTeams.length > 0) {
+    const worst = fraudTeams[0];
+    const type = worst.pct >= 30 ? 'bad' : 'warn';
+    const top = fraudTeams.slice(0, 3).map(x => `${x.tl.split(' ').slice(0,2).join(' ')} (${x.pct.toFixed(0)}%)`).join(', ');
+    alerts.push({ type, icon:'🕵️', title:`Риск накрутки допродаж — ${fraudTeams.length} команд`, text: `${top} — доля 2-х продуктов ≤400₽/мес завышена` });
+  }
+
+  // РўРѕРї-3 РїСЂРѕР±Р»РµРјРЅС‹С… СЃРѕС‚СЂСѓРґРЅРёРєР° РїРѕ SLA
+  const empProbs = [];
+  const kind = period.kind === 'month' ? 'by_month' : 'by_week';
+  const src = DATA.registered[kind][period.key] && DATA.registered[kind][period.key].employee || {};
+  for (const e of emps) {
+    const m = src[e.name];
+    if (!m || m.n_total < 10) continue;
+    if (m.sla_acc_rate > 60) empProbs.push({ name: e.name, sla: m.sla_acc_rate, tot: m.n_total, teamlead: e.teamlead });
+  }
+  empProbs.sort((a,b) => b.sla - a.sla);
+  if (empProbs.length > 0) {
+    const top3 = empProbs.slice(0, 3).map(p => `${p.name.split(' ').slice(0,2).join(' ')} (SLA ${p.sla.toFixed(0)}%)`).join(', ');
+    alerts.push({ type:'warn', icon:'👤', title:`В красной зоне ${empProbs.length} сотрудник(ов)`, text: top3 + (empProbs.length > 3 ? ` и ещё ${empProbs.length-3}` : '') });
+  }
+
+  if (alerts.length === 0) alerts.push({ type:'good', icon:'✅', title:'Всё спокойно', text:'Критичных отклонений не обнаружено' });
+  host.innerHTML = alerts.map(a =>
+    `<div class="alert ${a.type}"><span class="a-icon">${a.icon}</span><span><b class="a-title">${a.title}.</b> ${a.text}</span></div>`
+  ).join('');
+}
+
+function renderCohort(period, empNames) {
+  const host = document.getElementById('cohort-body');
+  // РљРѕРіРѕСЂС‚С‹ С‚РѕР»СЊРєРѕ РґР»СЏ РјРµСЃСЏС‡РЅС‹С… РїРµСЂРёРѕРґРѕРІ (РїРѕ С‚РµРєСѓС‰РµР№ СЂРµР°Р»РёР·Р°С†РёРё ETL)
+  if (period.kind !== 'month') {
+    host.innerHTML = `<div style="color:var(--muted);font-size:13px">РљРѕРіРѕСЂС‚РЅР°СЏ СЂР°Р·Р±РёРІРєР° РґРѕСЃС‚СѓРїРЅР° С‚РѕР»СЊРєРѕ РґР»СЏ РјРµСЃСЏС‡РЅС‹С… РїРµСЂРёРѕРґРѕРІ. РЎРµР№С‡Р°СЃ РІС‹Р±СЂР°РЅР° РЅРµРґРµР»СЏ <b>${period.label}</b>. РљР»РёРєРЅРёС‚Рµ РЅР° РјРµСЃСЏС† РІ РїРѕР»РѕСЃРµ СЃРІРµСЂС…Сѓ, С‡С‚РѕР±С‹ СѓРІРёРґРµС‚СЊ, РёР· РєР°РєРёС… РєРѕРіРѕСЂС‚ Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅРЅС‹С… Р·Р°СЏРІРѕРє СЃР»РѕР¶РёР»СЃСЏ СЂРµР·СѓР»СЊС‚Р°С‚.</div>`;
+    return;
+  }
+  const coh = DATA.cohort.by_month[period.key];
+  if (!coh) { host.innerHTML = '<div style="color:var(--muted)">РЅРµС‚ РґР°РЅРЅС‹С…</div>'; return; }
+  // РЎСѓРјРјРёСЂСѓРµРј С‚РѕР»СЊРєРѕ РїРѕ filtered empNames вЂ” Рє СЃРѕР¶Р°Р»РµРЅРёСЋ, cohort РІ ETL РЅРµ СЂР°Р·Р±РёС‚ РїРѕ СЃРѕС‚СЂСѓРґРЅРёРєР°Рј;
+  // РїРѕРєР°Р¶РµРј РѕР±С‰СѓСЋ РєР°СЂС‚РёРЅСѓ СЃ РїСЂРёРјРµС‡Р°РЅРёРµРј (РµСЃР»Рё С„РёР»СЊС‚СЂС‹ Р°РєС‚РёРІРЅС‹)
+  const f = currentFilters();
+  const hasFilters = f.direction || f.mrf || f.director || f.teamlead;
+
+  const regPeriods = Object.keys(coh).sort();
+  const rows = regPeriods.map(rp => ({ rp, ...coh[rp] }));
+  const total = rows.reduce((s, r) => s + r.n_connected, 0);
+  const totalNd = rows.reduce((s, r) => s + r.nd_sum, 0);
+  if (total === 0) { host.innerHTML = '<div style="color:var(--muted)">РЅРµС‚ Р·Р°РєСЂС‹С‚РёР№</div>'; return; }
+
+  const monthName = (mk) => {
+    const t = DATA.timeline.find(x => x.key === mk);
+    return t ? t.label : mk;
+  };
+  const colors = ['#94a3b8','#60a5fa','#34d399','#fbbf24','#f87171','#a78bfa','#22d3ee','#fb923c'];
+
+  // РљРѕР»РѕРєРѕР»СЊС‡РёРє: РёР· РєР°РєРѕРіРѕ РјРµСЃСЏС†Р° Р±РѕР»СЊС€Рµ РІСЃРµРіРѕ РїСЂРёС€Р»Рѕ
+  const maxRow = rows.reduce((a,b) => a.n_connected > b.n_connected ? a : b);
+  const maxShare = 100 * maxRow.n_connected / total;
+
+  const barSegs = rows.map((r, i) => {
+    const w = 100 * r.n_connected / total;
+    return `<div class="seg" style="flex:${w};background:${colors[i%colors.length]}" title="${monthName(r.rp)}: ${r.n_connected} (${w.toFixed(1)}%)">${w > 8 ? monthName(r.rp) : ''}</div>`;
+  }).join('');
+  const legend = rows.map((r, i) => `<span><span class="dot" style="background:${colors[i%colors.length]}"></span>${monthName(r.rp)}: ${r.n_connected} (${(100*r.n_connected/total).toFixed(1)}%) В· ${fmtMoney(r.nd_sum)}</span>`).join('');
+
+  host.innerHTML = `
+    <div class="cohort-plate">
+      <div class="cohort-text">
+        Р’ РїРµСЂРёРѕРґРµ <b>${period.label}</b> Р·Р°РєСЂС‹Р»РѕСЃСЊ <span class="big">${fmtInt(total)}</span> РїРѕРґРєР»СЋС‡РµРЅРёР№ РЅР° <b>${fmtMoneyFull(totalNd)}</b>.
+        Р“Р»Р°РІРЅР°СЏ РєРѕРіРѕСЂС‚Р° вЂ” <b>${monthName(maxRow.rp)}</b>: ${maxShare.toFixed(0)}% РІСЃРµС… РїРѕРґРєР»СЋС‡РµРЅРёР№ РїСЂРёС€Р»Рё РёР· СЂРµРіРёСЃС‚СЂР°С†РёР№ СЌС‚РѕРіРѕ РїРµСЂРёРѕРґР°.
+        ${hasFilters ? '<br><small style="color:var(--muted)">⚠️ Когорты считаются по всем сотрудникам (без фильтров)</small>' : ''}
+      </div>
+      <div>
+        <div class="cohort-bar">${barSegs}</div>
+        <div class="cohort-legend">${legend}</div>
+      </div>
+    </div>`;
+}
+
+function renderDirTable(period, prev, empNames) {
+  const tbody = document.querySelector('#table-directions tbody');
+  const dirsRaw = (DATA.directions && DATA.directions.length ? DATA.directions : ['НИР','НПП','НСП']);
+  const dirs = dirsRaw.filter(d => String(d || '').trim().toLowerCase() !== 'развитие');
+  const rows = [];
+  for (const d of dirs) {
+    // Р¤РёР»СЊС‚СЂСѓРµРј СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ СЌС‚РѕРіРѕ РЅР°РїСЂР°РІР»РµРЅРёСЏ
+    const empsD = empNames.filter(n => {
+      const e = DATA.employees.find(e => e.name === n);
+      return e && e.direction === d;
+    });
+    if (!empsD.length) continue;
+    const r = regMetrics(period, empsD) || {};
+    const c = closedMetrics(period, empsD) || {};
+    const rP = prev ? (regMetrics(prev, empsD) || {}) : {};
+    const cP = prev ? (closedMetrics(prev, empsD) || {}) : {};
+    rows.push({ name: d, r, c, rP, cP });
+  }
+  tbody.innerHTML = rows.map(row => {
+    const ddelta = (m, prev, metric, fn, kind) => {
+      if (prev == null) return '';
+      const d = m - prev;
+      const sign = deltaSign(metric, d);
+      const str = kind === 'pp' ? (d>0?'+':'') + d.toFixed(1) + ' п.п.'
+                : kind === 'money' ? (d>0?'+':'-') + fmtMoney(Math.abs(d))
+                : (d>0?'+':'') + Math.round(d).toLocaleString('ru-RU');
+      return `<div class="delta-${sign}" style="font-size:10px">${arrowFor(sign)} ${str}</div>`;
+    };
+    return `<tr>
+      <td class="name">${row.name}</td>
+      <td class="num">${fmtInt(row.r.n_total)}${ddelta(row.r.n_total, row.rP.n_total, 'n_total', fmtInt, 'cnt')}</td>
+      <td class="num">${fmtPct(row.r.transfer_rate)}${ddelta(row.r.transfer_rate, row.rP.transfer_rate, 'transfer_rate', null, 'pp')}</td>
+      <td class="num">${fmtPct(row.r.repeat_pct)}${ddelta(row.r.repeat_pct, row.rP.repeat_pct, 'repeat_pct', null, 'pp')}</td>
+      <td class="num">${fmtPct(row.r.sla_acc_rate)}${ddelta(row.r.sla_acc_rate, row.rP.sla_acc_rate, 'sla_acc_rate', null, 'pp')}</td>
+      <td class="num">${fmtInt(row.c.n_connected)}${ddelta(row.c.n_connected, row.cP.n_connected, 'n_connected', fmtInt, 'cnt')}</td>
+      <td class="num">${fmtMoney(row.c.nd_sum)}${ddelta(row.c.nd_sum, row.cP.nd_sum, 'nd_sum', fmtMoney, 'money')}</td>
+      <td class="num">${fmtPct(row.c.close_conv,2)}${ddelta(row.c.close_conv, row.cP.close_conv, 'close_conv', null, 'pp')}</td>
+      <td class="num">${fmtPct(row.c.equip_share)}${ddelta(row.c.equip_share, row.cP.equip_share, 'equip_share', null, 'pp')}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="9" class="empty">РЅРµС‚ РґР°РЅРЅС‹С…</td></tr>';
+}
+
+function renderDynamicChart(empNames) {
+  destroyChart('ch-dynamic');
+  const weeks = DATA.weeks.slice(-12);
+  const labels = weeks.map(w => w.label);
+  const regs = weeks.map(w => { const r = regMetrics({key:w.key, kind:'week'}, empNames); return r ? r.n_total : 0; });
+  const conns = weeks.map(w => { const c = closedMetrics({key:w.key, kind:'week'}, empNames); return c ? c.n_connected : 0; });
+  const sla = weeks.map(w => { const r = regMetrics({key:w.key, kind:'week'}, empNames); return r ? r.sla_acc_rate : 0; });
+  CHARTS['ch-dynamic'] = new Chart(document.getElementById('ch-dynamic'), {
+    data: {
+      labels, datasets: [
+        { type:'bar', label:'Р—Р°СЏРІРѕРє (СЂРµРі.)', data: regs, backgroundColor:'rgba(37,99,235,0.3)', borderColor:'#2563eb', yAxisID:'y', order:3 },
+        { type:'line', label:'РџРѕРґРєР»СЋС‡РµРЅРёР№ (Р·Р°РєСЂ.)', data: conns, borderColor:'#059669', backgroundColor:'#059669', yAxisID:'y', tension:0.25, order:2 },
+        { type:'line', label:'SLA РїСЂРёРЅСЏС‚РёСЏ, РЅР°СЂСѓС€. %', data: sla, borderColor:'#dc2626', backgroundColor:'#dc2626', yAxisID:'y2', tension:0.25, order:1 },
+      ]
+    },
+    options: chartOpts({ y:{pos:'left'}, y2:{pos:'right', pct:true} })
+  });
+}
+function renderConvChart(empNames) {
+  destroyChart('ch-conv');
+  const weeks = DATA.weeks.slice(-12);
+  const labels = weeks.map(w => w.label);
+  const nd = weeks.map(w => { const c = closedMetrics({key:w.key, kind:'week'}, empNames); return c ? c.nd_sum/1000 : 0; });
+  const conv = weeks.map(w => { const r = regMetrics({key:w.key, kind:'week'}, empNames); return r ? r.conv_clean : 0; });
+  CHARTS['ch-conv'] = new Chart(document.getElementById('ch-conv'), {
+    data: {
+      labels, datasets: [
+        { type:'bar', label:'РќР” Р·Р°РєСЂС‹С‚С‹С…, С‚С‹СЃ в‚Ѕ', data: nd, backgroundColor:'rgba(217,119,6,0.3)', borderColor:'#d97706', yAxisID:'y', order:2 },
+        { type:'line', label:'РљРѕРЅРІ. РєРѕРіРѕСЂС‚С‹ (clean) %', data: conv, borderColor:'#2563eb', backgroundColor:'#2563eb', yAxisID:'y2', tension:0.25, order:1 },
+      ]
+    },
+    options: chartOpts({ y:{pos:'left', money:true}, y2:{pos:'right', pct:true} })
+  });
+}
+
+function chartOpts(axs) {
+  const scales = {};
+  for (const [id, cfg] of Object.entries(axs)) {
+    scales[id] = {
+      position: cfg.pos || 'left',
+      beginAtZero: true,
+      grid: { display: id === 'y' },
+      ticks: {
+        callback: v => {
+          if (cfg.pct) return v.toFixed(0) + '%';
+          if (cfg.money) return v >= 1000 ? (v/1000).toFixed(0)+'Рњ' : v.toLocaleString('ru-RU');
+          return v.toLocaleString('ru-RU');
+        }
+      }
+    };
+  }
+  return {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { position:'bottom', labels: { font:{size:11}, boxWidth:12 } },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => {
+            let v = ctx.parsed.y; const y = ctx.dataset.yAxisID || 'y'; const cfg = axs[y] || {};
+            let s;
+            if (cfg.pct) s = v.toFixed(2) + '%';
+            else if (cfg.money) s = Math.round(v*1000).toLocaleString('ru-RU') + ' в‚Ѕ';
+            else s = Number.isInteger(v) ? v.toLocaleString('ru-RU') : v.toFixed(2);
+            return ctx.dataset.label + ': ' + s;
+          }
+        }
+      }
+    },
+    scales
+  };
+}
+function destroyChart(id) { if (CHARTS[id]) { CHARTS[id].destroy(); delete CHARTS[id]; } }
+
+// --------- Teams tab ---------
+function renderTeams() {
+  const period = activeTl();
+  const emps = filteredEmployees();
+  const byTeam = {};
+  for (const e of emps) {
+    if (!e.teamlead) continue;
+    if (!byTeam[e.teamlead]) byTeam[e.teamlead] = { tl: e.teamlead, director: e.director, emps: [] };
+    byTeam[e.teamlead].emps.push(e.name);
+  }
+  const rows = Object.values(byTeam).map(t => {
+    const r = regMetrics(period, t.emps) || {};
+    const c = closedMetrics(period, t.emps) || {};
+    const kind = period.kind === 'month' ? 'by_month' : 'by_week';
+    const active = t.emps.filter(n => (DATA.registered[kind][period.key]?.employee?.[n]?.n_total || 0) > 0).length || 1;
+    // Р”Р»СЏ РєРѕРјР°РЅРґС‹ Р±РµСЂС‘Рј scope-bucket С‚РёРјР»РёРґР° РЅР°РїСЂСЏРјСѓСЋ (СѓРЅРёРєР°Р»СЊРЅС‹Рµ РРќРќ РЅРµ Р·Р°РґРІР°РёРІР°СЋС‚СЃСЏ)
+    const tlBucket = DATA.closed[kind][period.key]?.teamlead?.[t.tl] || {};
+    return {
+      name: t.tl, director: t.director || 'вЂ”',
+      emp_cnt: t.emps.length,
+      n_total: r.n_total || 0,
+      sla_acc_rate: r.sla_acc_rate || 0,
+      transfer_rate: r.transfer_rate || 0,
+      repeat_pct: r.repeat_pct || 0,
+      conv_exec_pct: r.conv_exec_pct || 0,
+      conv_primary_pct: r.conv_primary_pct || 0,
+      load: (r.n_total || 0) / active,
+      n_connected: c.n_connected || 0,
+      nd_sum: c.nd_sum || 0,
+      close_conv: c.close_conv || 0,
+      // Cross-sell + С„СЂРѕРґ РёР· teamlead-Р±Р°РєРµС‚Р°
+      crossell_pct: tlBucket.crossell_pct || 0,
+      fraud_pct: tlBucket.fraud_pct || 0,
+      n_inn_connected: tlBucket.n_inn_connected || 0,
+      n_inn_multi: tlBucket.n_inn_multi || 0,
+      n_secondary: tlBucket.n_secondary || 0,
+      n_ultra_cheap: tlBucket.n_ultra_cheap || 0,
+      emps: t.emps,
+    };
+  });
+  rows.sort((a, b) => b.nd_sum - a.nd_sum);
+
+  const tbody = document.querySelector('#table-teams tbody');
+  tbody.innerHTML = rows.map((r, i) => `<tr data-idx="${i}">
+    <td class="name">${r.name}</td>
+    <td>${r.director}</td>
+    <td class="num">${r.emp_cnt}</td>
+    <td class="num">${fmtInt(r.n_total)}</td>
+    <td class="num">${pillPct(r.sla_acc_rate, [40, 60], true)}</td>
+    <td class="num">${pillPct(r.transfer_rate, [25, 40], true)}</td>
+    <td class="num">${pillPct(r.repeat_pct, [6, 10], true)}</td>
+    <td class="num">${pillPct(r.conv_exec_pct, [10, 15], false, 1)}</td>
+    <td class="num">${pillPct(r.conv_primary_pct, [10, 15], false, 1)}</td>
+    <td class="num mono">${r.load.toFixed(1)}</td>
+    <td class="num">${fmtInt(r.n_connected)}</td>
+    <td class="num">${fmtMoney(r.nd_sum)}</td>
+    <td class="num">${pillPct(r.close_conv, [10, 20], false, 2)}</td>
+    <td class="num" title="${fmtInt(r.n_inn_multi)} РёР· ${fmtInt(r.n_inn_connected)} СѓРЅРёРє. РРќРќ">${pillPct(r.crossell_pct, [3, 6], false, 1)}</td>
+    <td class="num" title="${fmtInt(r.n_ultra_cheap)} РёР· ${fmtInt(r.n_secondary)} 2-С… РїСЂРѕРґСѓРєС‚РѕРІ в‰¤400в‚Ѕ/РјРµСЃ">${pillPct(r.fraud_pct, [15, 30], true, 1)}</td>
+    <td class="spark"><canvas id="tspark-${i}" width="120" height="28"></canvas></td>
+  </tr>`).join('') || '<tr><td colspan="16" class="empty">РЅРµС‚ РґР°РЅРЅС‹С…</td></tr>';
+
+  // Sparklines РґР»СЏ РєРѕРјР°РЅРґ вЂ” С‚СЂРµРЅРґ РїРѕРґРєР»СЋС‡РµРЅРёР№ (12 РЅРµРґРµР»СЊ)
+  rows.forEach((r, i) => {
+    const weeks = DATA.weeks.slice(-12);
+    const data = weeks.map(w => { const cc = closedMetrics({key:w.key, kind:'week'}, r.emps); return cc ? cc.n_connected : 0; });
+    const canvas = document.getElementById(`tspark-${i}`);
+    if (canvas) {
+      if (CHARTS['tsp-'+i]) CHARTS['tsp-'+i].destroy();
+      CHARTS['tsp-'+i] = new Chart(canvas, {
+        type: 'line',
+        data: { labels: weeks.map(_=>''), datasets: [{ data, borderColor:'#059669', backgroundColor:'rgba(5,150,105,0.15)', fill:true, borderWidth:1.5, pointRadius:0, tension:0.3 }]},
+        options: { responsive:false, plugins:{legend:{display:false},tooltip:{enabled:false}}, scales:{x:{display:false},y:{display:false,beginAtZero:true}} }
+      });
+    }
+  });
+
+  document.getElementById('teams-sub').textContent =
+    `РїРµСЂРёРѕРґ: ${period.label_full || period.label} В· РєРѕРјР°РЅРґ: ${rows.length}`;
+  enableSort('table-teams', rows, (sorted) => {
+    const tbody = document.querySelector('#table-teams tbody');
+    tbody.innerHTML = sorted.map((r, i) => tbody.querySelector(`tr[data-idx="${rows.indexOf(r)}"]`)?.outerHTML || '').join('');
+  });
+}
+
+// --------- Employees tab ---------
+function renderEmployees() {
+  const period = activeTl();
+  const emps = filteredEmployees();
+  const kind = period.kind === 'month' ? 'by_month' : 'by_week';
+  const srcReg = DATA.registered[kind][period.key]?.employee || {};
+  const srcRegExec = DATA.registered[kind][period.key]?.employee_exec || {};
+  const srcCl = DATA.closed[kind][period.key]?.employee || {};
+  const allRows = emps.map(e => {
+    const r = srcReg[e.name] || {};
+    const rExec = srcRegExec[e.name] || {};
+    const c = srcCl[e.name] || {};
+    const op = DATA.open.employee[e.name] || {};
+    const denomClean = (r.n_conv_primary_total || 0);
+    const numClean = (r.n_conv_clean_connected || 0);
+    const convCleanV2 = denomClean ? 100 * numClean / denomClean : 0;
+    return {
+      name: e.name,
+      teamlead: e.teamlead || 'вЂ”',
+      mrf: e.mrf || 'вЂ”',
+      n_total: r.n_total || 0,
+      n_conv_exec_total: rExec.n_conv_exec_total || 0,
+      sla_acc_rate: r.sla_acc_rate || 0,
+      transfer_rate: r.transfer_rate || 0,
+      repeat_pct: r.repeat_pct || 0,
+      conv_exec_pct: rExec.conv_exec_pct || 0,
+      conv_primary_pct: convCleanV2 || 0,
+      n_connected: c.n_connected || 0,
+      n_conv_exec_connected: rExec.n_conv_exec_connected || 0,
+      nd_sum: c.nd_sum || 0,
+      equip_share: c.equip_share || 0,
+      crossell_pct: c.crossell_pct || 0,
+      fraud_pct: c.fraud_pct || 0,
+      n_inn_connected: c.n_inn_connected || 0,
+      n_inn_multi: c.n_inn_multi || 0,
+      n_secondary: c.n_secondary || 0,
+      n_ultra_cheap: c.n_ultra_cheap || 0,
+    };
+  }).filter(r => r.n_total > 0 || r.n_connected > 0);
+  const unknownCount = allRows.filter(isUnknownEmployeeRow).length;
+  const rows = STATE.hideUnknownEmployees ? allRows.filter(r => !isUnknownEmployeeRow(r)) : allRows;
+  rows.sort((a, b) => b.n_conv_exec_total - a.n_conv_exec_total);
+  const table = document.getElementById('table-emp');
+  const tbody = table?.querySelector('tbody');
+
+  const renderBody = (list) => {
+    if (!tbody) return;
+    tbody.innerHTML = list.map(r => `<tr>
+      <td class="name">${r.name}</td>
+      <td>${r.teamlead}</td>
+      <td>${r.mrf}</td>
+      <td class="num">${fmtInt(r.n_conv_exec_total)}</td>
+      <td class="num">${pillPct(r.sla_acc_rate, [40, 60], true)}</td>
+      <td class="num">${pillPct(r.transfer_rate, [25, 40], true)}</td>
+      <td class="num">${pillPct(r.repeat_pct, [6, 10], true)}</td>
+      <td class="num">${pillPct(r.conv_exec_pct, [10, 15], false, 1)}</td>
+      <td class="num">${pillPct(r.conv_primary_pct, [10, 15], false, 1)}</td>
+      <td class="num">${fmtInt(r.n_conv_exec_connected)}</td>
+      <td class="num">${fmtMoney(r.nd_sum)}</td>
+      <td class="num">${fmtPct(r.equip_share)}</td>
+      <td class="num" title="${fmtInt(r.n_inn_multi)}/${fmtInt(r.n_inn_connected)} РРќРќ">${r.n_inn_connected ? pillPct(r.crossell_pct, [3, 6], false, 1) : 'вЂ”'}</td>
+      <td class="num" title="${fmtInt(r.n_ultra_cheap)}/${fmtInt(r.n_secondary)} 2-С… в‰¤400в‚Ѕ">${r.n_secondary ? pillPct(r.fraud_pct, [15, 30], true, 1) : 'вЂ”'}</td>
+    </tr>`).join('') || '<tr><td colspan="14" class="empty">РЅРµС‚ РґР°РЅРЅС‹С…</td></tr>';
+  };
+
+  enableSort('table-emp', rows, (sorted) => renderBody(sorted));
+
+  let initial = rows;
+  const ths = table?.querySelectorAll('thead th[data-k]') || [];
+  if (table && table._sortKey) {
+    initial = sortRows(rows, table._sortKey, table._sortDir || 'asc');
+    ths.forEach(t => t.classList.remove('sorted-asc', 'sorted-desc'));
+    const activeTh = table.querySelector(`thead th[data-k="${table._sortKey}"]`);
+    if (activeTh) activeTh.classList.add('sorted-' + (table._sortDir || 'asc'));
+  }
+  renderBody(initial);
+  document.getElementById('emp-sub').textContent =
+    `РїРµСЂРёРѕРґ: ${period.label_full || period.label} В· СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ: ${rows.length}${unknownCount ? ` (без МРФ/ТЛ: ${unknownCount})` : ''}`;
+}
+
+// --------- Open tab ---------
+function renderOpen() {
+  const emps = filteredEmployees();
+  const empNames = emps.map(e => e.name);
+  const op = openMetrics(empNames);
+  const host = document.getElementById('open-kpis');
+  const kpis = [
+    { lbl: 'РћС‚РєСЂС‹С‚С‹С… (СЃРЅСЌРїС€РѕС‚)', cur: op.n_open, prev: null, fmt: fmtInt, metric:'n_open' },
+    { lbl: 'Р—Р°СЃС‚СЂСЏРІС€РёС… &gt;30 РґРЅ.', cur: op.n_stale, prev: null, fmt: fmtInt, metric:'n_stale' },
+    { lbl: '% Р·Р°СЃС‚СЂСЏРІС€РёС…', cur: op.stale_rate, prev: null, fmt: v=>fmtPct(v,1), metric:'stale_rate' },
+    { lbl: 'РЎСЂРµРґРЅРёР№ Р·Р°СЃС‚РѕР№', cur: null, prev: null, fmt: v=>v==null?'вЂ”':v, metric:'' },
+  ];
+  host.innerHTML = kpis.map(k => {
+    const subHtml = k.sub ? `<div class="kpi-sub">${k.sub(k.cur)}</div>` : '';
+    return `<div class="kpi neutral">
+      <div class="kpi-label">${k.lbl}</div>
+      <div class="kpi-val">${k.fmt(k.cur)}</div>
+      ${subHtml}
+    </div>`;
+  }).join('');
+
+  // РћС‚РєСЂС‹С‚С‹Рµ РїРѕ РЅРµРґРµР»Рµ
+  const weeks = DATA.weeks.slice(-16);
+  const labels = weeks.map(w => w.label);
+  const byw = weeks.map(w => op.by_week[w.key] || 0);
+  const staleByw = weeks.map(w => op.stale_by_week[w.key] || 0);
+  destroyChart('ch-open-weeks');
+  CHARTS['ch-open-weeks'] = new Chart(document.getElementById('ch-open-weeks'), {
+    type:'bar',
+    data: { labels, datasets: [
+      { label:'РћС‚РєСЂС‹С‚Рѕ', data: byw, backgroundColor:'rgba(37,99,235,0.5)' },
+      { label:'РР· РЅРёС… Р·Р°СЃС‚СЂСЏР»Рё', data: staleByw, backgroundColor:'rgba(220,38,38,0.7)' },
+    ]},
+    options: { ...chartOpts({y:{pos:'left'}}), scales: { y: { beginAtZero: true, stacked:false }}}
+  });
+
+  // Р—Р°СЃС‚СЂСЏРІС€РёРµ РїРѕ С‚РёРјР»РёРґР°Рј
+  const byTL = {};
+  for (const e of emps) {
+    if (!e.teamlead) continue;
+    const o = DATA.open.employee[e.name];
+    if (!o) continue;
+    byTL[e.teamlead] = (byTL[e.teamlead] || 0) + o.n_stale30;
+  }
+  const tlList = Object.entries(byTL).sort((a,b) => b[1]-a[1]).slice(0, 12);
+  destroyChart('ch-stale-teams');
+  CHARTS['ch-stale-teams'] = new Chart(document.getElementById('ch-stale-teams'), {
+    type:'bar',
+    data: { labels: tlList.map(x => x[0].split(' ').slice(0,2).join(' ')), datasets: [
+      { label:'Р—Р°СЃС‚СЂСЏРІС€РёС… &gt;30 РґРЅ.', data: tlList.map(x => x[1]), backgroundColor:'rgba(220,38,38,0.6)' }
+    ]},
+    options: { ...chartOpts({y:{pos:'left'}}), indexAxis: 'y' }
+  });
+
+  // РўР°Р±Р»РёС†Р° вЂ” СЃРѕС‚СЂСѓРґРЅРёРєРё СЃ Р·Р°СЃС‚СЂСЏРІС€РёРјРё
+  const rows = op.per_emp.filter(p => p.n_stale30 > 0).map(p => {
+    const e = DATA.employees.find(x => x.name === p.name) || {};
+    return {
+      name: p.name, teamlead: e.teamlead || 'вЂ”',
+      n_open: p.n_open, n_stale: p.n_stale30,
+      stale_rate: p.n_open ? 100*p.n_stale30/p.n_open : 0,
+    };
+  }).sort((a,b) => b.n_stale - a.n_stale);
+  const tbody = document.querySelector('#table-stale tbody');
+  tbody.innerHTML = rows.map(r => `<tr>
+    <td class="name">${r.name}</td>
+    <td>${r.teamlead}</td>
+    <td class="num">${fmtInt(r.n_open)}</td>
+    <td class="num"><span class="cell-pill pill-r">${fmtInt(r.n_stale)}</span></td>
+    <td class="num">${fmtPct(r.stale_rate)}</td>
+  </tr>`).join('') || '<tr><td colspan="5" class="empty">Р·Р°СЃС‚СЂСЏРІС€РёС… РЅРµС‚</td></tr>';
+  enableSort('table-stale', rows);
+}
+
+// --------- Services tab ---------
+function renderServices() {
+  const period = activeTl();
+  const prev = prevTl();
+  const emps = filteredEmployees();
+  const empNames = emps.map(e => e.name);
+  const cur = closedMetrics(period, empNames) || { by_service:{}, by_service_equip:{}, n_connected:0 };
+  const prv = prev ? (closedMetrics(prev, empNames) || { by_service:{}, by_service_equip:{}, n_connected:0 }) : null;
+
+  const allServices = new Set([...Object.keys(cur.by_service), ...(prv ? Object.keys(prv.by_service) : [])]);
+  const items = Array.from(allServices).map(s => {
+    const c = cur.by_service[s] || 0;
+    const p = prv ? (prv.by_service[s] || 0) : 0;
+    const eq = cur.by_service_equip[s] || 0;
+    return {
+      service: s, cur: c, prev: p,
+      cur_share: cur.n_connected ? 100*c/cur.n_connected : 0,
+      prev_share: (prv && prv.n_connected) ? 100*p/prv.n_connected : 0,
+      delta: c - p,
+      eq_cur: eq,
+      eq_share: c ? 100*eq/c : 0,
+    };
+  }).sort((a,b) => b.cur - a.cur);
+
+  // РљСЂСѓРіРѕРІР°СЏ РґРёР°РіСЂР°РјРјР° РґРѕР»РµР№
+  const top = items.slice(0, 8);
+  destroyChart('ch-serv-share');
+  CHARTS['ch-serv-share'] = new Chart(document.getElementById('ch-serv-share'), {
+    type:'bar',
+    data: { labels: top.map(x => x.service), datasets: [
+      { label:'РўРµРє. РїРµСЂРёРѕРґ', data: top.map(x => x.cur), backgroundColor:'rgba(37,99,235,0.5)' },
+      { label:'РџСЂРµРґ. РїРµСЂРёРѕРґ', data: top.map(x => x.prev), backgroundColor:'rgba(148,163,184,0.5)' },
+    ]},
+    options: chartOpts({y:{pos:'left'}})
+  });
+  destroyChart('ch-serv-equip');
+  const eqTop = items.filter(x => x.cur > 0).slice(0, 8);
+  CHARTS['ch-serv-equip'] = new Chart(document.getElementById('ch-serv-equip'), {
+    type:'bar',
+    data: { labels: eqTop.map(x => x.service), datasets: [
+      { label:'Р’СЃРµРіРѕ РїРѕРґРєР»СЋС‡РµРЅРёР№', data: eqTop.map(x => x.cur), backgroundColor:'rgba(37,99,235,0.4)' },
+      { label:'РЎ РѕР±РѕСЂСѓРґРѕРІР°РЅРёРµРј', data: eqTop.map(x => x.eq_cur), backgroundColor:'#d97706' },
+    ]},
+    options: chartOpts({y:{pos:'left'}})
+  });
+  document.getElementById('serv-sub').textContent =
+    `РїРµСЂРёРѕРґ: ${period.label_full || period.label} В· СЃСЂР°РІРЅРµРЅРёРµ: ${prev ? (prev.label_full || prev.label) : 'вЂ”'}`;
+
+  const tbody = document.querySelector('#table-services tbody');
+  tbody.innerHTML = items.map(r => {
+    const dsign = deltaSign('n_connected', r.delta);
+    return `<tr>
+      <td class="name">${r.service}</td>
+      <td class="num">${fmtInt(r.cur)}</td>
+      <td class="num">${fmtPct(r.cur_share)}</td>
+      <td class="num">${fmtInt(r.prev)}</td>
+      <td class="num delta-${dsign}">${r.delta>0?'+':''}${r.delta}</td>
+      <td class="num">${fmtInt(r.eq_cur)}</td>
+      <td class="num">${fmtPct(r.eq_share)}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" class="empty">РЅРµС‚ РґР°РЅРЅС‹С…</td></tr>';
+  enableSort('table-services', items);
+}
+
+// --------- Helpers ---------
+function pillPct(v, thresh, inverse, dig=1) {
+  let cls = 'pill-y';
+  if (inverse) {
+    if (v < thresh[0]) cls = 'pill-g';
+    else if (v < thresh[1]) cls = 'pill-y';
+    else cls = 'pill-r';
+  } else {
+    if (v >= thresh[1]) cls = 'pill-g';
+    else if (v >= thresh[0]) cls = 'pill-y';
+    else cls = 'pill-r';
+  }
+  return `<span class="cell-pill ${cls}">${fmtPct(v, dig)}</span>`;
+}
+
+function sortRows(rows, k, dir) {
+  const cur = dir === 'desc' ? 'desc' : 'asc';
+  return [...rows].sort((a, b) => {
+    const av = a?.[k] ?? '';
+    const bv = b?.[k] ?? '';
+    if (typeof av === 'number' && typeof bv === 'number') return cur === 'asc' ? av - bv : bv - av;
+    return cur === 'asc'
+      ? String(av).localeCompare(String(bv), 'ru')
+      : String(bv).localeCompare(String(av), 'ru');
+  });
+}
+
+function enableSort(tableId, rows, onSort) {
+  const table = document.getElementById(tableId);
+  if (!table) return;
+
+  // Allow re-binding data on every render
+  table._sortRows = rows;
+  table._sortOnSort = onSort;
+
+  const ths = table.querySelectorAll('thead th[data-k]');
+  if (!table._sortInit) {
+    table._sortInit = true;
+    ths.forEach(th => {
+      th.addEventListener('click', () => {
+        const k = th.dataset.k;
+        const cur = th.classList.contains('sorted-asc') ? 'desc' : 'asc';
+        table._sortKey = k;
+        table._sortDir = cur;
+
+        ths.forEach(t => t.classList.remove('sorted-asc', 'sorted-desc'));
+        th.classList.add('sorted-' + cur);
+
+        const src = table._sortRows || [];
+        const sorted = sortRows(src, k, cur);
+        const cb = table._sortOnSort;
+        if (cb) cb(sorted, k, cur);
+        else {
+          const curTab = document.querySelector('.tab.active').dataset.tab;
+          if (curTab === 'employees') renderEmployees();
+          else if (curTab === 'services') renderServices();
+          else if (curTab === 'open') renderOpen();
+        }
+      });
+    });
+  }
+}
+
+function _rawMatchesFilters(rr, useExecDims=false) {
+  const f = currentFilters();
+  const dir = useExecDims ? (rr.exec_direction || '') : (rr.direction || '');
+  const mrf = useExecDims ? (rr.exec_mrf || '') : (rr.mrf || '');
+  const dre = useExecDims ? (rr.exec_director || '') : (rr.director || '');
+  const tl = useExecDims ? (rr.exec_teamlead || '') : (rr.teamlead || '');
+  if (f.direction && dir !== f.direction) return false;
+  if (f.mrf && mrf !== f.mrf) return false;
+  if (f.director && dre !== f.director) return false;
+  if (f.teamlead && tl !== f.teamlead) return false;
+  return true;
+}
+
+function ensureRawLoaded() {
+  return new Promise((resolve, reject) => {
+    if (window.DASH_RAW && window.DASH_RAW.rows && window.DASH_RAW.rows.length) return resolve();
+    const src = window.DASH_RAW_SRC || 'udp_daily_dashboard_raw.js';
+
+    // If already loading, just wait.
+    if (window.__RAW_LOADING) {
+      const t0 = Date.now();
+      const tick = () => {
+        if (window.DASH_RAW && window.DASH_RAW.rows && window.DASH_RAW.rows.length) return resolve();
+        if (Date.now() - t0 > 30000) return reject(new Error('timeout'));
+        setTimeout(tick, 250);
+      };
+      tick();
+      return;
+    }
+    window.__RAW_LOADING = true;
+
+    try {
+      const s = document.createElement('script');
+      s.src = src;
+      s.onload = () => {
+        window.__RAW_LOADING = false;
+        if (window.DASH_RAW && window.DASH_RAW.rows && window.DASH_RAW.rows.length) resolve();
+        else reject(new Error('empty raw'));
+      };
+      s.onerror = () => { window.__RAW_LOADING = false; reject(new Error('load error')); };
+      document.head.appendChild(s);
+    } catch (e) {
+      window.__RAW_LOADING = false;
+      reject(e);
+    }
+  });
+}
+
+function _exportRawXLS(rows, filename) {
+  const RAW = getRAW();
+  const header = RAW.headers || [];
+
+  const esc = (v) => {
+    const s = v === null || v === undefined ? '' : String(v);
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  };
+  const td = (v) => `<td>${esc(v)}</td>`;
+  const tr = (cells) => `<tr>${cells.join('')}</tr>`;
+
+  const bodyRows = rows.map(rr => {
+    const vals = rr.v || [];
+    return tr(vals.map(td));
+  }).join('') || tr([`<td colspan="${header.length}">нет данных</td>`]);
+
+  const html = [
+    '<!doctype html>',
+    '<html><head><meta charset="utf-8"></head><body>',
+    '<table border="1">',
+    tr(header.map(h => `<th>${esc(h)}</th>`)),
+    bodyRows,
+    '</table>',
+    '</body></html>',
+  ].join('');
+
+  const blob = new Blob([html], { type:'application/vnd.ms-excel;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `${filename}_${new Date().toISOString().slice(0,10)}.xls`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function exportRawRowsForActiveTab() {
+  const RAW = getRAW();
+  if (!(RAW && RAW.rows && RAW.rows.length)) {
+    ensureRawLoaded().then(() => exportRawRowsForActiveTab()).catch((e) => {
+      alert('RAW-данные не загружены. Убедитесь, что рядом с HTML лежит файл udp_daily_dashboard_raw.js.');
+    });
+    return;
+  }
+  const tab = document.querySelector('.tab.active')?.dataset?.tab || 'main';
+  if (tab === 'main') {
+    alert('Экспорт сырьевых строк доступен только для вкладок, кроме главной.');
+    return;
+  }
+  const period = activeTl();
+  const emps = filteredEmployees();
+  const empSet = new Set(emps.map(e => e.name));
+
+  const periodKey = period.key;
+  const periodKind = period.kind; // 'week' | 'month'
+
+  const out = [];
+  for (const rr of (RAW.rows || [])) {
+    if (tab === 'open') {
+      if (!_rawMatchesFilters(rr, false)) continue;
+      if (rr.has_final) continue;
+      if (!empSet.has(rr.employee)) continue;
+      out.push(rr);
+      continue;
+    }
+
+    if (tab === 'services') {
+      if (!_rawMatchesFilters(rr, false)) continue;
+      if (!rr.has_final) continue;
+      if (!rr.connected) continue;
+      if (!empSet.has(rr.employee)) continue;
+      if (periodKind === 'month') { if (rr.cl_m !== periodKey) continue; }
+      else { if (rr.cl_w !== periodKey) continue; }
+      out.push(rr);
+      continue;
+    }
+
+    if (tab === 'teams' || tab === 'employees') {
+      const inRegPeriod = periodKind === 'month' ? (rr.reg_m === periodKey) : (rr.reg_w === periodKey);
+      const inClPeriod = periodKind === 'month' ? (rr.cl_m === periodKey) : (rr.cl_w === periodKey);
+
+      const regHitPrimary = inRegPeriod && empSet.has(rr.employee) && _rawMatchesFilters(rr, false);
+      const regHitExec = inRegPeriod && empSet.has(rr.employee_exec) && _rawMatchesFilters(rr, true);
+      const regHit = regHitPrimary || regHitExec;
+
+      const clHit = inClPeriod && rr.has_final && empSet.has(rr.employee) && _rawMatchesFilters(rr, false);
+      if (regHit || clHit) out.push(rr);
+      continue;
+    }
+  }
+
+  const fname = `raw_${tab}_${period.key}`;
+  _exportRawXLS(out, fname);
+}
+
+function exportMuzRowsXlsxForActiveTab() {
+  // Export MUZ rows using RAW (no server). Requires dist/udp_daily_dashboard_raw.js next to HTML.
+  const RAW = getRAW();
+  if (!(RAW && RAW.rows && RAW.rows.length)) {
+    ensureRawLoaded().then(() => exportMuzRowsXlsxForActiveTab()).catch(() => {
+      alert('RAW-данные не загружены. Убедись, что рядом с HTML лежит файл udp_daily_dashboard_raw.js.');
+    });
+    return;
+  }
+
+  const tab = document.querySelector('.tab.active')?.dataset?.tab || 'main';
+  if (tab === 'main') {
+    alert('Экспорт заявок доступен только для вкладок: Команды/Сотрудники/Открытые/Услуги.');
+    return;
+  }
+
+  const period = activeTl();
+  let emps = filteredEmployees();
+  if (STATE.hideUnknownEmployees) emps = emps.filter(e => !isUnknownEmployeeRow(e));
+  const empSet = new Set(emps.map(e => e.name));
+
+  const periodKey = period.key;
+  const periodKind = period.kind; // 'week' | 'month'
+
+  const out = [];
+  for (const rr of (RAW.rows || [])) {
+    if (tab === 'open') {
+      if (!_rawMatchesFilters(rr, false)) continue;
+      if (rr.has_final) continue;
+      if (!empSet.has(rr.employee)) continue;
+      out.push(rr);
+      continue;
+    }
+
+    if (tab === 'services') {
+      if (!_rawMatchesFilters(rr, false)) continue;
+      if (!rr.has_final) continue;
+      if (!rr.connected) continue;
+      if (!empSet.has(rr.employee)) continue;
+      if (periodKind === 'month') { if (rr.cl_m !== periodKey) continue; }
+      else { if (rr.cl_w !== periodKey) continue; }
+      out.push(rr);
+      continue;
+    }
+
+    if (tab === 'teams' || tab === 'employees') {
+      const inRegPeriod = periodKind === 'month' ? (rr.reg_m === periodKey) : (rr.reg_w === periodKey);
+      const inClPeriod = periodKind === 'month' ? (rr.cl_m === periodKey) : (rr.cl_w === periodKey);
+
+      const regHitPrimary = inRegPeriod && empSet.has(rr.employee) && _rawMatchesFilters(rr, false);
+      const regHitExec = inRegPeriod && empSet.has(rr.employee_exec) && _rawMatchesFilters(rr, true);
+      const regHit = regHitPrimary || regHitExec;
+
+      const clHit = inClPeriod && rr.has_final && empSet.has(rr.employee) && _rawMatchesFilters(rr, false);
+      if (regHit || clHit) out.push(rr);
+      continue;
+    }
+  }
+
+  const fname = `muz_rows_${tab}_${period.key}`;
+  exportRawRowsToXlsx(out, fname);
+}
+
+function exportRawRowsToXlsx(rows, filename) {
+  const RAW = getRAW();
+  const headers = RAW.headers || [];
+
+  const crc32Table = (() => {
+    const t = new Uint32Array(256);
+    for (let i = 0; i < 256; i++) {
+      let c = i;
+      for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      t[i] = c >>> 0;
+    }
+    return t;
+  })();
+
+  function crc32(bytes) {
+    let c = 0xFFFFFFFF;
+    for (let i = 0; i < bytes.length; i++) c = crc32Table[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  function u16le(v) { return new Uint8Array([v & 0xFF, (v >>> 8) & 0xFF]); }
+  function u32le(v) { return new Uint8Array([v & 0xFF, (v >>> 8) & 0xFF, (v >>> 16) & 0xFF, (v >>> 24) & 0xFF]); }
+  function concat(chunks) {
+    const total = chunks.reduce((s, a) => s + a.length, 0);
+    const out = new Uint8Array(total);
+    let off = 0;
+    for (const a of chunks) { out.set(a, off); off += a.length; }
+    return out;
+  }
+
+  const te = new TextEncoder();
+  const xml = (s) => te.encode(s);
+
+  function escapeXml(s) {
+    return String(s ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+  }
+
+  function colName(n0) {
+    // 0-based column index -> Excel column name
+    let n = n0 + 1;
+    let s = '';
+    while (n > 0) {
+      const r = (n - 1) % 26;
+      s = String.fromCharCode(65 + r) + s;
+      n = Math.floor((n - 1) / 26);
+    }
+    return s;
+  }
+
+  function sheetXml() {
+    const rowsXml = [];
+    const all = [{ v: headers }, ...(rows || [])];
+    for (let r = 0; r < all.length; r++) {
+      const rr = all[r];
+      const vals = (r === 0) ? (rr.v || []) : (rr.v || []);
+      const cells = [];
+      for (let c = 0; c < vals.length; c++) {
+        const ref = `${colName(c)}${r + 1}`;
+        const v = vals[c];
+        // Inline string: simplest + no sharedStrings.xml needed.
+        cells.push(`<c r="${ref}" t="inlineStr"><is><t>${escapeXml(v)}</t></is></c>`);
+      }
+      rowsXml.push(`<row r="${r + 1}">${cells.join('')}</row>`);
+    }
+
+    return `<?xml version="1.0" encoding="UTF-8"?>` +
+      `<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">` +
+      `<sheetData>${rowsXml.join('')}</sheetData>` +
+      `</worksheet>`;
+  }
+
+  const now = new Date();
+  const created = now.toISOString();
+
+  const files = [
+    ['[Content_Types].xml',
+      `<?xml version="1.0" encoding="UTF-8"?>` +
+      `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">` +
+      `<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>` +
+      `<Default Extension="xml" ContentType="application/xml"/>` +
+      `<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>` +
+      `<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>` +
+      `<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>` +
+      `<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>` +
+      `<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>` +
+      `</Types>`
+    ],
+    ['_rels/.rels',
+      `<?xml version="1.0" encoding="UTF-8"?>` +
+      `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">` +
+      `<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>` +
+      `<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>` +
+      `<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>` +
+      `</Relationships>`
+    ],
+    ['docProps/core.xml',
+      `<?xml version="1.0" encoding="UTF-8"?>` +
+      `<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" ` +
+      `xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">` +
+      `<dc:creator>dashboard</dc:creator>` +
+      `<cp:lastModifiedBy>dashboard</cp:lastModifiedBy>` +
+      `<dcterms:created xsi:type="dcterms:W3CDTF">${created}</dcterms:created>` +
+      `<dcterms:modified xsi:type="dcterms:W3CDTF">${created}</dcterms:modified>` +
+      `</cp:coreProperties>`
+    ],
+    ['docProps/app.xml',
+      `<?xml version="1.0" encoding="UTF-8"?>` +
+      `<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" ` +
+      `xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">` +
+      `<Application>dashboard</Application>` +
+      `</Properties>`
+    ],
+    ['xl/workbook.xml',
+      `<?xml version="1.0" encoding="UTF-8"?>` +
+      `<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" ` +
+      `xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">` +
+      `<sheets><sheet name="MUZ" sheetId="1" r:id="rId1"/></sheets>` +
+      `</workbook>`
+    ],
+    ['xl/_rels/workbook.xml.rels',
+      `<?xml version="1.0" encoding="UTF-8"?>` +
+      `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">` +
+      `<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>` +
+      `<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>` +
+      `</Relationships>`
+    ],
+    ['xl/styles.xml',
+      `<?xml version="1.0" encoding="UTF-8"?>` +
+      `<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">` +
+      `<fonts count="1"><font><sz val="11"/><color theme="1"/><name val="Calibri"/><family val="2"/></font></fonts>` +
+      `<fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills>` +
+      `<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>` +
+      `<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>` +
+      `<cellXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/></cellXfs>` +
+      `<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>` +
+      `</styleSheet>`
+    ],
+    ['xl/worksheets/sheet1.xml', sheetXml()],
+  ];
+
+  function buildZipStore(entries) {
+    const localParts = [];
+    const centralParts = [];
+    let offset = 0;
+    const cdEntries = [];
+
+    for (const [name, contentStr] of entries) {
+      const nameBytes = te.encode(name);
+      const dataBytes = (contentStr instanceof Uint8Array) ? contentStr : te.encode(contentStr);
+      const crc = crc32(dataBytes);
+      const size = dataBytes.length >>> 0;
+
+      const lfh = concat([
+        u32le(0x04034b50),
+        u16le(20),
+        u16le(0),
+        u16le(0),
+        u16le(0),
+        u16le(0),
+        u32le(crc),
+        u32le(size),
+        u32le(size),
+        u16le(nameBytes.length),
+        u16le(0),
+        nameBytes,
+      ]);
+      localParts.push(lfh, dataBytes);
+
+      const cdh = concat([
+        u32le(0x02014b50),
+        u16le(20),
+        u16le(20),
+        u16le(0),
+        u16le(0),
+        u16le(0),
+        u16le(0),
+        u32le(crc),
+        u32le(size),
+        u32le(size),
+        u16le(nameBytes.length),
+        u16le(0),
+        u16le(0),
+        u16le(0),
+        u16le(0),
+        u32le(0),
+        u32le(offset),
+        nameBytes,
+      ]);
+      centralParts.push(cdh);
+      cdEntries.push(cdh);
+
+      offset += lfh.length + dataBytes.length;
+    }
+
+    const cdOffset = offset;
+    const cdData = concat(centralParts);
+    const cdSize = cdData.length;
+
+    const eocd = concat([
+      u32le(0x06054b50),
+      u16le(0),
+      u16le(0),
+      u16le(entries.length),
+      u16le(entries.length),
+      u32le(cdSize),
+      u32le(cdOffset),
+      u16le(0),
+    ]);
+
+    return concat([...localParts, cdData, eocd]);
+  }
+
+  const zipBytes = buildZipStore(files);
+  const blob = new Blob([zipBytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${filename}_${new Date().toISOString().slice(0,10)}.xlsx`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// ==================== TABS ====================
+function initTabs() {
+  const u = readUrlFilters();
+  if (u.tab && document.querySelector(`.tab[data-tab="${u.tab}"]`)) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelector(`.tab[data-tab="${u.tab}"]`).classList.add('active');
+    document.querySelector(`.tab-content[data-tab="${u.tab}"]`).classList.add('active');
+  }
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      document.querySelector(`.tab-content[data-tab="${t.dataset.tab}"]`).classList.add('active');
+      safeRenderAll(); writeUrlFilters();
+    });
+  });
+}
+
+// ==================== Р“Р›РђР’РќР«Р™ Р”РРЎРџРђРўР§Р•Р  ====================
+function renderAll() {
+  const activeTab = document.querySelector('.tab.active').dataset.tab;
+  if (activeTab === 'main') renderMain();
+  else if (activeTab === 'teams') renderTeams();
+  else if (activeTab === 'employees') renderEmployees();
+  else if (activeTab === 'open') renderOpen();
+  else if (activeTab === 'services') renderServices();
+}
+
+// ==================== Р—РђРџРЈРЎРљ ====================
+function safeRenderAll() {
+  try {
+    renderAll();
+  } catch (e) {
+    console.error(e);
+    const host = document.getElementById('main-alerts') || document.body;
+    const msg = (e && (e.stack || e.message)) ? (e.stack || e.message) : String(e);
+    host.innerHTML = `<div class="alert bad"><b>JS error</b><div style="font-family:ui-monospace,Consolas,monospace;font-size:12px;white-space:pre-wrap;margin-top:6px">${msg}</div></div>`;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderHeader();
+
+  const u = readUrlFilters();
+  // РџРѕ СѓРјРѕР»С‡Р°РЅРёСЋ вЂ” current_week (С‚РµРєСѓС‰Р°СЏ РЅРµРґРµР»СЏ РѕС‚РєСЂС‹С‚РѕРіРѕ РјРµСЃСЏС†Р°)
+  STATE.activePeriod = u.period || DATA.meta.current_week;
+  STATE.hideUnknownEmployees = !!u.hideUnknownEmployees;
+
+  initFilters();
+  renderTimeline();
+  initTabs();
+  syncEmpUnknownToggleUi();
+  const btnUnknown = document.getElementById('btn-emp-hide-unknown');
+  if (btnUnknown) {
+    btnUnknown.addEventListener('click', () => {
+      STATE.hideUnknownEmployees = !STATE.hideUnknownEmployees;
+      syncEmpUnknownToggleUi();
+      safeRenderAll(); writeUrlFilters();
+    });
+  }
+  safeRenderAll();
+});
+</script>
+
+</body>
+</html>
