@@ -1,0 +1,542 @@
+Спецификация расчётов по источнику `combined_project/lm/Заявки+обращения_объединено.xlsx`
+
+Назначение
+Этот документ описывает, как в проекте считаются показатели по источнику `Заявки+обращения_объединено.xlsx`, чтобы другой GPT или другой разработчик мог воспроизвести те же расчёты в своём отчёте.
+
+Главный ETL
+- Основной расчёт выполняет файл `combined_project/scripts/prepare_dashboard_data_combined.py`.
+- Вход:
+  - `combined_project/lm/Заявки+обращения_объединено.xlsx`
+  - `combined_project/muz_to_combined_mapping.txt`
+  - `combined_project/config/employee_hierarchy.xlsx`
+  - `combined_project/config/filter_people.json`
+  - `combined_project/config/combined_source_exclusions.json`
+  - `combined_project/Del/исключаемые заявки и обращения.xlsx`
+- Выход:
+  - `combined_project/data/processed/daily_dashboard_data.json`
+
+Общая идея расчёта
+- Сначала из исходного Excel строится унифицированный набор полей по текстовому маппингу.
+- Затем каждая строка проходит нормализацию, фильтры и превращается в набор флагов.
+- После этого данные агрегируются:
+  - по дате регистрации (`registered`)
+  - по дате итогового статуса/закрытия (`closed`)
+  - по открытым заявкам (`open`)
+  - по дням (`daily`)
+  - по когортам месяц регистрации -> месяц подключения (`cohort`)
+
+1. Построение унифицированных полей
+
+Источник правил
+- Поля собираются функцией `build_fields(...)` из `combined_project/scripts/calc_combined_mapping_fields.py`.
+- Маппинг читается из `combined_project/muz_to_combined_mapping.txt`.
+
+Правило выбора колонок
+- Для каждого поля берётся:
+  - сначала первая колонка-источник из маппинга
+  - если там пусто, вторая
+- Пустыми считаются `None`, `NaN`, пустая строка.
+
+Важные вычисляемые поля
+- `current_status`
+  - если уже собран из маппинга, используется он
+  - иначе берётся из исходной колонки `Статус`
+- `connection_result`
+  - `"да"`, если `current_status == "Услуга подключена"`
+  - иначе пусто
+- `connector_name`
+  - `ФИО исполнителя заявки`, но только если `current_status == "Услуга подключена"`
+  - иначе пусто
+- `final_status`
+  - берётся только если статус входит в множество:
+    - `Услуга подключена`
+    - `Услуга не подключена`
+  - иначе `NULL`
+- `final_dt`
+  - берётся из `Дата, время обновления статуса заявки`, но только если статус итоговый
+- `hrs_since_reg`
+  - вычисляется как `(момент запуска ETL - reg_dt)` в часах
+
+Преобразование типов
+- Даты:
+  - `reg_dt`, `accept_dt`, `transfer_dt`, `final_dt`
+  - парсятся как datetime
+  - поддерживаются строки вида `dd.mm.yyyy HH:MM[:SS]`, возможный хвост с таймзоной отрезается
+- Числа:
+  - `equip_price`, `install_amount`, `monthly_amount`, `connected_services_cnt`
+  - пробелы и неразрывные пробелы убираются
+  - запятая заменяется на точку
+
+Нормализация строк
+- Для строк используется trim.
+- Для некоторых полей также схлопываются повторные пробелы.
+- Для имён сотрудников используется `clean_name(...)`:
+  - отрезается email-хвост, если есть
+  - из строки берутся только буквенные токены
+  - если есть кириллица, приоритет у первых 2-3 кириллических токенов
+
+2. Унифицированные поля и их смысл
+
+Ниже перечислены основные поля, которые реально участвуют в расчётах:
+- `mrf`
+- `region`
+- `reg_dt`
+- `channel`
+- `service`
+- `equip_price`
+- `inn`
+- `segment`
+- `exec_name`
+  - ФИО исполнителя, на кого назначена заявка
+- `exec_podr`
+- `accept_dt`
+- `primary_name`
+  - ФИО сотрудника, принявшего заявку в работу первично
+- `primary_podr`
+- `sla_cont`
+- `sla_acc`
+- `transfer_dt`
+- `connection_result`
+- `connector_name`
+- `connected_services_cnt`
+- `install_amount`
+- `monthly_amount`
+- `final_dt`
+- `final_status`
+- `final_reason`
+- `current_status`
+- `current_exec`
+- `current_podr`
+- `hrs_since_reg`
+- `hrs_in_status`
+
+3. Исключения строк и сотрудников
+
+Исключение строк по реестру
+- Читается файл `combined_project/Del/исключаемые заявки и обращения.xlsx`.
+- Из него берётся колонка `Обращ`.
+- В основном источнике строка исключается, если:
+  - значение `Номер обращения` после нормализации совпало со значением `Обращ` из файла исключений.
+
+Исключение сотрудников
+- Читается `combined_project/config/combined_source_exclusions.json`.
+- Если `primary_name` или `exec_name` совпадает с именем из списка исключений, строка пропускается.
+- Сравнение имён нестрогое:
+  - имена чистятся через `clean_name`
+  - допускается совпадение по началу строки
+  - допускается совпадение по набору токенов
+
+Фильтры по МРФ/тимлидам
+- ETL поддерживает env-фильтры:
+  - `DASH_INCLUDE_MRFS`
+  - `DASH_EXCLUDE_MRFS`
+  - `DASH_INCLUDE_TEAMLEADS`
+  - `DASH_EXCLUDE_TEAMLEADS`
+- Эти фильтры применяются при включении строки в расчёт.
+
+4. Бизнес-правила и служебные функции
+
+Наши каналы
+- Для combined-источника "наши" каналы:
+  - `ЦК РП`
+  - `ГАП`
+  - `ГПО`
+  - `3К`
+  - `ГПХ`
+
+Определения
+- `is_our_channel(current_podr)`:
+  - True, если `current_podr` входит в список наших каналов
+- `is_transferred(current_podr)`:
+  - True, если `current_podr` НЕ входит в список наших каналов
+- `is_base_service(service_lower)`:
+  - True, если услуга не входит в:
+    - `другие услуги`
+    - `другая услуга`
+    - `заказ оборудования`
+- `is_connected(final_status)`:
+  - True, если `final_status == "Услуга подключена"`
+- `is_internet_service(service_lower)`:
+  - True, если строка услуги равна `интернет` или содержит `интернет`
+- `is_sla_violated(value)`:
+  - True, если значение равно `нарушен`
+
+Повторы
+- Строка помечается как повтор по комментарию, если комментарий содержит любую из подстрок:
+  - `повтор`
+  - `срочно`
+  - `эскалац`
+  - `ждёт звонка`
+  - `ждет звонка`
+  - `ждут звонка`
+  - ` ос`
+  - `связаться`
+- Телефон нормализуется удалением всех нецифровых символов.
+
+5. Логика по одной строке
+
+Для каждой строки ETL вычисляет следующие базовые значения:
+- `service = lower(service)`
+- `service_raw = исходное service или "—"`
+- `current_podr = нормализованное current_podr`
+- `_stayed = is_our_channel(current_podr)`
+- `_transferred = is_transferred(current_podr)`
+- `_connected = is_connected(final_status)`
+- `_has_final = bool(final_status)`
+- `final_dt = parse_dt(final_dt)`, если `_has_final`
+- `_in_conv_base = is_base_service(service)`
+- `_sla_acc_viol = is_sla_violated(sla_acc.lower())`
+- `_sla_cont_viol = is_sla_violated(sla_cont.lower())`
+- `equip_price = parse_num(equip_price)`
+- `_with_equip = _connected and equip_price > 0`
+- `inst = parse_num(install_amount)`
+- `mon_ = parse_num(monthly_amount)`
+- `nd_val = inst + mon_`
+- если `nd_val > 1_000_000_000`, то `nd_val = 0`
+- `inn_val = нормализованный inn`
+- `_cross_eligible = bool(inn_val) and _connected`
+- `_is_internet = is_internet_service(service)`
+- `primary_name = clean_name(primary_name)`
+- `exec_name = clean_name(exec_name)`
+- `same_emp = primary_name != "" and primary_name == exec_name`
+
+6. Периоды
+
+Используются два ключа периода:
+- ISO-неделя:
+  - формат `YYYY-Www`
+  - неделя считается от понедельника до воскресенья
+- Месяц:
+  - формат `YYYY-MM`
+
+Периоды строятся отдельно:
+- по дате регистрации `reg_dt`
+- по дате итогового статуса `final_dt`
+
+Для текущего набора данных:
+- `current_week` = ISO-неделя `dates_max`
+- `current_month` = месяц `dates_max`
+- закрытые месяцы:
+  - все месяцы строго меньше `current_month`
+- открытый месяц:
+  - `current_month`
+- открытые недели:
+  - последние 2 недели, пересекающиеся с текущим месяцем и не позже `dates_max`
+
+7. Группировки
+
+Агрегация строится по следующим scope:
+- `total`
+- `direction`
+- `director`
+- `teamlead`
+- `employee`
+- `employee_exec`
+
+Важно:
+- `employee`
+  - в registered-метриках обычно привязан к `primary_name`
+  - в closed-метриках в текущей версии привязан к `exec_name`
+- `employee_exec`
+  - отдельная ось только для `exec_name`, используется в registered-конверсиях
+
+8. Registered-метрики
+
+Registered = агрегация по дате регистрации `reg_dt`.
+
+Счётчики registered
+- `n_total`
+  - количество строк периода
+- `n_base_all`
+  - количество строк, где `_in_conv_base == True`
+- `n_stayed_base`
+  - количество строк, где `_in_conv_base == True` и `_stayed == True`
+- `n_transferred`
+  - количество строк, где `_transferred == True`
+- `n_sla_acc_viol`
+  - количество строк, где `_sla_acc_viol == True`
+- `n_sla_cont_viol`
+  - количество строк, где `_sla_cont_viol == True`
+- `n_connected_stayed_from_period`
+  - количество строк, где `_in_conv_base == True`, `_stayed == True`, `_connected == True`
+- `nd_sum_from_period`
+  - сумма `nd_val` по строкам, где `_in_conv_base == True`, `_stayed == True`, `_connected == True`
+
+Формулы registered-процентов
+- `transfer_rate = 100 * n_transferred / n_total`
+- `sla_acc_rate = 100 * n_sla_acc_viol / n_total`
+- `sla_cont_rate = 100 * n_sla_cont_viol / n_total`
+- `repeat_pct = 100 * n_repeat / n_total`
+
+9. Конверсии registered
+
+Обычная конверсия по exec
+- Для каждого bucket:
+  - `n_conv_exec_total += 1`
+  - если `_connected == True`, то `n_conv_exec_connected += 1`
+- Формула:
+  - `conv_exec_pct = 100 * n_conv_exec_connected / n_conv_exec_total`
+  - в коде также это называется `conv_regular`
+
+Конверсия по primary
+- Для каждого bucket:
+  - `n_conv_primary_total += 1`
+  - если `_connected == True`, то `n_conv_primary_connected += 1`
+- Формула:
+  - `conv_primary_pct = 100 * n_conv_primary_connected / n_conv_primary_total`
+
+Чистая конверсия
+- Использует условие `same_emp == True`, то есть `primary_name == exec_name`.
+- Числитель:
+  - `n_conv_clean_connected`
+  - увеличивается только если `same_emp == True` и `_connected == True`
+- Знаменатель:
+  - `n_conv_primary_total`
+- Формула:
+  - `conv_clean = 100 * n_conv_clean_connected / n_conv_primary_total`
+
+Месячные дополнительные конверсионные счётчики
+- В месячных bucket'ах также считаются:
+  - `n_month_conv_primary_total`
+  - `n_month_conv_primary_connected`
+  - `n_month_conv_exec_total`
+  - `n_month_conv_exec_connected`
+  - `n_month_conv_clean_connected`
+- Они нужны интерфейсу для month-view и считаются на том же наборе строк месяца регистрации.
+
+10. Closed-метрики
+
+Closed = агрегация по дате итогового статуса `final_dt`.
+
+Строка попадает в closed-агрегацию только если:
+- `final_status` не пустой
+- `final_dt` успешно распарсилась
+
+Счётчики closed
+- `n_closed`
+  - количество строк с итоговым статусом в периоде закрытия
+- `n_connected`
+  - количество строк, где `_connected == True`
+- `n_with_equip`
+  - количество строк, где `_connected == True` и `equip_price > 0`
+- `nd_sum`
+  - сумма `nd_val` по строкам, где `_connected == True`
+- `by_service`
+  - количество подключений по каждой услуге
+- `by_service_equip`
+  - количество подключений с оборудованием по каждой услуге
+
+Атрибуция closed на уровне сотрудников
+- В текущей версии closed employee-метрики привязываются к `exec_name`.
+- То есть `nd_sum`, `n_connected`, `n_closed` на уровне `employee` относятся к исполнителю "на кого назначена заявка".
+- Это важный нюанс. Ранее в одной части проекта использовался `primary_name`, но текущая рабочая логика для combined уже переключена на `exec_name`.
+
+Формулы closed-процентов
+- `close_conv = 100 * n_connected / n_closed`
+- `equip_share = 100 * n_with_equip / n_connected`
+
+11. Cross-sell и fraud
+
+Cross-sell eligibility
+- Строка участвует в cross-sell, если:
+  - `inn` не пустой
+  - `_connected == True`
+
+Накопление
+- Для eligible-строки:
+  - в `inn_services[inn]` добавляется `service_raw`
+- Если строка подключена и услуга НЕ интернет:
+  - в список `secondaries` добавляется кортеж:
+    - `(service_raw, monthly_amount, inn)`
+
+Финальные cross-sell метрики
+- `n_inn_connected`
+  - число уникальных ИНН в `inn_services`
+- `n_inn_multi`
+  - число ИНН, у которых количество разных услуг >= 2
+- `crossell_pct = 100 * n_inn_multi / n_inn_connected`
+
+Fraud-метрика
+- `n_secondary`
+  - число элементов списка `secondaries`
+- `n_ultra_cheap`
+  - число secondaries, где `monthly_amount <= 400`
+- `fraud_pct = 100 * n_ultra_cheap / n_secondary`
+
+12. Open-метрики
+
+Open = снимок строк без итогового статуса.
+
+Строка считается open, если:
+- `final_status` пустой
+
+Счётчики open
+- `n_open`
+  - количество открытых строк
+- `n_stale30`
+  - количество открытых строк, где `hrs_in_status > 720`
+- `stale_rate = 100 * n_stale30 / n_open`
+- Также сохраняется разбивка по неделям регистрации:
+  - `by_week`
+  - `stale_by_week`
+
+Open employee-атрибуция
+- На уровне `employee` открытые строки привязываются к `primary_name`.
+
+13. Daily-метрики
+
+По каждому календарному дню:
+- `daily[date].n_total`
+  - число зарегистрированных строк по `reg_dt`
+- `daily[date].n_connected`
+  - число подключённых закрытий по `final_dt`
+- `daily[date].nd_sum`
+  - сумма `nd_val` по подключённым закрытиям по `final_dt`
+
+14. Cohort-метрики
+
+Когорта строится как:
+- строка когорты = месяц регистрации `mkey_reg`
+- столбец когорты = месяц закрытия/подключения `mkey_cl`
+
+Для connected-строк:
+- `n_connected += 1`
+- `nd_sum += nd_val`
+- `n_with_equip += 1`, если `_with_equip == True`
+
+15. Повторные обращения
+
+Алгоритм:
+- Для каждой строки ищется телефон из доступных колонок:
+  - `Номер телефона`
+  - `Номер телефона для связи`
+  - `Обращение.Номер телефона`
+  - `Обращение.Номер телефона для связи`
+- Также ищется комментарий:
+  - `Комментарий к статусу`
+  - `Обращение.Комментарий к статусу`
+  - `Обращение.Комментарий регистратора`
+- Если комментарий содержит repeat-keyword, телефон попадает в список repeat-кандидатов.
+- Одновременно по каждому телефону сохраняется минимальная `reg_dt`.
+- Потом повтор атрибутируется именно на bucket той записи, у которой минимальная `reg_dt` по этому телефону.
+
+Итог
+- `n_repeat` увеличивается в registered-метриках по:
+  - `total`
+  - `director`
+  - `teamlead`
+  - `employee`
+- employee для repeat привязывается к `primary_name`
+
+16. Иерархия сотрудников
+
+Источник
+- `combined_project/config/employee_hierarchy.xlsx`
+
+Что даёт иерархия
+- Для сотрудника подтягиваются:
+  - `teamlead`
+  - `director`
+  - `direction`
+  - `mrf`
+  - `is_active`
+
+Как используется
+- Для `primary_name` и `exec_name` иерархия ищется отдельно.
+- Registered primary-ось использует иерархию `primary_name`.
+- Registered exec-конверсия использует иерархию `exec_name`.
+- Closed employee-ось в текущей версии использует `exec_name`.
+
+17. Список сотрудников в итоговом JSON
+
+Формирование списка `employees`
+- Сначала берутся все сотрудники из иерархии.
+- Флаг `in_data = True`, если имя встретилось в registered employee bucket'ах.
+- Затем добавляются имена, встретившиеся в данных, но отсутствующие в иерархии:
+  - для них `teamlead`, `director`, `direction`, `mrf` пустые
+  - `is_active = True`
+  - `in_data = True`
+
+18. Что именно должен воспроизвести другой GPT
+
+Если цель — полностью повторить расчёты combined-источника, другой GPT должен:
+- Прочитать `Заявки+обращения_объединено.xlsx`.
+- Построить унифицированные поля по логике `muz_to_combined_mapping.txt`.
+- Исключить строки из реестра исключений по `Номер обращения`.
+- Исключить строки по списку сотрудников-исключений.
+- Нормализовать даты, числа, строки, имена.
+- Рассчитать базовые флаги:
+  - stayed
+  - transferred
+  - connected
+  - has_final
+  - with_equip
+  - cross_eligible
+  - is_internet
+  - same_emp
+  - sla_acc_viol
+  - sla_cont_viol
+- Посчитать registered / closed / open / daily / cohort метрики по формулам выше.
+- Для closed employee-метрик использовать `exec_name`.
+- Для registered employee-метрик использовать `primary_name`.
+- Для registered exec-конверсии использовать отдельную ось `employee_exec = exec_name`.
+
+19. Краткий словарь ключевых формул
+
+Строковые флаги
+- `stayed = current_podr in OUR_CHANNELS`
+- `transferred = current_podr not in OUR_CHANNELS`
+- `connected = final_status == "Услуга подключена"`
+- `with_equip = connected and equip_price > 0`
+- `same_emp = primary_name == exec_name and primary_name != ""`
+
+Денежные поля
+- `nd_val = install_amount + monthly_amount`
+- если `nd_val > 1_000_000_000`, то `nd_val = 0`
+
+Registered
+- `transfer_rate = 100 * n_transferred / n_total`
+- `sla_acc_rate = 100 * n_sla_acc_viol / n_total`
+- `sla_cont_rate = 100 * n_sla_cont_viol / n_total`
+- `repeat_pct = 100 * n_repeat / n_total`
+- `conv_exec_pct = 100 * n_conv_exec_connected / n_conv_exec_total`
+- `conv_primary_pct = 100 * n_conv_primary_connected / n_conv_primary_total`
+- `conv_clean = 100 * n_conv_clean_connected / n_conv_primary_total`
+
+Closed
+- `close_conv = 100 * n_connected / n_closed`
+- `equip_share = 100 * n_with_equip / n_connected`
+- `crossell_pct = 100 * n_inn_multi / n_inn_connected`
+- `fraud_pct = 100 * n_ultra_cheap / n_secondary`
+
+20. Критичные нюансы, из-за которых чаще всего не сходятся цифры
+
+- Не забыть исключать строки из `исключаемые заявки и обращения.xlsx`.
+- Не забыть исключать строки по сотрудникам из `combined_source_exclusions.json`.
+- `final_status` считается итоговым только для:
+  - `Услуга подключена`
+  - `Услуга не подключена`
+- `final_dt` существует только для итоговых статусов.
+- `НД` считается как `install_amount + monthly_amount + equip_price`, а не только ежемесячка.
+- `НД` попадает в `closed.nd_sum` только для `connected == True`.
+- Closed employee-метрики должны быть привязаны к `exec_name`, а не к `primary_name`.
+- Open employee-метрики и registered employee-метрики остаются на `primary_name`.
+- Повторы атрибутируются не на текущую строку, а на минимальную дату регистрации по телефону.
+- `direction` для combined по каналам не используется, потому что `DIR_MAP = {}`. То есть направление обычно пустое.
+
+21. Минимальный набор файлов, который можно отдать другому GPT
+
+Если нужно передать расчёт в другую систему, достаточно отдать:
+- `combined_project/lm/Заявки+обращения_объединено.xlsx`
+- `combined_project/muz_to_combined_mapping.txt`
+- `combined_project/config/employee_hierarchy.xlsx`
+- `combined_project/config/filter_people.json`
+- `combined_project/config/combined_source_exclusions.json`
+- `combined_project/Del/исключаемые заявки и обращения.xlsx`
+- этот файл `combined_requests_incidents_calculation_spec.txt`
+
+22. Версия логики
+
+Этот документ описывает текущую логику проекта на момент его формирования, включая последние правки:
+- closed employee-метрики в combined привязаны к `exec_name`
+- интерфейсные суммы `НД` на вкладках должны сходиться по одному и тому же видимому набору сотрудников
